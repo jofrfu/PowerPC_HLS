@@ -30,6 +30,6 @@
 #include <stdint.h>
 #include "ppc_types.h"
 
-fixed_point_decode_result_t decode(uint32_t instruction_port);
+decode_result_t decode(uint32_t instruction_port);
 
 #endif

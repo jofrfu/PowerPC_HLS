@@ -27,16 +27,25 @@
 #include "instruction_decode.hpp"
 #include "decode_utils.hpp"
 
-fixed_point_decode_result_t decode(uint32_t instruction_port) {
+decode_result_t decode(uint32_t instruction_port) {
 	instruction_t instruction;
 	instruction.instruction_bits = instruction_port;
+
+	decode_result_t decode_result;
+
+	// branch processor decode structures
+	branch_decode_result_t branch_result;
 
 	branch_decode_t branch_decoded;
 	init_branch(branch_decoded)
 
 	system_call_decode_t system_call_decoded = 0;
 
-	fixed_point_decode_result_t result;
+	condition_decode_t condition_decoded;
+	init_condition(condition_decoded)
+
+	// fixed point processor decode structures
+	fixed_point_decode_result_t fixed_point_result;
 
 	load_store_decode_t load_store_decoded;
 	init_load_store(load_store_decoded)
@@ -104,6 +113,55 @@ fixed_point_decode_result_t decode(uint32_t instruction_port) {
 					branch_decoded.BI = instruction.XL_Form.BA; // BI is BA in XL Form
 					branch_decoded.BO = instruction.XL_Form.BT; // BO is BT in XL Form
 					branch_decoded.BH = instruction.XL_Form.BB; // BH is part of BH in XL Form
+					break;
+				// XL Form Condition instructions
+				case 0: // mcrf
+					condition_decoded.operation = condition::MOVE;
+					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
+					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
+					condition_decoded.CR_result_reg_address = instruction.XL_Form.BT;
+					break;
+				case 33: // crnor
+					condition_decoded.operation = condition::NOR;
+					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
+					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
+					condition_decoded.CR_result_reg_address = instruction.XL_Form.BT;
+					break;
+				case 129: // crandc
+					condition_decoded.operation = condition::AND_COMPLEMENT;
+					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
+					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
+					condition_decoded.CR_result_reg_address = instruction.XL_Form.BT;
+					break;
+				case 193: // crxor
+					condition_decoded.operation = condition::XOR;
+					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
+					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
+					condition_decoded.CR_result_reg_address = instruction.XL_Form.BT;
+					break;
+				case 257: // crand
+					condition_decoded.operation = condition::AND;
+					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
+					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
+					condition_decoded.CR_result_reg_address = instruction.XL_Form.BT;
+					break;
+				case 289: // creqv
+					condition_decoded.operation = condition::EQUIVALENT;
+					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
+					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
+					condition_decoded.CR_result_reg_address = instruction.XL_Form.BT;
+					break;
+				case 417: // crorc
+					condition_decoded.operation = condition::OR_COMPLEMENT;
+					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
+					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
+					condition_decoded.CR_result_reg_address = instruction.XL_Form.BT;
+					break;
+				case 449: // cror
+					condition_decoded.operation = condition::OR;
+					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
+					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
+					condition_decoded.CR_result_reg_address = instruction.XL_Form.BT;
 					break;
 			}
 			break;
@@ -622,7 +680,7 @@ fixed_point_decode_result_t decode(uint32_t instruction_port) {
 					break;
 				// X Form Logical instructions
 				case 26: // cntlzw, cntlzw.
-					log_decoded.operation = COUNT_LEDING_ZEROS_WORD;
+					log_decoded.operation = logical::COUNT_LEDING_ZEROS_WORD;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = true;
 					log_decoded.op2_immediate = 0;
@@ -635,7 +693,7 @@ fixed_point_decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 28: // and, and.
-					log_decoded.operation = AND;
+					log_decoded.operation = logical::AND;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = false;
 					log_decoded.op2_immediate = 0;
@@ -651,7 +709,7 @@ fixed_point_decode_result_t decode(uint32_t instruction_port) {
 					// NOT SUPPORTED!!!
 					break;
 				case 60: // andc, andc.
-					log_decoded.operation = AND_COMPLEMENT;
+					log_decoded.operation = logical::AND_COMPLEMENT;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = false;
 					log_decoded.op2_immediate = 0;
@@ -664,7 +722,7 @@ fixed_point_decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 122: // popcntb
-					log_decoded.operation = POPULATION_COUNT_BYTES;
+					log_decoded.operation = logical::POPULATION_COUNT_BYTES;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = true;
 					log_decoded.op2_immediate = 0;
@@ -673,7 +731,7 @@ fixed_point_decode_result_t decode(uint32_t instruction_port) {
 					log_decoded.alter_CR0 = false;
 					break;
 				case 124: // nor, nor.
-					log_decoded.operation = NOR;
+					log_decoded.operation = logical::NOR;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = false;
 					log_decoded.op2_immediate = 0;
@@ -686,7 +744,7 @@ fixed_point_decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 284: // eqv, eqv.
-					log_decoded.operation = EQUIVALENT;
+					log_decoded.operation = logical::EQUIVALENT;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = false;
 					log_decoded.op2_immediate = 0;
@@ -699,7 +757,7 @@ fixed_point_decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 316: // xor, xor.
-					log_decoded.operation = XOR;
+					log_decoded.operation = logical::XOR;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = false;
 					log_decoded.op2_immediate = 0;
@@ -712,7 +770,7 @@ fixed_point_decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 412: // orc, orc.
-					log_decoded.operation = OR_COMPLEMENT;
+					log_decoded.operation = logical::OR_COMPLEMENT;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = false;
 					log_decoded.op2_immediate = 0;
@@ -725,7 +783,7 @@ fixed_point_decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 444: // or, or.
-					log_decoded.operation = OR;
+					log_decoded.operation = logical::OR;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = false;
 					log_decoded.op2_immediate = 0;
@@ -738,7 +796,7 @@ fixed_point_decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 476: // nand, nand.
-					log_decoded.operation = NAND;
+					log_decoded.operation = logical::NAND;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = false;
 					log_decoded.op2_immediate = 0;
@@ -751,7 +809,7 @@ fixed_point_decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 922: // extsh, extsh.
-					log_decoded.operation = EXTEND_SIGN_HALFWORD;
+					log_decoded.operation = logical::EXTEND_SIGN_HALFWORD;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = true;
 					log_decoded.op2_immediate = 0;
@@ -764,7 +822,7 @@ fixed_point_decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 954: // extsb, extsb.
-					log_decoded.operation = EXTEND_SIGN_BYTE;
+					log_decoded.operation = logical::EXTEND_SIGN_BYTE;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = true;
 					log_decoded.op2_immediate = 0;
@@ -996,7 +1054,7 @@ fixed_point_decode_result_t decode(uint32_t instruction_port) {
 			break;
 		// D Form Logical instructions
 		case 24: // ori
-			log_decoded.operation = OR;
+			log_decoded.operation = logical::OR;
 			log_decoded.op1_reg_address = instruction.D_Form.RT;
 			log_decoded.op2_imm = true;
 			log_decoded.op2_immediate = instruction.D_Form.D;
@@ -1005,7 +1063,7 @@ fixed_point_decode_result_t decode(uint32_t instruction_port) {
 			log_decoded.alter_CR0 = false;
 			break;
 		case 25: // oris
-			log_decoded.operation = OR;
+			log_decoded.operation = logical::OR;
 			log_decoded.op1_reg_address = instruction.D_Form.RT;
 			log_decoded.op2_imm = true;
 			log_decoded.op2_immediate = instruction.D_Form.D << 16;
@@ -1014,7 +1072,7 @@ fixed_point_decode_result_t decode(uint32_t instruction_port) {
 			log_decoded.alter_CR0 = false;
 			break;
 		case 26: // xori
-			log_decoded.operation = XOR;
+			log_decoded.operation = logical::XOR;
 			log_decoded.op1_reg_address = instruction.D_Form.RT;
 			log_decoded.op2_imm = true;
 			log_decoded.op2_immediate = instruction.D_Form.D;
@@ -1023,7 +1081,7 @@ fixed_point_decode_result_t decode(uint32_t instruction_port) {
 			log_decoded.alter_CR0 = false;
 			break;
 		case 27: // xoris
-			log_decoded.operation = XOR;
+			log_decoded.operation = logical::XOR;
 			log_decoded.op1_reg_address = instruction.D_Form.RT;
 			log_decoded.op2_imm = true;
 			log_decoded.op2_immediate = instruction.D_Form.D << 16;
@@ -1032,7 +1090,7 @@ fixed_point_decode_result_t decode(uint32_t instruction_port) {
 			log_decoded.alter_CR0 = false;
 			break;
 		case 28: // andi.
-			log_decoded.operation = AND;
+			log_decoded.operation = logical::AND;
 			log_decoded.op1_reg_address = instruction.D_Form.RT;
 			log_decoded.op2_imm = true;
 			log_decoded.op2_immediate = instruction.D_Form.D;
@@ -1041,7 +1099,7 @@ fixed_point_decode_result_t decode(uint32_t instruction_port) {
 			log_decoded.alter_CR0 = true;
 			break;
 		case 29: // andis.
-			log_decoded.operation = AND;
+			log_decoded.operation = logical::AND;
 			log_decoded.op1_reg_address = instruction.D_Form.RT;
 			log_decoded.op2_imm = true;
 			log_decoded.op2_immediate = instruction.D_Form.D << 16;
@@ -1051,13 +1109,20 @@ fixed_point_decode_result_t decode(uint32_t instruction_port) {
 			break;
 	}
 
-	result.load_store_decoded = load_store_decoded;
-	result.add_sub_decoded = add_sub_decoded;
-	result.mul_decoded = mul_decoded;
-	result.div_decoded = div_decoded;
-	result.cmp_decoded = cmp_decoded;
-	result.trap_decoded = trap_decoded;
-	result.log_decoded = log_decoded;
+	branch_result.branch_decoded = branch_decoded;
+	branch_result.system_call_decoded = system_call_decoded;
+	branch_result.condition_decoded = condition_decoded;
 
-	return result;
+	fixed_point_result.load_store_decoded = load_store_decoded;
+	fixed_point_result.add_sub_decoded = add_sub_decoded;
+	fixed_point_result.mul_decoded = mul_decoded;
+	fixed_point_result.div_decoded = div_decoded;
+	fixed_point_result.cmp_decoded = cmp_decoded;
+	fixed_point_result.trap_decoded = trap_decoded;
+	fixed_point_result.log_decoded = log_decoded;
+
+	decode_result.branch_decode_result = branch_result;
+	decode_result.fixed_point_result = fixed_point_result;
+
+	return decode_result;
 }

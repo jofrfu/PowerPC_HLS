@@ -27,6 +27,8 @@
 #ifndef __PPC_TYPES__
 #define __PPC_TYPES__
 
+#include <stdint.h>
+
 typedef union {
 	uint32_t instruction_bits;
 
@@ -186,6 +188,23 @@ typedef struct {
 
 typedef uint8_t system_call_decode_t;
 
+namespace condition {
+	typedef enum {AND, OR, XOR, NAND, NOR, EQUIVALENT, AND_COMPLEMENT, OR_COMPLEMENT, MOVE} condition_op_t;
+}
+
+typedef struct {
+	condition::condition_op_t operation;
+	uint8_t CR_op1_reg_address:5;
+	uint8_t CR_op2_reg_address:5;
+	uint8_t CR_result_reg_address:5;
+} condition_decode_t;
+
+typedef struct {
+	branch_decode_t branch_decoded;
+	system_call_decode_t system_call_decoded;
+	condition_decode_t condition_decoded;
+} branch_decode_result_t;
+
 // Types for fixed point processor
 typedef struct {
 	uint8_t word_size:2; // in bytes-1
@@ -255,16 +274,18 @@ typedef struct {
 	uint8_t TO:5;
 } trap_decode_t;
 
-typedef enum {
-	AND, OR, NOT, XOR, NAND, NOR,
-	EQUIVALENT, AND_COMPLEMENT, OR_COMPLEMENT,
-	EXTEND_SIGN_BYTE, EXTEND_SIGN_HALFWORD, // EXTEND_SIGN_WORD is not supported
-	COUNT_LEDING_ZEROS_WORD, // COOUNT_LEADING_ZEROS_DOUBLEWORD is not supported
-	POPULATION_COUNT_BYTES
-} logical_op_t;
+namespace logical {
+	typedef enum {
+		AND, OR, NOT, XOR, NAND, NOR,
+		EQUIVALENT, AND_COMPLEMENT, OR_COMPLEMENT,
+		EXTEND_SIGN_BYTE, EXTEND_SIGN_HALFWORD, // EXTEND_SIGN_WORD is not supported
+		COUNT_LEDING_ZEROS_WORD, // COOUNT_LEADING_ZEROS_DOUBLEWORD is not supported
+		POPULATION_COUNT_BYTES
+	} logical_op_t;
+}
 
 typedef struct {
-	logical_op_t operation;
+	logical::logical_op_t operation;
 	uint8_t op1_reg_address:5;
 	bool op2_imm; // Use immediate for second operand
 	uint32_t op2_immediate;
@@ -282,6 +303,11 @@ typedef struct {
 	trap_decode_t trap_decoded;
 	log_decode_t log_decoded;
 } fixed_point_decode_result_t;
+
+typedef struct {
+	branch_decode_result_t branch_decode_result;
+	fixed_point_decode_result_t fixed_point_result;
+} decode_result_t;
 
 /*
 typedef enum processing_type {BRANCH_PROCESSOR, FIXED_POINT_PROCESSOR, FLOATING_POINT_PROCESSOR} processing_type_t;

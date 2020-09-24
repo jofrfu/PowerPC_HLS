@@ -267,7 +267,7 @@
 	decoded_struct.TO = 0;
 
 #define init_log(decoded_struct)			\
-	decoded_struct.operation = AND;			\
+	decoded_struct.operation = logical::AND;			\
 	decoded_struct.op1_reg_address = 0;		\
 	decoded_struct.op2_imm = false;			\
 	decoded_struct.op2_immediate = 0;		\
@@ -284,5 +284,11 @@
 	decoded_struct.BI = 0;					\
 	decoded_struct.BO = 0;					\
 	decoded_struct.BH = 0;
+
+#define init_condition(decoded_struct)		\
+	decoded_struct.operation = condition::MOVE;		\
+	decoded_struct.CR_op1_reg_address = 0;	\
+	decoded_struct.CR_op2_reg_address = 0;	\
+	decoded_struct.CR_result_reg_address = 0;
 
 #endif
