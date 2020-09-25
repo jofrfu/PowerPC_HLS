@@ -291,4 +291,10 @@
 	decoded_struct.CR_op2_reg_address = 0;	\
 	decoded_struct.CR_result_reg_address = 0;
 
+#define init_float_move(decoded_struct)		\
+	decoded_struct.operation = MOVE;		\
+	decoded_struct.source_reg_address = 0;	\
+	decoded_struct.target_reg_address = 0;	\
+	decoded_struct.alter_CR1 = false;
+
 #endif

@@ -304,6 +304,30 @@ typedef struct {
 	log_decode_t log_decoded;
 } fixed_point_decode_result_t;
 
+// Types for floating point processor
+typedef struct {
+	uint8_t word_size:3; // in bytes-1
+	bool sum1_imm; // Use immediate for first summand
+	int16_t sum1_immediate;
+	uint8_t sum1_reg_address:5;
+	bool sum2_imm; // Use immediate for second summand
+	int16_t sum2_immediate;
+	uint8_t sum2_reg_address:5;
+	bool write_ea; // write effective address
+	uint8_t ea_reg_address:5;
+	uint8_t result_reg_address:5;
+	bool sign_extend; // Sign extend means, store as integer word for floating point
+} float_load_store_decode_t;
+
+typedef enum {MOVE, NEGATE, ABSOLUTE, NEGATIVE_ABSOLUTE} move_op_t;
+
+typedef struct {
+	move_op_t operation;
+	uint8_t source_reg_address:5;
+	uint8_t target_reg_address:5;
+	bool alter_CR1;
+} float_move_decode_t;
+
 typedef struct {
 	branch_decode_result_t branch_decode_result;
 	fixed_point_decode_result_t fixed_point_result;

@@ -68,6 +68,13 @@ decode_result_t decode(uint32_t instruction_port) {
 	log_decode_t log_decoded;
 	init_log(log_decoded)
 
+	// floating point processor decode structures
+	float_load_store_decode_t float_load_store_decoded;
+	init_load_store(float_load_store_decoded)
+
+	float_move_decode_t float_move_decoded;
+	init_float_move(float_move_decoded)
+
 	switch(instruction.I_Form.OPCD) {
 		// B Form Branch instructions
 		case 16: // bc, bca, bcl, bcla
@@ -837,6 +844,35 @@ decode_result_t decode(uint32_t instruction_port) {
 				case 986: // extsw, extsw.
 					// NOT SUPPORTED!!!
 					break;
+				// X Form floating point Load/Store instructions
+				case 535: // lfsx
+					decode_load_store_and_zero_x_form(float_load_store_decoded, instruction, 4)
+					break;
+				case 567: // lfsux
+					decode_load_store_and_zero_with_update_x_form(float_load_store_decoded, instruction, 4)
+					break;
+				case 599: // lfdx
+					decode_load_store_and_zero_x_form(float_load_store_decoded, instruction, 8)
+					break;
+				case 631: // lfdux
+					decode_load_store_and_zero_with_update_x_form(float_load_store_decoded, instruction, 8)
+					break;
+				case 663: // stfsx
+					decode_load_store_and_zero_x_form(float_load_store_decoded, instruction, 4)
+					break;
+				case 695: // stfsux
+					decode_load_store_and_zero_with_update_x_form(float_load_store_decoded, instruction, 4)
+					break;
+				case 727: // stfdx
+					decode_load_store_and_zero_x_form(float_load_store_decoded, instruction, 8)
+					break;
+				case 759: // stfdux
+					decode_load_store_and_zero_with_update_x_form(float_load_store_decoded, instruction, 8)
+					break;
+				case 983: // stfiwx
+					// Load decode is used here to be able to reduce the amount of macros, sign extend means that float should be stored as integer
+					decode_load_algebraic_x_form(float_load_store_decoded, instruction, 4)
+					break;
 			}
 			break;
 		// D Form load instructions
@@ -1106,6 +1142,76 @@ decode_result_t decode(uint32_t instruction_port) {
 			log_decoded.op2_reg_address = 0;
 			log_decoded.result_reg_address = instruction.D_Form.RA;
 			log_decoded.alter_CR0 = true;
+			break;
+		// D Form floating point Load/Store instructions
+		case 48: // lfs
+			decode_load_store_and_zero(float_load_store_decoded, instruction, 4)
+			break;
+		case 49: // lfsu
+			decode_load_store_and_zero_with_update(float_load_store_decoded, instruction, 4)
+			break;
+		case 50: // lfd
+			decode_load_store_and_zero(float_load_store_decoded, instruction, 8)
+			break;
+		case 51: // lfdu
+			decode_load_store_and_zero_with_update(float_load_store_decoded, instruction, 8)
+			break;
+		case 52: // stfs
+			decode_load_store_and_zero(float_load_store_decoded, instruction, 4)
+			break;
+		case 53: // stfsu
+			decode_load_store_and_zero_with_update(float_load_store_decoded, instruction, 4)
+			break;
+		case 54: // stfd
+			decode_load_store_and_zero(float_load_store_decoded, instruction, 8)
+			break;
+		case 55: // stfdu
+			decode_load_store_and_zero_with_update(float_load_store_decoded, instruction, 8)
+			break;
+		case 63:
+			switch(instruction.X_Form.XO) {
+				// X Form floating point Move instructions
+				case 40: // fneg, fneg.
+					float_move_decoded.operation = NEGATE;
+					float_move_decoded.source_reg_address = instruction.X_Form.RB;
+					float_move_decoded.target_reg_address = instruction.X_Form.RT;
+					if(instruction.X_Form.Rc == 1) {
+						float_move_decoded.alter_CR1 = true;
+					} else {
+						float_move_decoded.alter_CR1 = false;
+					}
+					break;
+				case 72: // fmr, fmr.
+					float_move_decoded.operation = MOVE;
+					float_move_decoded.source_reg_address = instruction.X_Form.RB;
+					float_move_decoded.target_reg_address = instruction.X_Form.RT;
+					if(instruction.X_Form.Rc == 1) {
+						float_move_decoded.alter_CR1 = true;
+					} else {
+						float_move_decoded.alter_CR1 = false;
+					}
+					break;
+				case 136: // fnabs, fnabs.
+					float_move_decoded.operation = NEGATIVE_ABSOLUTE;
+					float_move_decoded.source_reg_address = instruction.X_Form.RB;
+					float_move_decoded.target_reg_address = instruction.X_Form.RT;
+					if(instruction.X_Form.Rc == 1) {
+						float_move_decoded.alter_CR1 = true;
+					} else {
+						float_move_decoded.alter_CR1 = false;
+					}
+					break;
+				case 264: // fabs, fabs.
+					float_move_decoded.operation = ABSOLUTE;
+					float_move_decoded.source_reg_address = instruction.X_Form.RB;
+					float_move_decoded.target_reg_address = instruction.X_Form.RT;
+					if(instruction.X_Form.Rc == 1) {
+						float_move_decoded.alter_CR1 = true;
+					} else {
+						float_move_decoded.alter_CR1 = false;
+					}
+					break;
+			}
 			break;
 	}
 
