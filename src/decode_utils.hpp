@@ -297,4 +297,12 @@
 	decoded_struct.target_reg_address = 0;	\
 	decoded_struct.alter_CR1 = false;
 
+#define init_float_arithmetic(decoded_struct)		\
+	decoded_struct.operation = floating_point::ADD;	\
+	decoded_struct.op1_reg_address = 0;				\
+	decoded_struct.op2_reg_address = 0;				\
+	decoded_struct.result_reg_address = 0;			\
+	decoded_struct.single_precision = false;		\
+	decoded_struct.alter_CR1 = false;
+
 #endif

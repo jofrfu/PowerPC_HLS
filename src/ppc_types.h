@@ -319,14 +319,27 @@ typedef struct {
 	bool sign_extend; // Sign extend means, store as integer word for floating point
 } float_load_store_decode_t;
 
-typedef enum {MOVE, NEGATE, ABSOLUTE, NEGATIVE_ABSOLUTE} move_op_t;
+typedef enum {MOVE, NEGATE, ABSOLUTE, NEGATIVE_ABSOLUTE} float_move_op_t;
 
 typedef struct {
-	move_op_t operation;
+	float_move_op_t operation;
 	uint8_t source_reg_address:5;
 	uint8_t target_reg_address:5;
 	bool alter_CR1;
 } float_move_decode_t;
+
+namespace floating_point {
+	typedef enum {ADD, SUBTRACT, MULTIPLY, DIVIDE} float_arithmetic_op_t;
+}
+
+typedef struct {
+	floating_point::float_arithmetic_op_t operation;
+	uint8_t op1_reg_address:5;
+	uint8_t op2_reg_address:5;
+	uint8_t result_reg_address:5;
+	bool single_precision;
+	bool alter_CR1;
+} float_arithmetic_decode_t;
 
 typedef struct {
 	branch_decode_result_t branch_decode_result;
