@@ -83,6 +83,9 @@ decode_result_t decode(uint32_t instruction_port) {
 	float_madd_decode_t float_madd_decoded;
 	init_float_madd(float_madd_decoded)
 
+	float_convert_decode_t float_convert_decoded;
+	init_float_convert(float_convert_decoded)
+
 	switch(instruction.I_Form.OPCD) {
 		// B Form Branch instructions
 		case 16: // bc, bca, bcl, bcla
@@ -1219,6 +1222,52 @@ decode_result_t decode(uint32_t instruction_port) {
 						float_move_decoded.alter_CR1 = false;
 					}
 					break;
+				// X Form floating point Convert instructions
+				case 12: // frsp, frsp.
+					float_convert_decoded.source_reg_address = instruction.X_Form.RB;
+					float_convert_decoded.target_reg_address = instruction.X_Form.RT;
+					float_convert_decoded.round_to_single = true;
+					float_convert_decoded.convert_to_integer = false;
+					float_convert_decoded.round_toward_zero = false;
+					if(instruction.X_Form.Rc == 1) {
+						float_convert_decoded.alter_CR1 = true;
+					} else {
+						float_convert_decoded.alter_CR1 = false;
+					}
+					break;
+				case 14: // fctiw, fctiw.
+					float_convert_decoded.source_reg_address = instruction.X_Form.RB;
+					float_convert_decoded.target_reg_address = instruction.X_Form.RT;
+					float_convert_decoded.round_to_single = false;
+					float_convert_decoded.convert_to_integer = true;
+					float_convert_decoded.round_toward_zero = false;
+					if(instruction.X_Form.Rc == 1) {
+						float_convert_decoded.alter_CR1 = true;
+					} else {
+						float_convert_decoded.alter_CR1 = false;
+					}
+					break;
+				case 15: // fctiwz, fctiwz.
+					float_convert_decoded.source_reg_address = instruction.X_Form.RB;
+					float_convert_decoded.target_reg_address = instruction.X_Form.RT;
+					float_convert_decoded.round_to_single = false;
+					float_convert_decoded.convert_to_integer = true;
+					float_convert_decoded.round_toward_zero = true;
+					if(instruction.X_Form.Rc == 1) {
+						float_convert_decoded.alter_CR1 = true;
+					} else {
+						float_convert_decoded.alter_CR1 = false;
+					}
+					break;
+				case 814: // fctid, fctid.
+					// NOT SUPPORTED!!!
+					break;
+				case 815: // fctidz, fctidz.
+					// NOT SUPPORTED!!!
+					break;
+				case 846: // fcfid, fcfid.
+					// NOT SUPPORTED!!!
+					break;
 			}
 
 			switch(instruction.A_Form.XO) {
@@ -1453,6 +1502,7 @@ decode_result_t decode(uint32_t instruction_port) {
 	floating_point_decode_result.float_move_decoded = float_move_decoded;
 	floating_point_decode_result.float_arithmetic_decoded = float_arithmetic_decoded;
 	floating_point_decode_result.float_madd_decoded = float_madd_decoded;
+	floating_point_decode_result.float_convert_decoded = float_convert_decoded;
 
 	decode_result.branch_decode_result = branch_result;
 	decode_result.fixed_point_decode_result = fixed_point_decode_result;

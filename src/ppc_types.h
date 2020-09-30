@@ -353,10 +353,20 @@ typedef struct {
 } float_madd_decode_t;
 
 typedef struct {
+	uint8_t source_reg_address:5;
+	uint8_t target_reg_address:5;
+	bool round_to_single;
+	bool convert_to_integer;
+	bool round_toward_zero;
+	bool alter_CR1;
+} float_convert_decode_t;
+
+typedef struct {
 	float_load_store_decode_t float_load_store_decoded;
 	float_move_decode_t float_move_decoded;
 	float_arithmetic_decode_t float_arithmetic_decoded;
 	float_madd_decode_t float_madd_decoded;
+	float_convert_decode_t float_convert_decoded;
 } floating_point_decode_result_t;
 
 typedef struct {

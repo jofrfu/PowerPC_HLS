@@ -315,4 +315,12 @@
 	decoded_struct.negate_result = false;	\
 	decoded_struct.alter_CR1 = false;
 
+#define init_float_convert(decoded_struct)		\
+	decoded_struct.source_reg_address = 0;		\
+	decoded_struct.target_reg_address = 0;		\
+	decoded_struct.round_to_single = false;		\
+	decoded_struct.convert_to_integer = false;	\
+	decoded_struct.round_toward_zero = false;	\
+	decoded_struct.alter_CR1 = false;
+
 #endif
