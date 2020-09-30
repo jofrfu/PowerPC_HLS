@@ -45,7 +45,7 @@ decode_result_t decode(uint32_t instruction_port) {
 	init_condition(condition_decoded)
 
 	// fixed point processor decode structures
-	fixed_point_decode_result_t fixed_point_result;
+	fixed_point_decode_result_t fixed_point_decode_result;
 
 	load_store_decode_t load_store_decoded;
 	init_load_store(load_store_decoded)
@@ -69,6 +69,8 @@ decode_result_t decode(uint32_t instruction_port) {
 	init_log(log_decoded)
 
 	// floating point processor decode structures
+	floating_point_decode_result_t floating_point_decode_result;
+
 	float_load_store_decode_t float_load_store_decoded;
 	init_load_store(float_load_store_decoded)
 
@@ -77,6 +79,9 @@ decode_result_t decode(uint32_t instruction_port) {
 
 	float_arithmetic_decode_t float_arithmetic_decoded;
 	init_float_arithmetic(float_arithmetic_decoded)
+
+	float_madd_decode_t float_madd_decoded;
+	init_float_madd(float_madd_decoded)
 
 	switch(instruction.I_Form.OPCD) {
 		// B Form Branch instructions
@@ -1218,52 +1223,106 @@ decode_result_t decode(uint32_t instruction_port) {
 
 			switch(instruction.A_Form.XO) {
 				// A Form floating point Arithmetic instructions
-				case 18: // fdiv, fdiv. single
+				case 18: // fdiv, fdiv.
 					float_arithmetic_decoded.operation = floating_point::DIVIDE;
 					float_arithmetic_decoded.op1_reg_address = instruction.A_Form.FRA;
 					float_arithmetic_decoded.op2_reg_address = instruction.A_Form.FRB;
 					float_arithmetic_decoded.result_reg_address = instruction.A_Form.FRT;
-					float_arithmetic_decoded.single_precision = true;
+					float_arithmetic_decoded.single_precision = false;
 					if(instruction.A_Form.Rc == 1) {
 						float_arithmetic_decoded.alter_CR1 = true;
 					} else {
 						float_arithmetic_decoded.alter_CR1 = false;
 					}
 					break;
-				case 20: // fsub, fsub. single
+				case 20: // fsub, fsub.
 					float_arithmetic_decoded.operation = floating_point::SUBTRACT;
 					float_arithmetic_decoded.op1_reg_address = instruction.A_Form.FRA;
 					float_arithmetic_decoded.op2_reg_address = instruction.A_Form.FRB;
 					float_arithmetic_decoded.result_reg_address = instruction.A_Form.FRT;
-					float_arithmetic_decoded.single_precision = true;
+					float_arithmetic_decoded.single_precision = false;
 					if(instruction.A_Form.Rc == 1) {
 						float_arithmetic_decoded.alter_CR1 = true;
 					} else {
 						float_arithmetic_decoded.alter_CR1 = false;
 					}
 					break;
-				case 21: // fadd, fadd. single
+				case 21: // fadd, fadd.
 					float_arithmetic_decoded.operation = floating_point::ADD;
 					float_arithmetic_decoded.op1_reg_address = instruction.A_Form.FRA;
 					float_arithmetic_decoded.op2_reg_address = instruction.A_Form.FRB;
 					float_arithmetic_decoded.result_reg_address = instruction.A_Form.FRT;
-					float_arithmetic_decoded.single_precision = true;
+					float_arithmetic_decoded.single_precision = false;
 					if(instruction.A_Form.Rc == 1) {
 						float_arithmetic_decoded.alter_CR1 = true;
 					} else {
 						float_arithmetic_decoded.alter_CR1 = false;
 					}
 					break;
-				case 25: // fmul, fmul. single
+				case 25: // fmul, fmul.
 					float_arithmetic_decoded.operation = floating_point::MULTIPLY;
 					float_arithmetic_decoded.op1_reg_address = instruction.A_Form.FRA;
 					float_arithmetic_decoded.op2_reg_address = instruction.A_Form.FRB;
 					float_arithmetic_decoded.result_reg_address = instruction.A_Form.FRT;
-					float_arithmetic_decoded.single_precision = true;
+					float_arithmetic_decoded.single_precision = false;
 					if(instruction.A_Form.Rc == 1) {
 						float_arithmetic_decoded.alter_CR1 = true;
 					} else {
 						float_arithmetic_decoded.alter_CR1 = false;
+					}
+					break;
+
+				// A Form floating point Madd instructions
+				case 28: // fmsub, fmsub.
+					float_madd_decoded.mul1_reg_address = instruction.A_Form.FRA;
+					float_madd_decoded.mul2_reg_address = instruction.A_Form.FRC;
+					float_madd_decoded.add_reg_address = instruction.A_Form.FRB;
+					float_madd_decoded.single_precision = false;
+					float_madd_decoded.negate_add = true;
+					float_madd_decoded.negate_result = false;
+					if(instruction.A_Form.Rc == 1) {
+						float_madd_decoded.alter_CR1 = true;
+					} else {
+						float_madd_decoded.alter_CR1 = false;
+					}
+					break;
+				case 29: // fmadd, fmadd.
+					float_madd_decoded.mul1_reg_address = instruction.A_Form.FRA;
+					float_madd_decoded.mul2_reg_address = instruction.A_Form.FRC;
+					float_madd_decoded.add_reg_address = instruction.A_Form.FRB;
+					float_madd_decoded.single_precision = false;
+					float_madd_decoded.negate_add = false;
+					float_madd_decoded.negate_result = false;
+					if(instruction.A_Form.Rc == 1) {
+						float_madd_decoded.alter_CR1 = true;
+					} else {
+						float_madd_decoded.alter_CR1 = false;
+					}
+					break;
+				case 30: // fnmsub, fnmsub.
+					float_madd_decoded.mul1_reg_address = instruction.A_Form.FRA;
+					float_madd_decoded.mul2_reg_address = instruction.A_Form.FRC;
+					float_madd_decoded.add_reg_address = instruction.A_Form.FRB;
+					float_madd_decoded.single_precision = false;
+					float_madd_decoded.negate_add = true;
+					float_madd_decoded.negate_result = true;
+					if(instruction.A_Form.Rc == 1) {
+						float_madd_decoded.alter_CR1 = true;
+					} else {
+						float_madd_decoded.alter_CR1 = false;
+					}
+					break;
+				case 31: // fnmadd, fnmadd.
+					float_madd_decoded.mul1_reg_address = instruction.A_Form.FRA;
+					float_madd_decoded.mul2_reg_address = instruction.A_Form.FRC;
+					float_madd_decoded.add_reg_address = instruction.A_Form.FRB;
+					float_madd_decoded.single_precision = false;
+					float_madd_decoded.negate_add = false;
+					float_madd_decoded.negate_result = true;
+					if(instruction.A_Form.Rc == 1) {
+						float_madd_decoded.alter_CR1 = true;
+					} else {
+						float_madd_decoded.alter_CR1 = false;
 					}
 					break;
 			}
@@ -1272,52 +1331,105 @@ decode_result_t decode(uint32_t instruction_port) {
 			case 59:
 				switch(instruction.A_Form.XO) {
 					// A Form floating point Arithmetic instructions
-					case 18: // fdiv, fdiv. double
+					case 18: // fdivs, fdivs.
 						float_arithmetic_decoded.operation = floating_point::DIVIDE;
 						float_arithmetic_decoded.op1_reg_address = instruction.A_Form.FRA;
 						float_arithmetic_decoded.op2_reg_address = instruction.A_Form.FRB;
 						float_arithmetic_decoded.result_reg_address = instruction.A_Form.FRT;
-						float_arithmetic_decoded.single_precision = false;
+						float_arithmetic_decoded.single_precision = true;
 						if(instruction.A_Form.Rc == 1) {
 							float_arithmetic_decoded.alter_CR1 = true;
 						} else {
 							float_arithmetic_decoded.alter_CR1 = false;
 						}
 						break;
-					case 20: // fsub, fsub. double
+					case 20: // fsubs, fsubs.
 						float_arithmetic_decoded.operation = floating_point::SUBTRACT;
 						float_arithmetic_decoded.op1_reg_address = instruction.A_Form.FRA;
 						float_arithmetic_decoded.op2_reg_address = instruction.A_Form.FRB;
 						float_arithmetic_decoded.result_reg_address = instruction.A_Form.FRT;
-						float_arithmetic_decoded.single_precision = false;
+						float_arithmetic_decoded.single_precision = true;
 						if(instruction.A_Form.Rc == 1) {
 							float_arithmetic_decoded.alter_CR1 = true;
 						} else {
 							float_arithmetic_decoded.alter_CR1 = false;
 						}
 						break;
-					case 21: // fadd, fadd. double
+					case 21: // fadds, fadds.
 						float_arithmetic_decoded.operation = floating_point::ADD;
 						float_arithmetic_decoded.op1_reg_address = instruction.A_Form.FRA;
 						float_arithmetic_decoded.op2_reg_address = instruction.A_Form.FRB;
 						float_arithmetic_decoded.result_reg_address = instruction.A_Form.FRT;
-						float_arithmetic_decoded.single_precision = false;
+						float_arithmetic_decoded.single_precision = true;
 						if(instruction.A_Form.Rc == 1) {
 							float_arithmetic_decoded.alter_CR1 = true;
 						} else {
 							float_arithmetic_decoded.alter_CR1 = false;
 						}
 						break;
-					case 25: // fmul, fmul. double
+					case 25: // fmuls, fmuls.
 						float_arithmetic_decoded.operation = floating_point::MULTIPLY;
 						float_arithmetic_decoded.op1_reg_address = instruction.A_Form.FRA;
 						float_arithmetic_decoded.op2_reg_address = instruction.A_Form.FRB;
 						float_arithmetic_decoded.result_reg_address = instruction.A_Form.FRT;
-						float_arithmetic_decoded.single_precision = false;
+						float_arithmetic_decoded.single_precision = true;
 						if(instruction.A_Form.Rc == 1) {
 							float_arithmetic_decoded.alter_CR1 = true;
 						} else {
 							float_arithmetic_decoded.alter_CR1 = false;
+						}
+						break;
+					// A Form floating point Madd instructions
+					case 28: // fmsubs, fmsubs.
+						float_madd_decoded.mul1_reg_address = instruction.A_Form.FRA;
+						float_madd_decoded.mul2_reg_address = instruction.A_Form.FRC;
+						float_madd_decoded.add_reg_address = instruction.A_Form.FRB;
+						float_madd_decoded.single_precision = true;
+						float_madd_decoded.negate_add = true;
+						float_madd_decoded.negate_result = false;
+						if(instruction.A_Form.Rc == 1) {
+							float_madd_decoded.alter_CR1 = true;
+						} else {
+							float_madd_decoded.alter_CR1 = false;
+						}
+						break;
+					case 29: // fmadds, fmadds.
+						float_madd_decoded.mul1_reg_address = instruction.A_Form.FRA;
+						float_madd_decoded.mul2_reg_address = instruction.A_Form.FRC;
+						float_madd_decoded.add_reg_address = instruction.A_Form.FRB;
+						float_madd_decoded.single_precision = true;
+						float_madd_decoded.negate_add = false;
+						float_madd_decoded.negate_result = false;
+						if(instruction.A_Form.Rc == 1) {
+							float_madd_decoded.alter_CR1 = true;
+						} else {
+							float_madd_decoded.alter_CR1 = false;
+						}
+						break;
+					case 30: // fnmsubs, fnmsubs.
+						float_madd_decoded.mul1_reg_address = instruction.A_Form.FRA;
+						float_madd_decoded.mul2_reg_address = instruction.A_Form.FRC;
+						float_madd_decoded.add_reg_address = instruction.A_Form.FRB;
+						float_madd_decoded.single_precision = true;
+						float_madd_decoded.negate_add = true;
+						float_madd_decoded.negate_result = true;
+						if(instruction.A_Form.Rc == 1) {
+							float_madd_decoded.alter_CR1 = true;
+						} else {
+							float_madd_decoded.alter_CR1 = false;
+						}
+						break;
+					case 31: // fnmadds, fnmadds.
+						float_madd_decoded.mul1_reg_address = instruction.A_Form.FRA;
+						float_madd_decoded.mul2_reg_address = instruction.A_Form.FRC;
+						float_madd_decoded.add_reg_address = instruction.A_Form.FRB;
+						float_madd_decoded.single_precision = true;
+						float_madd_decoded.negate_add = false;
+						float_madd_decoded.negate_result = true;
+						if(instruction.A_Form.Rc == 1) {
+							float_madd_decoded.alter_CR1 = true;
+						} else {
+							float_madd_decoded.alter_CR1 = false;
 						}
 						break;
 				}
@@ -1329,16 +1441,22 @@ decode_result_t decode(uint32_t instruction_port) {
 	branch_result.system_call_decoded = system_call_decoded;
 	branch_result.condition_decoded = condition_decoded;
 
-	fixed_point_result.load_store_decoded = load_store_decoded;
-	fixed_point_result.add_sub_decoded = add_sub_decoded;
-	fixed_point_result.mul_decoded = mul_decoded;
-	fixed_point_result.div_decoded = div_decoded;
-	fixed_point_result.cmp_decoded = cmp_decoded;
-	fixed_point_result.trap_decoded = trap_decoded;
-	fixed_point_result.log_decoded = log_decoded;
+	fixed_point_decode_result.load_store_decoded = load_store_decoded;
+	fixed_point_decode_result.add_sub_decoded = add_sub_decoded;
+	fixed_point_decode_result.mul_decoded = mul_decoded;
+	fixed_point_decode_result.div_decoded = div_decoded;
+	fixed_point_decode_result.cmp_decoded = cmp_decoded;
+	fixed_point_decode_result.trap_decoded = trap_decoded;
+	fixed_point_decode_result.log_decoded = log_decoded;
+
+	floating_point_decode_result.float_load_store_decoded = float_load_store_decoded;
+	floating_point_decode_result.float_move_decoded = float_move_decoded;
+	floating_point_decode_result.float_arithmetic_decoded = float_arithmetic_decoded;
+	floating_point_decode_result.float_madd_decoded = float_madd_decoded;
 
 	decode_result.branch_decode_result = branch_result;
-	decode_result.fixed_point_result = fixed_point_result;
+	decode_result.fixed_point_decode_result = fixed_point_decode_result;
+	decode_result.floating_point_decode_result = floating_point_decode_result;
 
 	return decode_result;
 }

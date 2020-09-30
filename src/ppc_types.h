@@ -342,17 +342,27 @@ typedef struct {
 } float_arithmetic_decode_t;
 
 typedef struct {
+	uint8_t mul1_reg_address:5;
+	uint8_t mul2_reg_address:5;
+	uint8_t add_reg_address:5;
+	uint8_t result_reg_address:5;
+	bool single_precision;
+	bool negate_add;
+	bool negate_result;
+	bool alter_CR1;
+} float_madd_decode_t;
+
+typedef struct {
+	float_load_store_decode_t float_load_store_decoded;
+	float_move_decode_t float_move_decoded;
+	float_arithmetic_decode_t float_arithmetic_decoded;
+	float_madd_decode_t float_madd_decoded;
+} floating_point_decode_result_t;
+
+typedef struct {
 	branch_decode_result_t branch_decode_result;
-	fixed_point_decode_result_t fixed_point_result;
+	fixed_point_decode_result_t fixed_point_decode_result;
+	floating_point_decode_result_t floating_point_decode_result;
 } decode_result_t;
 
-/*
-typedef enum processing_type {BRANCH_PROCESSOR, FIXED_POINT_PROCESSOR, FLOATING_POINT_PROCESSOR} processing_type_t;
-typedef enum branch_type {} branch_type_t;
-typedef enum fixed_point_type {LOGICAL, ARITHMETIC, STORAGE} fixed_point_type_t;
-typedef enum floating_point_type {ARITHMETIC, STORAGE} floating_point_type_t;
-typedef enum branch_operation {} branch_operation_t;
-typedef enum fixed_point_operation {NONE, LOAD} fixed_point_operation_t;
-typedef enum floating_point_operation {} floating_point_operation_t;
-*/
 #endif

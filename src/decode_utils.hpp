@@ -305,4 +305,14 @@
 	decoded_struct.single_precision = false;		\
 	decoded_struct.alter_CR1 = false;
 
+#define init_float_madd(decoded_struct)		\
+	decoded_struct.mul1_reg_address = 0;	\
+	decoded_struct.mul2_reg_address = 0;	\
+	decoded_struct.add_reg_address = 0;		\
+	decoded_struct.result_reg_address = 0;	\
+	decoded_struct.single_precision = false;\
+	decoded_struct.negate_add = false;		\
+	decoded_struct.negate_result = false;	\
+	decoded_struct.alter_CR1 = false;
+
 #endif
