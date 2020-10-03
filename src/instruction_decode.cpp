@@ -86,8 +86,11 @@ decode_result_t decode(uint32_t instruction_port) {
 	float_convert_decode_t float_convert_decoded;
 	init_float_convert(float_convert_decoded)
 
+	float_compare_decode_t float_compare_decoded;
+	init_float_compare(float_compare_decoded)
 	switch(instruction.I_Form.OPCD) {
 		// B Form Branch instructions
+
 		case 16: // bc, bca, bcl, bcla
 			branch_decoded.operation = BRANCH;
 			branch_decoded.LK = instruction.B_Form.LK;
@@ -1268,6 +1271,19 @@ decode_result_t decode(uint32_t instruction_port) {
 				case 846: // fcfid, fcfid.
 					// NOT SUPPORTED!!!
 					break;
+				// X Form floating point compare instructions
+				case 0: // fcmpu
+					float_compare_decoded.FRA = instruction.X_Form.RA;
+					float_compare_decoded.FRA = instruction.X_Form.RB;
+					float_compare_decoded.BF = instruction.X_Form.RT >> 2;
+					float_compare_decoded.unordered = true;
+					break;
+				case 63: // fcmpo
+					float_compare_decoded.FRA = instruction.X_Form.RA;
+					float_compare_decoded.FRA = instruction.X_Form.RB;
+					float_compare_decoded.BF = instruction.X_Form.RT >> 2;
+					float_compare_decoded.unordered = false;
+					break;
 			}
 
 			switch(instruction.A_Form.XO) {
@@ -1503,6 +1519,7 @@ decode_result_t decode(uint32_t instruction_port) {
 	floating_point_decode_result.float_arithmetic_decoded = float_arithmetic_decoded;
 	floating_point_decode_result.float_madd_decoded = float_madd_decoded;
 	floating_point_decode_result.float_convert_decoded = float_convert_decoded;
+	floating_point_decode_result.float_compare_decoded = float_compare_decoded;
 
 	decode_result.branch_decode_result = branch_result;
 	decode_result.fixed_point_decode_result = fixed_point_decode_result;

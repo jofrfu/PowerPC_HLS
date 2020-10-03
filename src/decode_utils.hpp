@@ -323,4 +323,10 @@
 	decoded_struct.round_toward_zero = false;	\
 	decoded_struct.alter_CR1 = false;
 
+#define init_float_compare(decoded_struct)	\
+	decoded_struct.FRA = 0;					\
+	decoded_struct.FRB = 0;					\
+	decoded_struct.BF = 0;				\
+	decoded_struct.unordered = false;
+
 #endif

@@ -362,11 +362,19 @@ typedef struct {
 } float_convert_decode_t;
 
 typedef struct {
+	uint8_t FRA:5;
+	uint8_t FRB:5;
+	uint8_t BF:3;
+	bool unordered;
+} float_compare_decode_t;
+
+typedef struct {
 	float_load_store_decode_t float_load_store_decoded;
 	float_move_decode_t float_move_decoded;
 	float_arithmetic_decode_t float_arithmetic_decoded;
 	float_madd_decode_t float_madd_decoded;
 	float_convert_decode_t float_convert_decoded;
+	float_compare_decode_t float_compare_decoded;
 } floating_point_decode_result_t;
 
 typedef struct {
