@@ -369,12 +369,28 @@ typedef struct {
 } float_compare_decode_t;
 
 typedef struct {
+	uint8_t FRT_FRB:5; // FRT or FRB
+	uint8_t BF_BT:5; // BF or BT
+	uint8_t BFA:3;
+	uint8_t U:4;
+	uint8_t FLM;
+	bool move_to_FPR;
+	bool move_to_CR;
+	bool move_to_FPSCR;
+	bool use_U;
+	bool bit_0;
+	bool bit_1;
+	bool alter_CR1;
+} float_status_decode_t;
+
+typedef struct {
 	float_load_store_decode_t float_load_store_decoded;
 	float_move_decode_t float_move_decoded;
 	float_arithmetic_decode_t float_arithmetic_decoded;
 	float_madd_decode_t float_madd_decoded;
 	float_convert_decode_t float_convert_decoded;
 	float_compare_decode_t float_compare_decoded;
+	float_status_decode_t float_status_decoded;
 } floating_point_decode_result_t;
 
 typedef struct {
