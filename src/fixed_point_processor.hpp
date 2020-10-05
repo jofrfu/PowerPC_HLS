@@ -24,8 +24,9 @@
 #define __FIXED_POINT_PROCESSOR__
 
 #include <stdint.h>
+#include <ap_int.h>
 #include "ppc_types.h"
 
-void add_sub(bool execute, add_sub_decode_t decoded, uint32_t *GPR);
+void add_sub(bool execute, add_sub_decode_t decoded, registers_t &registers);
 
 #endif

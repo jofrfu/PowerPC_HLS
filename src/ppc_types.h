@@ -28,6 +28,7 @@
 #define __PPC_TYPES__
 
 #include <stdint.h>
+#include "registers.hpp"
 
 typedef union {
 	uint32_t instruction_bits;
