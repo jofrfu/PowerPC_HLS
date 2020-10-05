@@ -88,9 +88,12 @@ decode_result_t decode(uint32_t instruction_port) {
 
 	float_compare_decode_t float_compare_decoded;
 	init_float_compare(float_compare_decoded)
+
+	float_status_decode_t float_status_decoded;
+	init_float_status(float_status_decoded)
+
 	switch(instruction.I_Form.OPCD) {
 		// B Form Branch instructions
-
 		case 16: // bc, bca, bcl, bcla
 			branch_decoded.operation = BRANCH;
 			branch_decoded.LK = instruction.B_Form.LK;
@@ -1284,6 +1287,112 @@ decode_result_t decode(uint32_t instruction_port) {
 					float_compare_decoded.BF = instruction.X_Form.RT >> 2;
 					float_compare_decoded.unordered = false;
 					break;
+				// X Form floating point status instructions
+				case 38: // mtfsb1, mtfsb1.
+					float_status_decoded.FRT_FRB = 0;
+					float_status_decoded.BF_BT = instruction.X_Form.RT;
+					float_status_decoded.BFA = 0;
+					float_status_decoded.U = 0;
+					float_status_decoded.FLM = 0;
+					float_status_decoded.move_to_FPR = false;
+					float_status_decoded.move_to_CR = false;
+					float_status_decoded.move_to_FPSCR = true;
+					float_status_decoded.use_U = false;
+					float_status_decoded.bit_0 = false;
+					float_status_decoded.bit_1 = true;
+					if(instruction.X_Form.Rc == 1) {
+						float_status_decoded.alter_CR1 = true;
+					} else {
+						float_status_decoded.alter_CR1 = false;
+					}
+					break;
+				case 64: // mcrfs
+					float_status_decoded.FRT_FRB = 0;
+					float_status_decoded.BF_BT = instruction.X_Form.RT >> 2;
+					float_status_decoded.BFA = instruction.X_Form.RA >> 2;
+					float_status_decoded.U = 0;
+					float_status_decoded.FLM = 0;
+					float_status_decoded.move_to_FPR = false;
+					float_status_decoded.move_to_CR = true;
+					float_status_decoded.move_to_FPSCR = false;
+					float_status_decoded.use_U = false;
+					float_status_decoded.bit_0 = false;
+					float_status_decoded.bit_1 = false;
+					float_status_decoded.alter_CR1 = false;
+					break;
+				case 70: // mtfsb0, mtfsb0.
+					float_status_decoded.FRT_FRB = 0;
+					float_status_decoded.BF_BT = instruction.X_Form.RT;
+					float_status_decoded.BFA = 0;
+					float_status_decoded.U = 0;
+					float_status_decoded.FLM = 0;
+					float_status_decoded.move_to_FPR = false;
+					float_status_decoded.move_to_CR = false;
+					float_status_decoded.move_to_FPSCR = true;
+					float_status_decoded.use_U = false;
+					float_status_decoded.bit_0 = true;
+					float_status_decoded.bit_1 = false;
+					if(instruction.X_Form.Rc == 1) {
+						float_status_decoded.alter_CR1 = true;
+					} else {
+						float_status_decoded.alter_CR1 = false;
+					}
+					break;
+				case 134: // mtfsfi, mtfsfi.
+					float_status_decoded.FRT_FRB = 0;
+					float_status_decoded.BF_BT = instruction.X_Form.RT >> 2;
+					float_status_decoded.BFA = 0;
+					float_status_decoded.U = instruction.X_Form.RB >> 1;
+					float_status_decoded.FLM = 0;
+					float_status_decoded.move_to_FPR = false;
+					float_status_decoded.move_to_CR = false;
+					float_status_decoded.move_to_FPSCR = true;
+					float_status_decoded.use_U = true;
+					float_status_decoded.bit_0 = false;
+					float_status_decoded.bit_1 = false;
+					if(instruction.X_Form.Rc == 1) {
+						float_status_decoded.alter_CR1 = true;
+					} else {
+						float_status_decoded.alter_CR1 = false;
+					}
+					break;
+				case 583: // mffs, mffs.
+					float_status_decoded.FRT_FRB = instruction.X_Form.RT;
+					float_status_decoded.BF_BT = 0;
+					float_status_decoded.BFA = 0;
+					float_status_decoded.U = 0;
+					float_status_decoded.FLM = 0;
+					float_status_decoded.move_to_FPR = true;
+					float_status_decoded.move_to_CR = false;
+					float_status_decoded.move_to_FPSCR = false;
+					float_status_decoded.use_U = false;
+					float_status_decoded.bit_0 = false;
+					float_status_decoded.bit_1 = false;
+					if(instruction.X_Form.Rc == 1) {
+						float_status_decoded.alter_CR1 = true;
+					} else {
+						float_status_decoded.alter_CR1 = false;
+					}
+					break;
+				// XFL Form floating point status instructions
+				case 711: // mtfsf, mtfsf.
+					float_status_decoded.FRT_FRB = instruction.XFL_Form.FRB;
+					float_status_decoded.BF_BT = 0;
+					float_status_decoded.BFA = 0;
+					float_status_decoded.U = 0;
+					float_status_decoded.FLM = instruction.XFL_Form.FLM;
+					float_status_decoded.move_to_FPR = false;
+					float_status_decoded.move_to_CR = false;
+					float_status_decoded.move_to_FPSCR = true;
+					float_status_decoded.use_U = false;
+					float_status_decoded.bit_0 = false;
+					float_status_decoded.bit_1 = false;
+					if(instruction.XFL_Form.Rc == 1) {
+						float_status_decoded.alter_CR1 = true;
+					} else {
+						float_status_decoded.alter_CR1 = false;
+					}
+					break;
 			}
 
 			switch(instruction.A_Form.XO) {
@@ -1520,6 +1629,7 @@ decode_result_t decode(uint32_t instruction_port) {
 	floating_point_decode_result.float_madd_decoded = float_madd_decoded;
 	floating_point_decode_result.float_convert_decoded = float_convert_decoded;
 	floating_point_decode_result.float_compare_decoded = float_compare_decoded;
+	floating_point_decode_result.float_status_decoded = float_status_decoded;
 
 	decode_result.branch_decode_result = branch_result;
 	decode_result.fixed_point_decode_result = fixed_point_decode_result;

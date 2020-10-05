@@ -329,4 +329,20 @@
 	decoded_struct.BF = 0;				\
 	decoded_struct.unordered = false;
 
+#define init_float_status(decoded_struct)	\
+	decoded_struct.FRT_FRB = 0;				\
+	decoded_struct.BF_BT = 0;				\
+	decoded_struct.BFA = 0;					\
+	decoded_struct.U = 0;					\
+	decoded_struct.FLM = 0;					\
+	decoded_struct.move_to_FPR = false;		\
+	decoded_struct.move_to_CR = false;		\
+	decoded_struct.move_to_FPSCR = false;	\
+	decoded_struct.use_U = false;			\
+	decoded_struct.bit_0 = false;			\
+	decoded_struct.bit_1 = false;			\
+	decoded_struct.alter_CR1 = false;
+
 #endif
+
+
