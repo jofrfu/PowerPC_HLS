@@ -307,6 +307,18 @@ typedef struct {
 } rotate_decode_t;
 
 typedef struct {
+	bool shift_imm;
+	uint8_t shift_immediate:5;
+	uint8_t shift_reg_address:5;
+	uint8_t source_reg_address:5;
+	uint8_t target_reg_address:5;
+	bool shift_left;
+	bool sign_extend;
+	bool alter_CA;
+	bool alter_CR0;
+} shift_decode_t;
+
+typedef struct {
 	load_store_decode_t load_store_decoded;
 	add_sub_decode_t add_sub_decoded;
 	mul_decode_t mul_decoded;
@@ -315,6 +327,7 @@ typedef struct {
 	trap_decode_t trap_decoded;
 	log_decode_t log_decoded;
 	rotate_decode_t rotate_decoded;
+	shift_decode_t shift_decoded;
 } fixed_point_decode_result_t;
 
 // Types for floating point processor

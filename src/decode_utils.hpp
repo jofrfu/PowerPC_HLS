@@ -286,6 +286,17 @@
 	decoded_struct.mask_insert = false;		\
 	decoded_struct.alter_CR0 = false;
 
+#define init_shift(decoded_struct)			\
+	decoded_struct.shift_imm = false;		\
+	decoded_struct.shift_immediate = 0;		\
+	decoded_struct.shift_reg_address = 0;	\
+	decoded_struct.source_reg_address = 0;	\
+	decoded_struct.target_reg_address = 0;	\
+	decoded_struct.shift_left = false;		\
+	decoded_struct.sign_extend = false;		\
+	decoded_struct.alter_CA = false;		\
+	decoded_struct.alter_CR0 = false;
+
 #define init_branch(decoded_struct)			\
 	decoded_struct.operation = BRANCH;		\
 	decoded_struct.LK = 0;					\
