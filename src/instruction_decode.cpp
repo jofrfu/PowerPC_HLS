@@ -68,6 +68,9 @@ decode_result_t decode(uint32_t instruction_port) {
 	log_decode_t log_decoded;
 	init_log(log_decoded)
 
+	rotate_decode_t rotate_decoded;
+	init_rotate(rotate_decoded)
+
 	// floating point processor decode structures
 	floating_point_decode_result_t floating_point_decode_result;
 
@@ -196,6 +199,78 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				case 1: // sc
 					system_call_decoded = instruction.SC_Form.LEV;
+					break;
+			}
+			break;
+		// M Form rotate instructions
+		case 20: // rlwimi, rlwimi.
+			rotate_decoded.shift_imm = true;
+			rotate_decoded.shift_immediate = instruction.M_Form.RB;
+			rotate_decoded.shift_reg_address = 0;
+			rotate_decoded.source_reg_address = instruction.M_Form.RS;
+			rotate_decoded.target_reg_address = instruction.M_Form.RA;
+			rotate_decoded.MB = instruction.M_Form.MB;
+			rotate_decoded.ME = instruction.M_Form.ME;
+			rotate_decoded.mask_insert = true;
+			if(instruction.M_Form.Rc == 1) {
+				rotate_decoded.alter_CR0 = true;
+			} else {
+				rotate_decoded.alter_CR0 = false;
+			}
+			break;
+		case 21: // rlwinm, rlwinm.
+			rotate_decoded.shift_imm = true;
+			rotate_decoded.shift_immediate = instruction.M_Form.RB;
+			rotate_decoded.shift_reg_address = 0;
+			rotate_decoded.source_reg_address = instruction.M_Form.RS;
+			rotate_decoded.target_reg_address = instruction.M_Form.RA;
+			rotate_decoded.MB = instruction.M_Form.MB;
+			rotate_decoded.ME = instruction.M_Form.ME;
+			rotate_decoded.mask_insert = false;
+			if(instruction.M_Form.Rc == 1) {
+				rotate_decoded.alter_CR0 = true;
+			} else {
+				rotate_decoded.alter_CR0 = false;
+			}
+			break;
+		case 23: // rlwnm, rlwnm.
+			rotate_decoded.shift_imm = true;
+			rotate_decoded.shift_immediate = 0;
+			rotate_decoded.shift_reg_address = instruction.M_Form.RB;
+			rotate_decoded.source_reg_address = instruction.M_Form.RS;
+			rotate_decoded.target_reg_address = instruction.M_Form.RA;
+			rotate_decoded.MB = instruction.M_Form.MB;
+			rotate_decoded.ME = instruction.M_Form.ME;
+			rotate_decoded.mask_insert = false;
+			if(instruction.M_Form.Rc == 1) {
+				rotate_decoded.alter_CR0 = true;
+			} else {
+				rotate_decoded.alter_CR0 = false;
+			}
+			break;
+		case 30:
+			switch(instruction.MD_Form.XO) {
+				// MD Form rotate instructions
+				case 0: // rldicl, rldicl.
+					// NOT SUPPORTED!!!
+					break;
+				case 1: // rldicr, rldicr.
+					// NOT SUPPORTED!!!
+					break;
+				case 2: // rldic, rldic.
+					// NOT SUPPORTED!!!
+					break;
+				case 3: // rldimi, rldimi.
+					// NOT SUPPORTED!!!
+					break;
+			}
+			switch(instruction.MDS_Form.XO) {
+				// MDS Form rotate instructions
+				case 8: // rldcl, rldcl.
+					// NOT SUPPORTED!!!
+					break;
+				case 9: // rldcr, rldcr.
+					// NOT SUPPORTED!!!
 					break;
 			}
 			break;
@@ -1622,6 +1697,7 @@ decode_result_t decode(uint32_t instruction_port) {
 	fixed_point_decode_result.cmp_decoded = cmp_decoded;
 	fixed_point_decode_result.trap_decoded = trap_decoded;
 	fixed_point_decode_result.log_decoded = log_decoded;
+	fixed_point_decode_result.rotate_decoded = rotate_decoded;
 
 	floating_point_decode_result.float_load_store_decoded = float_load_store_decoded;
 	floating_point_decode_result.float_move_decoded = float_move_decoded;
