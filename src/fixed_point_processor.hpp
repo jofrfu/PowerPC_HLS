@@ -27,6 +27,10 @@
 #include <ap_int.h>
 #include "ppc_types.h"
 
+void load(bool execute, load_store_decode_t decoded, registers_t &registers, ap_uint<32> *data_memory);
+
+void store(bool execute, load_store_decode_t decoded, registers_t &registers, ap_uint<32> *data_memory);
+
 void add_sub(bool execute, add_sub_decode_t decoded, registers_t &registers);
 
 #endif
