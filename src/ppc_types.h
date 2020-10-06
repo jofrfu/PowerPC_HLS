@@ -28,6 +28,7 @@
 #define __PPC_TYPES__
 
 #include <stdint.h>
+#include "registers.hpp"
 
 typedef union {
 	uint32_t instruction_bits;
@@ -318,12 +319,12 @@ typedef struct {
 	bool alter_CR0;
 } shift_decode_t;
 
-namespace system {
+namespace system_ppc {
 	typedef enum {MOVE_TO_SPR, MOVE_FROM_SPR, MOVE_TO_CR, MOVE_FROM_CR} system_op_t;
 }
 
 typedef struct {
-	system::system_op_t operation;
+	system_ppc::system_op_t operation;
 	uint8_t RS_RT:5; // RS or RT reg address
 	uint16_t SPR:10; // Special purpose register address
 	uint8_t FXM; // Field mask
