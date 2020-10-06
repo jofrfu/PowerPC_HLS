@@ -74,6 +74,9 @@ decode_result_t decode(uint32_t instruction_port) {
 	shift_decode_t shift_decoded;
 	init_shift(shift_decoded)
 
+	system_decode_t system_decoded;
+	init_system(system_decoded)
+
 	// floating point processor decode structures
 	floating_point_decode_result_t floating_point_decode_result;
 
@@ -769,7 +772,7 @@ decode_result_t decode(uint32_t instruction_port) {
 						cmp_decoded.BF = BF;
 					}
 					break;
-				// D Form Trap instructions
+				// X Form Trap instructions
 				case 68: // td
 					// NOT SUPPORTED!!!
 					break;
@@ -1012,6 +1015,33 @@ decode_result_t decode(uint32_t instruction_port) {
 					} else {
 						shift_decoded.alter_CR0 = false;
 					}
+					break;
+				// XFX Form move system register instructions
+				case 19: // mfcr
+					if((instruction.XFX_Form.spr >> 9) == 1) break; // Field has to be 0
+					system_decoded.operation = system::MOVE_FROM_CR;
+					system_decoded.RS_RT = instruction.XFX_Form.RT;
+					system_decoded.SPR = 0;
+					system_decoded.FXM = 0;
+					break;
+				case 144: // mtcrf
+					if((instruction.XFX_Form.spr >> 9) == 1) break; // Field has to be 0
+					system_decoded.operation = system::MOVE_TO_CR;
+					system_decoded.RS_RT = instruction.XFX_Form.RT;
+					system_decoded.SPR = 0;
+					system_decoded.FXM = instruction.XFX_Form.spr >> 1;
+					break;
+				case 339: // mfspr
+					system_decoded.operation = system::MOVE_FROM_SPR;
+					system_decoded.RS_RT = instruction.XFX_Form.RT;
+					system_decoded.SPR = instruction.XFX_Form.spr;
+					system_decoded.FXM = 0;
+					break;
+				case 467: // mtspr
+					system_decoded.operation = system::MOVE_TO_SPR;
+					system_decoded.RS_RT = instruction.XFX_Form.RT;
+					system_decoded.SPR = instruction.XFX_Form.spr;
+					system_decoded.FXM = 0;
 					break;
 				// X Form floating point Load/Store instructions
 				case 535: // lfsx
@@ -1776,6 +1806,7 @@ decode_result_t decode(uint32_t instruction_port) {
 	fixed_point_decode_result.log_decoded = log_decoded;
 	fixed_point_decode_result.rotate_decoded = rotate_decoded;
 	fixed_point_decode_result.shift_decoded = shift_decoded;
+	fixed_point_decode_result.system_decoded = system_decoded;
 
 	floating_point_decode_result.float_load_store_decoded = float_load_store_decoded;
 	floating_point_decode_result.float_move_decoded = float_move_decoded;

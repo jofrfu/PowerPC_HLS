@@ -318,6 +318,17 @@ typedef struct {
 	bool alter_CR0;
 } shift_decode_t;
 
+namespace system {
+	typedef enum {MOVE_TO_SPR, MOVE_FROM_SPR, MOVE_TO_CR, MOVE_FROM_CR} system_op_t;
+}
+
+typedef struct {
+	system::system_op_t operation;
+	uint8_t RS_RT:5; // RS or RT reg address
+	uint16_t SPR:10; // Special purpose register address
+	uint8_t FXM; // Field mask
+} system_decode_t;
+
 typedef struct {
 	load_store_decode_t load_store_decoded;
 	add_sub_decode_t add_sub_decoded;
@@ -328,6 +339,7 @@ typedef struct {
 	log_decode_t log_decoded;
 	rotate_decode_t rotate_decoded;
 	shift_decode_t shift_decoded;
+	system_decode_t system_decoded;
 } fixed_point_decode_result_t;
 
 // Types for floating point processor

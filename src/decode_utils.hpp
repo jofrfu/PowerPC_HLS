@@ -297,6 +297,12 @@
 	decoded_struct.alter_CA = false;		\
 	decoded_struct.alter_CR0 = false;
 
+#define init_system(decoded_struct)					\
+	decoded_struct.operation = system::MOVE_TO_SPR;	\
+	decoded_struct.RS_RT = 0;						\
+	decoded_struct.SPR = 0;							\
+	decoded_struct.FXM = 0;
+
 #define init_branch(decoded_struct)			\
 	decoded_struct.operation = BRANCH;		\
 	decoded_struct.LK = 0;					\
