@@ -20,8 +20,9 @@
 // along with PowerPC_HLS. If not, see <http://www.gnu.org/licenses/>.
 
 #include "fixed_point_processor.hpp"
+#include "fixed_point_utils.hpp"
 
-void load(bool execute, load_store_decode_t decoded, registers_t &registers, ap_uint<32> *data_memory) {
+void fixed_point::load(bool execute, load_store_decode_t decoded, registers_t &registers, ap_uint<32> *data_memory) {
 	if(execute) {
 		uint32_t sum1, sum2;
 		if(decoded.sum1_imm) {
@@ -124,7 +125,7 @@ void load(bool execute, load_store_decode_t decoded, registers_t &registers, ap_
 	}
 }
 
-void store(bool execute, load_store_decode_t decoded, registers_t &registers, ap_uint<32> *data_memory) {
+void fixed_point::store(bool execute, load_store_decode_t decoded, registers_t &registers, ap_uint<32> *data_memory) {
 	if(execute) {
 		uint32_t sum1, sum2;
 		if(decoded.sum1_imm) {
@@ -207,7 +208,7 @@ void store(bool execute, load_store_decode_t decoded, registers_t &registers, ap
 	}
 }
 
-void add_sub(bool execute, add_sub_decode_t decoded, registers_t &registers) {
+void fixed_point::add_sub(bool execute, add_sub_decode_t decoded, registers_t &registers) {
 	if(execute) {
 		ap_uint<32> op1;
 		ap_uint<32> op2;
@@ -293,37 +294,21 @@ void add_sub(bool execute, add_sub_decode_t decoded, registers_t &registers) {
 		}
 
 		if(decoded.alter_OV) {
-			registers.fixed_exception_reg.exception_fields.OV = overflow;
-			// SO bit is sticky
-			if(registers.fixed_exception_reg.exception_fields.SO == 0) {
-				registers.fixed_exception_reg.exception_fields.SO = overflow;
-			}
+			fixed_point::set_overflow(overflow, registers);
 		}
 
 		if(decoded.alter_CR0) {
-			if(result == 0) {
-				// CR0 is at position 7
-				registers.condition_reg.CR[7].condition_fixed_point.LT = 0;
-				registers.condition_reg.CR[7].condition_fixed_point.GT = 0;
-				registers.condition_reg.CR[7].condition_fixed_point.EQ = 1;
-			} else if(result[32] == 1) { // < 0
-				// CR0 is at position 7
-				registers.condition_reg.CR[7].condition_fixed_point.LT = 1;
-				registers.condition_reg.CR[7].condition_fixed_point.GT = 0;
-				registers.condition_reg.CR[7].condition_fixed_point.EQ = 0;
-			} else { // > 0
-				// CR0 is at position 7
-				registers.condition_reg.CR[7].condition_fixed_point.LT = 0;
-				registers.condition_reg.CR[7].condition_fixed_point.GT = 1;
-				registers.condition_reg.CR[7].condition_fixed_point.EQ = 0;
-			}
+			fixed_point::check_condition(result, registers);
 		}
 
 		registers.GPR[decoded.result_reg_address] = result;
+
+		// Copy the SO field from XER into CR0
+		fixed_point::copy_summary_overflow(registers);
 	}
 }
 
-void divide(bool execute, div_decode_t decoded, registers_t &registers) {
+void fixed_point::divide(bool execute, div_decode_t decoded, registers_t &registers) {
 	if(execute) {
 		ap_int<33> signed_dividend;
 		ap_int<33> signed_divisor;
@@ -351,33 +336,16 @@ void divide(bool execute, div_decode_t decoded, registers_t &registers) {
 		}
 
 		if(decoded.alter_OV) {
-			registers.fixed_exception_reg.exception_fields.OV = overflow;
-			// SO bit is sticky
-			if(registers.fixed_exception_reg.exception_fields.SO == 0) {
-				registers.fixed_exception_reg.exception_fields.SO = overflow;
-			}
+			fixed_point::set_overflow(overflow, registers);
 		}
 
 		if(decoded.alter_CR0) {
-			if(quotient == 0) {
-				// CR0 is at position 7
-				registers.condition_reg.CR[7].condition_fixed_point.LT = 0;
-				registers.condition_reg.CR[7].condition_fixed_point.GT = 0;
-				registers.condition_reg.CR[7].condition_fixed_point.EQ = 1;
-			} else if(quotient[32] == 1) { // < 0
-				// CR0 is at position 7
-				registers.condition_reg.CR[7].condition_fixed_point.LT = 1;
-				registers.condition_reg.CR[7].condition_fixed_point.GT = 0;
-				registers.condition_reg.CR[7].condition_fixed_point.EQ = 0;
-			} else { // > 0
-				// CR0 is at position 7
-				registers.condition_reg.CR[7].condition_fixed_point.LT = 0;
-				registers.condition_reg.CR[7].condition_fixed_point.GT = 1;
-				registers.condition_reg.CR[7].condition_fixed_point.EQ = 0;
-			}
-
+			fixed_point::check_condition(quotient, registers);
 		}
 
 		registers.GPR[decoded.result_reg_address] = quotient;
+
+		// Copy the SO field from XER into CR0
+		fixed_point::copy_summary_overflow(registers);
 	}
 }

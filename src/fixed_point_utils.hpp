@@ -20,20 +20,20 @@
 // along with PowerPC_HLS. If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef __FIXED_POINT_PROCESSOR__
-#define __FIXED_POINT_PROCESSOR__
+#ifndef __FIXED_POINT_UTILS__
+#define __FIXED_POINT_UTILS__
 
 #include <stdint.h>
 #include <ap_int.h>
 #include "ppc_types.h"
 
 namespace fixed_point {
-void load(bool execute, load_store_decode_t decoded, registers_t &registers, ap_uint<32> *data_memory);
 
-void store(bool execute, load_store_decode_t decoded, registers_t &registers, ap_uint<32> *data_memory);
+void check_condition(uint32_t result, registers_t &registers);
 
-void add_sub(bool execute, add_sub_decode_t decoded, registers_t &registers);
+void copy_summary_overflow(registers_t &registers);
 
-void divide(bool execute, div_decode_t decoded, registers_t &registers);
+void set_overflow(ap_uint<1> overflow, registers_t &registers);
+
 }
 #endif
