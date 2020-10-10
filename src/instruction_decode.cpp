@@ -1019,26 +1019,26 @@ decode_result_t decode(uint32_t instruction_port) {
 				// XFX Form move system register instructions
 				case 19: // mfcr
 					if((instruction.XFX_Form.spr >> 9) == 1) break; // Field has to be 0
-					system_decoded.operation = system::MOVE_FROM_CR;
+					system_decoded.operation = system_ppc::MOVE_FROM_CR;
 					system_decoded.RS_RT = instruction.XFX_Form.RT;
 					system_decoded.SPR = 0;
 					system_decoded.FXM = 0;
 					break;
 				case 144: // mtcrf
 					if((instruction.XFX_Form.spr >> 9) == 1) break; // Field has to be 0
-					system_decoded.operation = system::MOVE_TO_CR;
+					system_decoded.operation = system_ppc::MOVE_TO_CR;
 					system_decoded.RS_RT = instruction.XFX_Form.RT;
 					system_decoded.SPR = 0;
 					system_decoded.FXM = instruction.XFX_Form.spr >> 1;
 					break;
 				case 339: // mfspr
-					system_decoded.operation = system::MOVE_FROM_SPR;
+					system_decoded.operation = system_ppc::MOVE_FROM_SPR;
 					system_decoded.RS_RT = instruction.XFX_Form.RT;
 					system_decoded.SPR = instruction.XFX_Form.spr;
 					system_decoded.FXM = 0;
 					break;
 				case 467: // mtspr
-					system_decoded.operation = system::MOVE_TO_SPR;
+					system_decoded.operation = system_ppc::MOVE_TO_SPR;
 					system_decoded.RS_RT = instruction.XFX_Form.RT;
 					system_decoded.SPR = instruction.XFX_Form.spr;
 					system_decoded.FXM = 0;
