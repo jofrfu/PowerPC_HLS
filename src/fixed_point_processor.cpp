@@ -317,11 +317,67 @@ void add_sub(bool execute, add_sub_decode_t decoded, registers_t &registers) {
 				registers.condition_reg.CR[7].condition_fixed_point.GT = 1;
 				registers.condition_reg.CR[7].condition_fixed_point.EQ = 0;
 			}
-
-			// Copy the SO field from XER into CR0
-			registers.condition_reg.CR[7].condition_fixed_point.SO = registers.fixed_exception_reg.exception_fields.SO;
 		}
 
 		registers.GPR[decoded.result_reg_address] = result;
+	}
+}
+
+void divide(bool execute, div_decode_t decoded, registers_t &registers) {
+	if(execute) {
+		ap_int<33> signed_dividend;
+		ap_int<33> signed_divisor;
+		signed_dividend(0, 31) = registers.GPR[decoded.dividend_reg_address];
+		signed_divisor(0, 31) = registers.GPR[decoded.divisor_reg_address];
+		if(decoded.div_signed) {
+			// sign extend
+			signed_dividend[32] = signed_dividend[31];
+			signed_divisor[32] = signed_divisor[31];
+		} else {
+			// zero extend
+			signed_dividend[32] = 0;
+			signed_divisor[32] = 0;
+		}
+
+		ap_int<32> quotient = signed_dividend / signed_divisor;
+
+		ap_uint<1> overflow;
+
+		if(signed_divisor == 0) {
+			// divide by zero is undefined
+			overflow = registers.fixed_exception_reg.exception_fields.OV = 1;
+		} else {
+			overflow = registers.fixed_exception_reg.exception_fields.OV = 0;
+		}
+
+		if(decoded.alter_OV) {
+			registers.fixed_exception_reg.exception_fields.OV = overflow;
+			// SO bit is sticky
+			if(registers.fixed_exception_reg.exception_fields.SO == 0) {
+				registers.fixed_exception_reg.exception_fields.SO = overflow;
+			}
+		}
+
+		if(decoded.alter_CR0) {
+			if(quotient == 0) {
+				// CR0 is at position 7
+				registers.condition_reg.CR[7].condition_fixed_point.LT = 0;
+				registers.condition_reg.CR[7].condition_fixed_point.GT = 0;
+				registers.condition_reg.CR[7].condition_fixed_point.EQ = 1;
+			} else if(quotient[32] == 1) { // < 0
+				// CR0 is at position 7
+				registers.condition_reg.CR[7].condition_fixed_point.LT = 1;
+				registers.condition_reg.CR[7].condition_fixed_point.GT = 0;
+				registers.condition_reg.CR[7].condition_fixed_point.EQ = 0;
+			} else { // > 0
+				// CR0 is at position 7
+				registers.condition_reg.CR[7].condition_fixed_point.LT = 0;
+				registers.condition_reg.CR[7].condition_fixed_point.GT = 1;
+				registers.condition_reg.CR[7].condition_fixed_point.EQ = 0;
+			}
+
+		}
+
+		registers.GPR[decoded.result_reg_address] = quotient;
 	}
 }

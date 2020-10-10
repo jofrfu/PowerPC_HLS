@@ -33,4 +33,6 @@ void store(bool execute, load_store_decode_t decoded, registers_t &registers, ap
 
 void add_sub(bool execute, add_sub_decode_t decoded, registers_t &registers);
 
+void divide(bool execute, div_decode_t decoded, registers_t &registers);
+
 #endif
