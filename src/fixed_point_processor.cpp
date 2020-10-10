@@ -328,8 +328,8 @@ void fixed_point::divide(bool execute, div_decode_t decoded, registers_t &regist
 
 		ap_uint<1> overflow;
 
-		if(signed_divisor == 0) {
-			// divide by zero is undefined
+		if(signed_divisor == 0 || (signed_divisor == -1 && signed_dividend(0, 31) == 0x80000000)) {
+			// divide by zero and the most number divided by -1 (the result wouldn't fit in 32 bits) is undefined
 			overflow = registers.fixed_exception_reg.exception_fields.OV = 1;
 		} else {
 			overflow = registers.fixed_exception_reg.exception_fields.OV = 0;
