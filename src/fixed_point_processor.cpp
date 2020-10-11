@@ -278,6 +278,8 @@ void fixed_point::add_sub(bool execute, add_sub_decode_t decoded, registers_t &r
 
 		result = op1 + op2 + op3;
 
+		registers.GPR[decoded.result_reg_address] = result;registers.GPR[decoded.result_reg_address] = result;
+
 		ap_uint<1> carry = result[32];
 		ap_uint<1> overflow;
 
@@ -299,12 +301,9 @@ void fixed_point::add_sub(bool execute, add_sub_decode_t decoded, registers_t &r
 
 		if(decoded.alter_CR0) {
 			fixed_point::check_condition(result, registers);
+			// Copy the SO field from XER into CR0
+			fixed_point::copy_summary_overflow(registers);
 		}
-
-		registers.GPR[decoded.result_reg_address] = result;
-
-		// Copy the SO field from XER into CR0
-		fixed_point::copy_summary_overflow(registers);
 	}
 }
 
@@ -326,6 +325,8 @@ void fixed_point::divide(bool execute, div_decode_t decoded, registers_t &regist
 
 		ap_int<32> quotient = signed_dividend / signed_divisor;
 
+		registers.GPR[decoded.result_reg_address] = quotient;
+
 		ap_uint<1> overflow;
 
 		if(signed_divisor == 0 || (signed_divisor == -1 && signed_dividend(0, 31) == 0x80000000)) {
@@ -341,11 +342,8 @@ void fixed_point::divide(bool execute, div_decode_t decoded, registers_t &regist
 
 		if(decoded.alter_CR0) {
 			fixed_point::check_condition(quotient, registers);
+			// Copy the SO field from XER into CR0
+			fixed_point::copy_summary_overflow(registers);
 		}
-
-		registers.GPR[decoded.result_reg_address] = quotient;
-
-		// Copy the SO field from XER into CR0
-		fixed_point::copy_summary_overflow(registers);
 	}
 }
