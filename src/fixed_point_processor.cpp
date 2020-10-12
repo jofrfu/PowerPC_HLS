@@ -330,7 +330,7 @@ void fixed_point::divide(bool execute, div_decode_t decoded, registers_t &regist
 		ap_uint<1> overflow;
 
 		if(signed_divisor == 0 || (signed_divisor == -1 && signed_dividend(0, 31) == 0x80000000)) {
-			// divide by zero and the most number divided by -1 (the result wouldn't fit in 32 bits) is undefined
+			// divide by zero and the most negative number divided by -1 (the result wouldn't fit in 32 bits) is undefined
 			overflow = registers.fixed_exception_reg.exception_fields.OV = 1;
 		} else {
 			overflow = registers.fixed_exception_reg.exception_fields.OV = 0;
@@ -371,21 +371,52 @@ void fixed_point::compare(bool execute, cmp_decode_t decoded, registers_t &regis
 			}
 		}
 
+		// Convert, because the fields lie in opposite order
+		ap_uint<5> BF = ((1<<5)-1) - decoded.BF;
+
 		if(op1 < op2) {
-			registers.condition_reg.CR[decoded.BF].condition_fixed_point.LT = 1;
-			registers.condition_reg.CR[decoded.BF].condition_fixed_point.GT = 0;
-			registers.condition_reg.CR[decoded.BF].condition_fixed_point.EQ = 0;
+			registers.condition_reg.CR[BF].condition_fixed_point.LT = 1;
+			registers.condition_reg.CR[BF].condition_fixed_point.GT = 0;
+			registers.condition_reg.CR[BF].condition_fixed_point.EQ = 0;
 		} else if(op1 > op2) {
-			registers.condition_reg.CR[decoded.BF].condition_fixed_point.LT = 0;
-			registers.condition_reg.CR[decoded.BF].condition_fixed_point.GT = 1;
-			registers.condition_reg.CR[decoded.BF].condition_fixed_point.EQ = 0;
+			registers.condition_reg.CR[BF].condition_fixed_point.LT = 0;
+			registers.condition_reg.CR[BF].condition_fixed_point.GT = 1;
+			registers.condition_reg.CR[BF].condition_fixed_point.EQ = 0;
 		} else { // op1 == op2
-			registers.condition_reg.CR[decoded.BF].condition_fixed_point.LT = 0;
-			registers.condition_reg.CR[decoded.BF].condition_fixed_point.GT = 0;
-			registers.condition_reg.CR[decoded.BF].condition_fixed_point.EQ = 1;
+			registers.condition_reg.CR[BF].condition_fixed_point.LT = 0;
+			registers.condition_reg.CR[BF].condition_fixed_point.GT = 0;
+			registers.condition_reg.CR[BF].condition_fixed_point.EQ = 1;
 		}
 
 		// Copy SO into the given SPR
 		registers.condition_reg.CR[decoded.BF].condition_fixed_point.SO = registers.fixed_exception_reg.exception_fields.SO;
 	}
+}
+
+bool fixed_point::trap(bool execute, trap_decode_t decoded, registers_t &registers) {
+	if(execute) {
+		int32_t op1 = registers.GPR[decoded.op1_reg_address];
+		int32_t op2;
+
+		if(decoded.op2_imm) {
+			op2 = decoded.op2_immediate;
+		} else {
+			op2 = registers.GPR[decoded.op2_reg_address];
+		}
+
+		uint32_t u_op1 = op1;
+		uint32_t u_op2 = op2;
+
+		ap_uint<5> TO = decoded.TO;
+
+		return	(
+				(op1   < op2   && TO[4] == 1) ||
+				(op1   > op2   && TO[3] == 1) ||
+				(op1  == op2   && TO[2] == 1) ||
+				(u_op1 < u_op2 && TO[1] == 1) ||
+				(u_op1 > u_op2 && TO[0] == 1)
+				);
+	}
+
+	return false;
 }
