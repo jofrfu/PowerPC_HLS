@@ -347,3 +347,45 @@ void fixed_point::divide(bool execute, div_decode_t decoded, registers_t &regist
 		}
 	}
 }
+
+void fixed_point::compare(bool execute, cmp_decode_t decoded, registers_t &registers) {
+	if(execute) {
+		ap_int<33> op1, op2;
+
+		op1(0, 31) = registers.GPR[decoded.op1_reg_address];
+		if(decoded.op2_imm) {
+			op2(0, 31) = decoded.op2_immediate;
+		} else {
+			op2(0, 31) = registers.GPR[decoded.op2_reg_address];
+		}
+
+		if(decoded.cmp_signed) {
+			op1[32] = op1[31];
+			op2[32] = op1[31];
+		} else {
+			op1[32] = 0;
+			if(decoded.op2_imm) { // If immediate is being used, it will always be sign extended
+				op2[32] = op2[31];
+			} else {
+				op2[32] = 0;
+			}
+		}
+
+		if(op1 < op2) {
+			registers.condition_reg.CR[decoded.BF].condition_fixed_point.LT = 1;
+			registers.condition_reg.CR[decoded.BF].condition_fixed_point.GT = 0;
+			registers.condition_reg.CR[decoded.BF].condition_fixed_point.EQ = 0;
+		} else if(op1 > op2) {
+			registers.condition_reg.CR[decoded.BF].condition_fixed_point.LT = 0;
+			registers.condition_reg.CR[decoded.BF].condition_fixed_point.GT = 1;
+			registers.condition_reg.CR[decoded.BF].condition_fixed_point.EQ = 0;
+		} else { // op1 == op2
+			registers.condition_reg.CR[decoded.BF].condition_fixed_point.LT = 0;
+			registers.condition_reg.CR[decoded.BF].condition_fixed_point.GT = 0;
+			registers.condition_reg.CR[decoded.BF].condition_fixed_point.EQ = 1;
+		}
+
+		// Copy SO into the given SPR
+		registers.condition_reg.CR[decoded.BF].condition_fixed_point.SO = registers.fixed_exception_reg.exception_fields.SO;
+	}
+}
