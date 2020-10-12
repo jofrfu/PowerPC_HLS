@@ -389,3 +389,9 @@ void fixed_point::compare(bool execute, cmp_decode_t decoded, registers_t &regis
 		registers.condition_reg.CR[decoded.BF].condition_fixed_point.SO = registers.fixed_exception_reg.exception_fields.SO;
 	}
 }
+
+void fixed_point::multiply(bool execute, mul_decode_t decoded, registers_t &registers) {
+	if (execute) {
+
+	}
+}

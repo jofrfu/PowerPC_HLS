@@ -21,13 +21,13 @@
 
 #include "fixed_point_utils.hpp"
 
-void fixed_point::check_condition(uint32_t result, registers_t &registers) {
+void fixed_point::check_condition(int32_t result, registers_t &registers) {
 	if(result == 0) {
 		// CR0 is at position 7
 		registers.condition_reg.CR[7].condition_fixed_point.LT = 0;
 		registers.condition_reg.CR[7].condition_fixed_point.GT = 0;
 		registers.condition_reg.CR[7].condition_fixed_point.EQ = 1;
-	} else if(result[32] == 1) { // < 0
+	} else if(result < 0) { // < 0
 		// CR0 is at position 7
 		registers.condition_reg.CR[7].condition_fixed_point.LT = 1;
 		registers.condition_reg.CR[7].condition_fixed_point.GT = 0;
