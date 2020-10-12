@@ -328,11 +328,37 @@ void fixed_point::multiply(bool execute, mul_decode_t decoded, registers_t &regi
 			op2[32] = 0;
 		}
 
-		ap_int<32> result = op1 * op2;
-
-		registers.GPR[decoded.result_reg_address] = result;
-
+		ap_int<66> result = op1 * op2;
 		ap_uint<1> overflow;
+
+
+		// Choose upper or lower part of result
+		if (!decoded.mul_higher) {
+			registers.GPR[decoded.result_reg_address] = result(0,31);
+		} else {
+			registers.GPR[decoded.result_reg_address] = result(31,63);
+		}
+
+		// Overflow
+		if (decoded.alter_OV) {
+			// If one operand is signed
+			if ((op1[32] == 1) ^ (op2[32] == 1)) {
+				if (result(32,65) != 0xF3FFFFFF) {
+					overflow = 0;
+				} else {
+					overflow = 1;
+				}
+			} else {
+				// Unsigned
+				if (result(32,65) != 0) {
+					overflow = 0;
+				} else {
+					overflow = 1;
+				}
+			}
+
+			fixed_point::set_overflow(overflow, registers);
+		}
 	}
 }
 
