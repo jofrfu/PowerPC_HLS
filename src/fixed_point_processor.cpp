@@ -449,3 +449,92 @@ bool fixed_point::trap(bool execute, trap_decode_t decoded, registers_t &registe
 
 	return false;
 }
+
+void fixed_point::logical(bool execute, log_decode_t decoded, registers_t &registers) {
+	if(execute) {
+		ap_uint<32> op1 = registers.GPR[decoded.op1_reg_address];
+		ap_uint<32> op2;
+
+		if(decoded.op2_imm) {
+			op2 = decoded.op2_immediate;
+		} else {
+			op2 = registers.GPR[decoded.op2_reg_address];
+		}
+
+		ap_uint<32> result;
+
+		switch(decoded.operation) {
+			case logical::AND:
+				result = op1 & op2;
+				break;
+			case logical::OR:
+				result = op1 | op2;
+				break;
+			case logical::XOR:
+				result = op1 ^ op2;
+				break;
+			case logical::NAND:
+				result = ~(op1 & op2);
+				break;
+			case logical::NOR:
+				result = ~(op1 | op2);
+				break;
+			case logical::EQUIVALENT:
+				result = ~(op1 ^ op2);
+				break;
+			case logical::AND_COMPLEMENT:
+				result = op1 & ~op2;
+				break;
+			case logical::OR_COMPLEMENT:
+				result = op1 | ~op2;
+				break;
+			case logical::EXTEND_SIGN_BYTE:
+				result(0, 7) = op1(0, 7);
+				if(result[7] == 1) {
+					// sign extend
+					result(8, 31) = 0xFFFFFF;
+				} else {
+					// zero extend
+					result(8, 31) = 0;
+				}
+				break;
+			case logical:: EXTEND_SIGN_HALFWORD:
+				result(0, 15) = op1(0, 15);
+				if(result[15] == 1) {
+					// sign extend
+					result(15, 31) = 0xFFFF;
+				} else {
+					// zero extend
+					result(15, 31) = 0;
+				}
+				break;
+			case logical::COUNT_LEDING_ZEROS_WORD:
+				ap_uint<6> count = 0;
+				for(uint32_t i = 31; i >= 0; i--) {
+					if(op1[i] == 0) {
+						count++;
+					}
+				}
+				result = count;
+				break;
+			case logical::POPULATION_COUNT_BYTES:
+				for(uint32_t b = 0; b < 4; b++) {
+					ap_uint<4> count = 0;
+					for(uint32_t i = 0; i < 8; i++) {
+						if(op1(b*8, (b+1)*8)[i] == 1) {
+							count++;
+						}
+					}
+					result(b*8, (b+1)*8) = count;
+				}
+		}
+
+		registers.GPR[decoded.result_reg_address] = result;
+
+		if(decoded.alter_CR0) {
+			fixed_point::check_condition(result, registers);
+			// Copy the SO field from XER into CR0
+			fixed_point::copy_summary_overflow(registers);
+		}
+	}
+}

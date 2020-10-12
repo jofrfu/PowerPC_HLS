@@ -42,5 +42,7 @@ void compare(bool execute, cmp_decode_t decoded, registers_t &registers);
 
 bool trap(bool execute, trap_decode_t decoded, registers_t &registers);
 
+void logical(bool execute, log_decode_t decoded, registers_t &registers);
+
 }
 #endif
