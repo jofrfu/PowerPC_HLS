@@ -29,7 +29,7 @@
 
 namespace fixed_point {
 
-void check_condition(uint32_t result, registers_t &registers);
+void check_condition(int32_t result, registers_t &registers);
 
 void copy_summary_overflow(registers_t &registers);
 

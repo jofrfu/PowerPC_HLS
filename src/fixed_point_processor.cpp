@@ -307,6 +307,12 @@ void fixed_point::add_sub(bool execute, add_sub_decode_t decoded, registers_t &r
 	}
 }
 
+void fixed_point::multiply(bool execute, mul_decode_t decoded, registers_t &registers) {
+	if (execute) {
+
+	}
+}
+
 void fixed_point::divide(bool execute, div_decode_t decoded, registers_t &registers) {
 	if(execute) {
 		ap_int<33> signed_dividend;
