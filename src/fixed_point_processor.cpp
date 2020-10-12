@@ -309,7 +309,30 @@ void fixed_point::add_sub(bool execute, add_sub_decode_t decoded, registers_t &r
 
 void fixed_point::multiply(bool execute, mul_decode_t decoded, registers_t &registers) {
 	if (execute) {
+		ap_int<33> op1, op2;
 
+		op1(0, 31) = registers.GPR[decoded.op1_reg_address];
+		if (decoded.op2_imm) {
+			op2(0, 31) = decoded.op2_immediate;
+		} else {
+			op2(0, 31) = registers.GPR[decoded.op2_reg_address];
+		}
+
+		if (decoded.mul_signed) {
+			// sign extend
+			op1[32] = op1[31];
+			op2[32] = op2[31];
+		} else {
+			// zero extend
+			op1[32] = 0;
+			op2[32] = 0;
+		}
+
+		ap_int<32> result = op1 * op2;
+
+		registers.GPR[decoded.result_reg_address] = result;
+
+		ap_uint<1> overflow;
 	}
 }
 
