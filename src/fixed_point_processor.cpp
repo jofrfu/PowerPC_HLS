@@ -328,11 +328,41 @@ void fixed_point::multiply(bool execute, mul_decode_t decoded, registers_t &regi
 			op2[32] = 0;
 		}
 
-		ap_int<32> result = op1 * op2;
+		ap_int<66> op_result = op1 * op2;
+		// Choose upper or lower part of result
+		uint32_t result = decoded.mul_higher ? op_result(31,63) : op_result(0,31);
+		ap_uint<1> overflow;
 
 		registers.GPR[decoded.result_reg_address] = result;
 
-		ap_uint<1> overflow;
+
+		// Overflow
+		if (decoded.alter_OV) {
+			// If one operand is signed
+			if ((op1[32] == 1) ^ (op2[32] == 1)) {
+				if (op_result(32,65) != 0xF3FFFFFF) {
+					overflow = 1;
+				} else {
+					overflow = 0;
+				}
+			} else {
+				// Unsigned
+				if (op_result(32,65) != 0) {
+					overflow = 1;
+				} else {
+					overflow = 0;
+				}
+			}
+
+			fixed_point::set_overflow(overflow, registers);
+		}
+
+		// Must respect lower and higher!
+		if(decoded.alter_CR0) {
+			fixed_point::check_condition(result, registers);
+			// Copy the SO field from XER into CR0
+			fixed_point::copy_summary_overflow(registers);
+		}
 	}
 }
 
