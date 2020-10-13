@@ -539,22 +539,25 @@ void fixed_point::logical(bool execute, log_decode_t decoded, registers_t &regis
 				}
 				break;
 			case logical::COUNT_LEDING_ZEROS_WORD:
-				ap_uint<6> count = 0;
-				for(uint32_t i = 31; i >= 0; i--) {
+				{
+					ap_uint<6> count = 0;
+					for(uint32_t i = 31; i >= 0; i--) {
 #pragma HLS unroll
-					if(op1[i] == 0) {
+						if(op1[i] == 0) {
 						count++;
+						}
 					}
+					result = count;
 				}
-				result = count;
 				break;
 			case logical::POPULATION_COUNT_BYTES:
 				for(uint32_t b = 0; b < 4; b++) {
 #pragma HLS unroll
 					ap_uint<4> count = 0;
+					ap_uint<8> byte = op1(b*8, (b+1)*8);
 					for(uint32_t i = 0; i < 8; i++) {
 #pragma HLS unroll
-						if(op1(b*8, (b+1)*8)[i] == 1) {
+						if(byte[i] == 1) {
 							count++;
 						}
 					}
@@ -622,6 +625,59 @@ void fixed_point::rotate(bool execute, rotate_decode_t decoded, registers_t &reg
 		}
 
 		registers.GPR[decoded.target_reg_address] = result;
+
+		if(decoded.alter_CR0) {
+			fixed_point::check_condition(result, registers);
+			// Copy the SO field from XER into CR0
+			fixed_point::copy_summary_overflow(registers);
+		}
+	}
+}
+
+void fixed_point::shift(bool execute, shift_decode_t decoded, registers_t &registers) {
+	if(execute) {
+		ap_uint<32> source = registers.GPR[decoded.source_reg_address];
+		ap_uint<5> shift;
+		if(decoded.shift_imm) {
+			shift = decoded.shift_immediate;
+		} else {
+			shift = registers.GPR[decoded.shift_reg_address];
+		}
+
+		ap_uint<32> result;
+		ap_uint<1> carry;
+		if(decoded.shift_left) {
+			result = source << shift;
+		} else { // Shift right
+			result = source >> shift;
+			if(decoded.sign_extend) {
+				carry = 0;
+				if(source[31] == 1) { // Is signed
+					for(uint32_t i = 0; i < 32; i++) {
+#pragma HLS unroll
+						if(i < shift) {
+							if(source[i] == 1) { // 1-bit is shifted out --> carry
+								carry = 1;
+							}
+						}
+					}
+				}
+
+				// Sign extend
+				for(uint32_t i = 31; i >= 0; i++) {
+#pragma HLS unroll
+					if(i >= (32-shift)) {
+						result[i] = result[31-shift];
+					}
+				}
+			}
+		}
+
+		registers.GPR[decoded.target_reg_address] = result;
+
+		if(decoded.alter_CA) {
+			registers.fixed_exception_reg.exception_fields.CA = carry;
+		}
 
 		if(decoded.alter_CR0) {
 			fixed_point::check_condition(result, registers);

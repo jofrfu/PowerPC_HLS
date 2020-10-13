@@ -45,5 +45,7 @@ bool trap(bool execute, trap_decode_t decoded, registers_t &registers);
 void logical(bool execute, log_decode_t decoded, registers_t &registers);
 
 void rotate(bool execute, rotate_decode_t decoded, registers_t &registers);
+
+void shift(bool execute, shift_decode_t decoded, registers_t &registers);
 }
 #endif
