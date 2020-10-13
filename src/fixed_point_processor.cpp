@@ -340,7 +340,7 @@ void fixed_point::multiply(bool execute, mul_decode_t decoded, registers_t &regi
 		if (decoded.alter_OV) {
 			// If one operand is signed
 			if ((op1[32] == 1) ^ (op2[32] == 1)) {
-				if (op_result(32,65) != 0xF3FFFFFF) {
+				if (op_result(32,65) != 0x3FFFFFFFF) {
 					overflow = 1;
 				} else {
 					overflow = 0;
@@ -431,7 +431,7 @@ void fixed_point::compare(bool execute, cmp_decode_t decoded, registers_t &regis
 		}
 
 		// Convert, because the fields lie in opposite order
-		ap_uint<5> BF = ((1<<5)-1) - decoded.BF;
+		ap_uint<3> BF = 7 - decoded.BF;
 
 		if(op1 < op2) {
 			registers.condition_reg.CR[BF].condition_fixed_point.LT = 1;
@@ -541,6 +541,7 @@ void fixed_point::logical(bool execute, log_decode_t decoded, registers_t &regis
 			case logical::COUNT_LEDING_ZEROS_WORD:
 				ap_uint<6> count = 0;
 				for(uint32_t i = 31; i >= 0; i--) {
+#pragma HLS unroll
 					if(op1[i] == 0) {
 						count++;
 					}
@@ -549,8 +550,10 @@ void fixed_point::logical(bool execute, log_decode_t decoded, registers_t &regis
 				break;
 			case logical::POPULATION_COUNT_BYTES:
 				for(uint32_t b = 0; b < 4; b++) {
+#pragma HLS unroll
 					ap_uint<4> count = 0;
 					for(uint32_t i = 0; i < 8; i++) {
+#pragma HLS unroll
 						if(op1(b*8, (b+1)*8)[i] == 1) {
 							count++;
 						}
@@ -560,6 +563,65 @@ void fixed_point::logical(bool execute, log_decode_t decoded, registers_t &regis
 		}
 
 		registers.GPR[decoded.result_reg_address] = result;
+
+		if(decoded.alter_CR0) {
+			fixed_point::check_condition(result, registers);
+			// Copy the SO field from XER into CR0
+			fixed_point::copy_summary_overflow(registers);
+		}
+	}
+}
+
+void fixed_point::rotate(bool execute, rotate_decode_t decoded, registers_t &registers) {
+	if(execute) {
+		ap_uint<32> source = registers.GPR[decoded.source_reg_address];
+		ap_uint<5> shift;
+		if(decoded.shift_imm) {
+			shift = decoded.shift_immediate;
+		} else {
+			shift = registers.GPR[decoded.shift_reg_address];
+		}
+
+		ap_uint<5> mask_begin = decoded.MB;
+		ap_uint<5> mask_end = decoded.ME;
+
+		ap_uint<32> mask = 0;
+		// Generate the mask
+		for(uint32_t i = 0; i < 32; i++) {
+#pragma HLS unroll
+			if(mask_begin > mask_end) {
+				if(i <= mask_end) {
+					mask[i] = 1;
+				} else if(i >= mask_begin) {
+					mask[i] = 1;
+				} else {
+					mask[i] = 0;
+				}
+			} else {
+				if(i >= mask_begin && i <= mask_end) {
+					mask[i] = 1;
+				} else {
+					mask[i] = 0;
+				}
+			}
+		}
+
+		ap_uint<32> shifted;
+		// Rotate left
+		for(uint32_t i = 0; i < 32; i++) {
+#pragma HLS unroll
+			ap_uint<5> target_index = (i + shift) % 32;
+			shifted[target_index] = source[i];
+		}
+
+		ap_uint<32> result;
+		if(decoded.mask_insert) {
+			result = (shifted & mask) | (registers.GPR[decoded.target_reg_address] & ~mask);
+		} else {
+			result = shifted & mask;
+		}
+
+		registers.GPR[decoded.target_reg_address] = result;
 
 		if(decoded.alter_CR0) {
 			fixed_point::check_condition(result, registers);
