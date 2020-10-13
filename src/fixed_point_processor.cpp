@@ -694,7 +694,9 @@ void fixed_point::system(bool execute, system_decode_t decoded, registers_t &reg
 		ap_uint<8> FXM = decoded.FXM;
 		ap_uint<32> mask;
 		for(uint32_t n = 0, b = 0; n < 8; n++) {
+#pragma HLS unroll
 			for(uint32_t i = 0; i < 4; i++) {
+#pragma HLS unroll
 				mask[b++] = FXM[n];
 			}
 		}
