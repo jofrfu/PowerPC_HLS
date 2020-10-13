@@ -277,7 +277,7 @@ typedef struct {
 
 namespace logical {
 	typedef enum {
-		AND, OR, NOT, XOR, NAND, NOR,
+		AND, OR, XOR, NAND, NOR,
 		EQUIVALENT, AND_COMPLEMENT, OR_COMPLEMENT,
 		EXTEND_SIGN_BYTE, EXTEND_SIGN_HALFWORD, // EXTEND_SIGN_WORD is not supported
 		COUNT_LEDING_ZEROS_WORD, // COOUNT_LEADING_ZEROS_DOUBLEWORD is not supported
