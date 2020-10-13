@@ -58,7 +58,7 @@ typedef union {
 } condition_reg_t;
 
 typedef union {
-	uint64_t exception_bits;
+	uint32_t exception_bits;
 	struct {
 		uint8_t string_bytes:7; // For load/store string
 		uint32_t RESERVED_2:22; // Reserved
@@ -73,6 +73,7 @@ typedef struct {
 	uint32_t GPR[32]; // General purpose registers
 	uint64_t FPR[32]; // Floating point registers
 	condition_reg_t condition_reg; // Condition register
+	uint32_t link_register; // Link register
 	fixed_point_exception_reg_t fixed_exception_reg; // Fixed point exception register
 } registers_t;
 

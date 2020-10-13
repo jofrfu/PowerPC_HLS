@@ -686,3 +686,52 @@ void fixed_point::shift(bool execute, shift_decode_t decoded, registers_t &regis
 		}
 	}
 }
+
+void fixed_point::system(bool execute, system_decode_t decoded, registers_t &registers) {
+	if(execute) {
+		// The order of the two 5 bit halves is reversed
+		ap_uint<10> SPR = decoded.SPR << 5 | decoded.SPR >> 5;
+		ap_uint<8> FXM = decoded.FXM;
+		ap_uint<32> mask;
+		for(uint32_t n = 0, b = 0; n < 8; n++) {
+			for(uint32_t i = 0; i < 4; i++) {
+				mask[b++] = FXM[n];
+			}
+		}
+
+		switch(decoded.operation) {
+			case system_ppc::MOVE_TO_SPR:
+				switch(SPR) {
+					case 1:
+						registers.fixed_exception_reg.exception_bits = registers.GPR[decoded.RS_RT];
+						break;
+					case 8:
+						registers.link_register = registers.GPR[decoded.RS_RT];
+						break;
+					case 9:
+						registers.condition_reg.condition_bits = registers.GPR[decoded.RS_RT];
+						break;
+				}
+				break;
+			case system_ppc::MOVE_FROM_SPR:
+				switch(SPR) {
+					case 1:
+						registers.GPR[decoded.RS_RT] = registers.fixed_exception_reg.exception_bits;
+						break;
+					case 8:
+						registers.GPR[decoded.RS_RT] = registers.link_register;
+						break;
+					case 9:
+						registers.GPR[decoded.RS_RT] = registers.condition_reg.condition_bits;
+						break;
+				}
+				break;
+			case system_ppc::MOVE_TO_CR:
+				registers.condition_reg.condition_bits = (registers.GPR[decoded.RS_RT] & mask) | (registers.condition_reg.condition_bits & ~mask);
+				break;
+			case system_ppc::MOVE_FROM_CR:
+				registers.GPR[decoded.RS_RT] = registers.condition_reg.condition_bits;
+				break;
+		}
+	}
+}
