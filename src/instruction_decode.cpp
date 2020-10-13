@@ -35,6 +35,9 @@ decode_result_t decode(uint32_t instruction_port) {
 
 	// branch processor decode structures
 	branch_decode_result_t branch_result;
+	branch_result.execute_branch = false;
+	branch_result.execute_system_call = false;
+	branch_result.execute_condition = false;
 
 	branch_decode_t branch_decoded;
 	init_branch(branch_decoded)
@@ -46,6 +49,17 @@ decode_result_t decode(uint32_t instruction_port) {
 
 	// fixed point processor decode structures
 	fixed_point_decode_result_t fixed_point_decode_result;
+	fixed_point_decode_result.execute_load = false;
+	fixed_point_decode_result.execute_store = false;
+	fixed_point_decode_result.execute_add_sub = false;
+	fixed_point_decode_result.execute_mul = false;
+	fixed_point_decode_result.execute_div = false;
+	fixed_point_decode_result.execute_compare = false;
+	fixed_point_decode_result.execute_trap = false;
+	fixed_point_decode_result.execute_logical = false;
+	fixed_point_decode_result.execute_rotate = false;
+	fixed_point_decode_result.execute_shift = false;
+	fixed_point_decode_result.execute_system = false;
 
 	load_store_decode_t load_store_decoded;
 	init_load_store(load_store_decoded)
@@ -79,6 +93,14 @@ decode_result_t decode(uint32_t instruction_port) {
 
 	// floating point processor decode structures
 	floating_point_decode_result_t floating_point_decode_result;
+	floating_point_decode_result.execute_load = false;
+	floating_point_decode_result.execute_store = false;
+	floating_point_decode_result.execute_move = false;
+	floating_point_decode_result.execute_arithmetic = false;
+	floating_point_decode_result.execute_madd = false;
+	floating_point_decode_result.execute_convert = false;
+	floating_point_decode_result.execute_compare = false;
+	floating_point_decode_result.execute_status = false;
 
 	float_load_store_decode_t float_load_store_decoded;
 	init_load_store(float_load_store_decoded)
@@ -104,6 +126,7 @@ decode_result_t decode(uint32_t instruction_port) {
 	switch(instruction.I_Form.OPCD) {
 		// B Form Branch instructions
 		case 16: // bc, bca, bcl, bcla
+			branch_result.execute_branch = true;
 			branch_decoded.operation = BRANCH;
 			branch_decoded.LK = instruction.B_Form.LK;
 			branch_decoded.AA = instruction.B_Form.AA;
@@ -115,6 +138,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			break;
 		// I Form Branch instructions
 		case 18: // b, ba, bl, bla
+			branch_result.execute_branch = true;
 			branch_decoded.operation = BRANCH_CONDITIONAL;
 			branch_decoded.LK = instruction.I_Form.LK;
 			branch_decoded.AA = instruction.I_Form.AA;
@@ -128,6 +152,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			switch(instruction.XL_Form.XO) {
 				// XL Form Branch instructions
 				case 16: // bclr, bclrl
+					branch_result.execute_branch = true;
 					branch_decoded.operation = BRANCH_CONDITIONAL_LINK;
 					branch_decoded.LK = instruction.XL_Form.LK;
 					branch_decoded.AA = 0;
@@ -138,6 +163,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					branch_decoded.BH = instruction.XL_Form.BB; // BH is part of BH in XL Form
 					break;
 				case 528: // bcctr, bcctrl
+					branch_result.execute_branch = true;
 					branch_decoded.operation = BRANCH_CONDITIONAL_COUNT;
 					branch_decoded.LK = instruction.XL_Form.LK;
 					branch_decoded.AA = 0;
@@ -149,48 +175,56 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				// XL Form Condition instructions
 				case 0: // mcrf
+					branch_result.execute_condition = true;
 					condition_decoded.operation = condition::MOVE;
 					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
 					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
 					condition_decoded.CR_result_reg_address = instruction.XL_Form.BT;
 					break;
 				case 33: // crnor
+					branch_result.execute_condition = true;
 					condition_decoded.operation = condition::NOR;
 					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
 					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
 					condition_decoded.CR_result_reg_address = instruction.XL_Form.BT;
 					break;
 				case 129: // crandc
+					branch_result.execute_condition = true;
 					condition_decoded.operation = condition::AND_COMPLEMENT;
 					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
 					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
 					condition_decoded.CR_result_reg_address = instruction.XL_Form.BT;
 					break;
 				case 193: // crxor
+					branch_result.execute_condition = true;
 					condition_decoded.operation = condition::XOR;
 					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
 					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
 					condition_decoded.CR_result_reg_address = instruction.XL_Form.BT;
 					break;
 				case 257: // crand
+					branch_result.execute_condition = true;
 					condition_decoded.operation = condition::AND;
 					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
 					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
 					condition_decoded.CR_result_reg_address = instruction.XL_Form.BT;
 					break;
 				case 289: // creqv
+					branch_result.execute_condition = true;
 					condition_decoded.operation = condition::EQUIVALENT;
 					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
 					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
 					condition_decoded.CR_result_reg_address = instruction.XL_Form.BT;
 					break;
 				case 417: // crorc
+					branch_result.execute_condition = true;
 					condition_decoded.operation = condition::OR_COMPLEMENT;
 					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
 					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
 					condition_decoded.CR_result_reg_address = instruction.XL_Form.BT;
 					break;
 				case 449: // cror
+					branch_result.execute_condition = true;
 					condition_decoded.operation = condition::OR;
 					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
 					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
@@ -204,12 +238,14 @@ decode_result_t decode(uint32_t instruction_port) {
 				case 0: // Invalid instruction!
 					break;
 				case 1: // sc
+					branch_result.execute_system_call = true;
 					system_call_decoded = instruction.SC_Form.LEV;
 					break;
 			}
 			break;
 		// M Form rotate instructions
 		case 20: // rlwimi, rlwimi.
+			fixed_point_decode_result.execute_rotate = true;
 			rotate_decoded.shift_imm = true;
 			rotate_decoded.shift_immediate = instruction.M_Form.RB;
 			rotate_decoded.shift_reg_address = 0;
@@ -225,6 +261,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			}
 			break;
 		case 21: // rlwinm, rlwinm.
+			fixed_point_decode_result.execute_rotate = true;
 			rotate_decoded.shift_imm = true;
 			rotate_decoded.shift_immediate = instruction.M_Form.RB;
 			rotate_decoded.shift_reg_address = 0;
@@ -240,6 +277,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			}
 			break;
 		case 23: // rlwnm, rlwnm.
+			fixed_point_decode_result.execute_rotate = true;
 			rotate_decoded.shift_imm = true;
 			rotate_decoded.shift_immediate = 0;
 			rotate_decoded.shift_reg_address = instruction.M_Form.RB;
@@ -287,36 +325,46 @@ decode_result_t decode(uint32_t instruction_port) {
 					// NOT SUPPORTED!!!
 					break;
 				case 23: // lwzx
+					fixed_point_decode_result.execute_load = true;
 					decode_load_store_and_zero_x_form(load_store_decoded, instruction, 4)
 					break;
 				case 53: // ldux
 					// NOT SUPPORTED!!!
 					break;
 				case 55: // lwzux
+					fixed_point_decode_result.execute_load = true;
 					decode_load_store_and_zero_with_update_x_form(load_store_decoded, instruction, 4)
 					break;
 				case 87: // lbzx
+					fixed_point_decode_result.execute_load = true;
 					decode_load_store_and_zero_x_form(load_store_decoded, instruction, 1)
 					break;
 				case 119: // lbzux
+					fixed_point_decode_result.execute_load = true;
 					decode_load_store_and_zero_with_update_x_form(load_store_decoded, instruction, 1)
 					break;
 				case 279: // lhzx
+					fixed_point_decode_result.execute_load = true;
 					decode_load_store_and_zero_x_form(load_store_decoded, instruction, 2)
 					break;
 				case 311: // lhzux
+					fixed_point_decode_result.execute_load = true;
 					decode_load_store_and_zero_with_update_x_form(load_store_decoded, instruction, 2)
 					break;
 				case 341: // lwax
+					fixed_point_decode_result.execute_load = true;
 					decode_load_algebraic_x_form(load_store_decoded, instruction, 4)
 					break;
 				case 343: // lhax
+					fixed_point_decode_result.execute_load = true;
 					decode_load_algebraic_x_form(load_store_decoded, instruction, 2)
 					break;
 				case 373: // lwaux
+					fixed_point_decode_result.execute_load = true;
 					decode_load_algebraic_with_update_x_form(load_store_decoded, instruction, 4);
 					break;
 				case 375: // lhaux
+					fixed_point_decode_result.execute_load = true;
 					decode_load_algebraic_with_update_x_form(load_store_decoded, instruction, 2)
 					break;
 				// X Form store instructions
@@ -324,24 +372,30 @@ decode_result_t decode(uint32_t instruction_port) {
 					// NOT SUPPORTED!!!
 					break;
 				case 151: // stwx
+					fixed_point_decode_result.execute_store = true;
 					decode_load_store_and_zero_x_form(load_store_decoded, instruction, 4)
 					break;
 				case 181: // stdux
 					// NOT SUPPORTED!!!
 					break;
 				case 183: // stwux
+					fixed_point_decode_result.execute_store = true;
 					decode_load_store_and_zero_with_update_x_form(load_store_decoded, instruction, 4)
 					break;
 				case 215: // stbx
+					fixed_point_decode_result.execute_store = true;
 					decode_load_store_and_zero_x_form(load_store_decoded, instruction, 1)
 					break;
 				case 247: // stbux
+					fixed_point_decode_result.execute_store = true;
 					decode_load_store_and_zero_with_update_x_form(load_store_decoded, instruction, 1)
 					break;
 				case 407: // sthx
+					fixed_point_decode_result.execute_store = true;
 					decode_load_store_and_zero_x_form(load_store_decoded, instruction, 2)
 					break;
 				case 439: // sthux
+					fixed_point_decode_result.execute_store = true;
 					decode_load_store_and_zero_with_update_x_form(load_store_decoded, instruction, 2)
 					break;
 				// Load/Store reverse order (little endian)
@@ -373,6 +427,7 @@ decode_result_t decode(uint32_t instruction_port) {
 				// XO Form Add/Sub instructions
 				case 8 | 0b1000000000:
 				case 8: // addc, addc., addco, addco.
+					fixed_point_decode_result.execute_add_sub = true;
 					add_sub_decoded.subtract = true;
 					add_sub_decoded.op1_imm = false;
 					add_sub_decoded.op1_immediate = 0;
@@ -397,6 +452,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				case 10 | 0b1000000000:
 				case 10: // addc, addc., addco, addco.
+					fixed_point_decode_result.execute_add_sub = true;
 					add_sub_decoded.subtract = false;
 					add_sub_decoded.op1_imm = false;
 					add_sub_decoded.op1_immediate = 0;
@@ -421,6 +477,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				case 40 | 0b1000000000:
 				case 40: // subf, subf., subfo, subfo.
+					fixed_point_decode_result.execute_add_sub = true;
 					add_sub_decoded.subtract = true;
 					add_sub_decoded.op1_imm = false;
 					add_sub_decoded.op1_immediate = 0;
@@ -445,6 +502,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				case 104 | 0b1000000000:
 				case 104: // neg, neg., nego, nego.
+					fixed_point_decode_result.execute_add_sub = true;
 					add_sub_decoded.subtract = true;
 					add_sub_decoded.op1_imm = false;
 					add_sub_decoded.op1_immediate = 0;
@@ -469,6 +527,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				case 136 | 0b1000000000:
 				case 136: // subfe, subfe., subfeo, subfeo.
+					fixed_point_decode_result.execute_add_sub = true;
 					add_sub_decoded.subtract = true;
 					add_sub_decoded.op1_imm = false;
 					add_sub_decoded.op1_immediate = 0;
@@ -493,6 +552,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				case 138 | 0b1000000000:
 				case 138: // adde, adde., addeo, addeo.
+					fixed_point_decode_result.execute_add_sub = true;
 					add_sub_decoded.subtract = false;
 					add_sub_decoded.op1_imm = false;
 					add_sub_decoded.op1_immediate = 0;
@@ -517,6 +577,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				case 200 | 0b1000000000:
 				case 200: // subfze, subfze., subfzeo, subfzeo.
+					fixed_point_decode_result.execute_add_sub = true;
 					add_sub_decoded.subtract = true;
 					add_sub_decoded.op1_imm = false;
 					add_sub_decoded.op1_immediate = 0;
@@ -541,6 +602,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				case 202 | 0b1000000000:
 				case 202: // addze, addze., addzeo, addzeo.
+					fixed_point_decode_result.execute_add_sub = true;
 					add_sub_decoded.subtract = false;
 					add_sub_decoded.op1_imm = false;
 					add_sub_decoded.op1_immediate = 0;
@@ -565,6 +627,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				case 232 | 0b1000000000:
 				case 232: // subfme, subfme., subfmeo, subfmeo.
+					fixed_point_decode_result.execute_add_sub = true;
 					add_sub_decoded.subtract = true;
 					add_sub_decoded.op1_imm = false;
 					add_sub_decoded.op1_immediate = 0;
@@ -589,6 +652,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				case 234 | 0b1000000000:
 				case 234: // addme, addme., addmeo, addmeo.
+					fixed_point_decode_result.execute_add_sub = true;
 					add_sub_decoded.subtract = false;
 					add_sub_decoded.op1_imm = false;
 					add_sub_decoded.op1_immediate = 0;
@@ -613,6 +677,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				case 266 | 0b1000000000:
 				case 266: // add, add., addo, addo.
+					fixed_point_decode_result.execute_add_sub = true;
 					add_sub_decoded.subtract = false;
 					add_sub_decoded.op1_imm = false;
 					add_sub_decoded.op1_immediate = 0;
@@ -642,6 +707,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				case 11 | 0b1000000000:
 				case 11: // mullhwu, mullhwu.
+					fixed_point_decode_result.execute_mul = true;
 					mul_decoded.op1_reg_address = instruction.XO_Form.RA;
 					mul_decoded.op2_imm = false;
 					mul_decoded.op2_immediate = 0;
@@ -661,6 +727,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				case 75 | 0b1000000000:
 				case 75: // mullhw, mullhw., mullhwo, mullhwo.
+					fixed_point_decode_result.execute_mul = true;
 					mul_decoded.op1_reg_address = instruction.XO_Form.RA;
 					mul_decoded.op2_imm = false;
 					mul_decoded.op2_immediate = 0;
@@ -684,6 +751,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				case 235 | 0b1000000000:
 				case 235: // mullw, mullw., mullwo, mullwo.
+					fixed_point_decode_result.execute_mul = true;
 					mul_decoded.op1_reg_address = instruction.XO_Form.RA;
 					mul_decoded.op2_imm = false;
 					mul_decoded.op2_immediate = 0;
@@ -708,6 +776,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				case 459 | 0b1000000000:
 				case 459: // divwu, divwu., divwuo, divwuo.
+					fixed_point_decode_result.execute_div = true;
 					div_decoded.dividend_reg_address = instruction.XO_Form.RA;
 					div_decoded.divisor_reg_address = instruction.XO_Form.RB;
 					div_decoded.result_reg_address = instruction.XO_Form.RT;
@@ -729,6 +798,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				case 491 | 0b1000000000:
 				case 491: // divw, divw., divwo, divwo.
+					fixed_point_decode_result.execute_div = true;
 					div_decoded.dividend_reg_address = instruction.XO_Form.RA;
 					div_decoded.divisor_reg_address = instruction.XO_Form.RB;
 					div_decoded.result_reg_address = instruction.XO_Form.RT;
@@ -747,6 +817,7 @@ decode_result_t decode(uint32_t instruction_port) {
 				// X Form Cmp instructions
 				case 0: // cmp
 					{
+						fixed_point_decode_result.execute_compare = true;
 						uint8_t L = instruction.X_Form.RT & 0b00001;
 						uint8_t BF = instruction.X_Form.RT >> 2;
 						if(L == 1) {
@@ -763,6 +834,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				case 32: // cmpl
 					{
+						fixed_point_decode_result.execute_compare = true;
 						uint8_t BF = instruction.D_Form.RT >> 2;
 						cmp_decoded.cmp_signed = false;
 						cmp_decoded.op1_reg_address = instruction.X_Form.RA;
@@ -777,6 +849,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					// NOT SUPPORTED!!!
 					break;
 				case 4: // tw
+					fixed_point_decode_result.execute_trap = true;
 					trap_decoded.op1_reg_address = instruction.X_Form.RA;
 					trap_decoded.op2_imm = false;
 					trap_decoded.op2_immediate = 0;
@@ -785,6 +858,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				// X Form Logical instructions
 				case 26: // cntlzw, cntlzw.
+					fixed_point_decode_result.execute_logical = true;
 					log_decoded.operation = logical::COUNT_LEDING_ZEROS_WORD;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = true;
@@ -798,6 +872,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 28: // and, and.
+					fixed_point_decode_result.execute_logical = true;
 					log_decoded.operation = logical::AND;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = false;
@@ -814,6 +889,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					// NOT SUPPORTED!!!
 					break;
 				case 60: // andc, andc.
+					fixed_point_decode_result.execute_logical = true;
 					log_decoded.operation = logical::AND_COMPLEMENT;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = false;
@@ -827,6 +903,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 122: // popcntb
+					fixed_point_decode_result.execute_logical = true;
 					log_decoded.operation = logical::POPULATION_COUNT_BYTES;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = true;
@@ -836,6 +913,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					log_decoded.alter_CR0 = false;
 					break;
 				case 124: // nor, nor.
+					fixed_point_decode_result.execute_logical = true;
 					log_decoded.operation = logical::NOR;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = false;
@@ -849,6 +927,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 284: // eqv, eqv.
+					fixed_point_decode_result.execute_logical = true;
 					log_decoded.operation = logical::EQUIVALENT;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = false;
@@ -862,6 +941,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 316: // xor, xor.
+					fixed_point_decode_result.execute_logical = true;
 					log_decoded.operation = logical::XOR;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = false;
@@ -875,6 +955,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 412: // orc, orc.
+					fixed_point_decode_result.execute_logical = true;
 					log_decoded.operation = logical::OR_COMPLEMENT;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = false;
@@ -888,6 +969,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 444: // or, or.
+					fixed_point_decode_result.execute_logical = true;
 					log_decoded.operation = logical::OR;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = false;
@@ -901,6 +983,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 476: // nand, nand.
+					fixed_point_decode_result.execute_logical = true;
 					log_decoded.operation = logical::NAND;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = false;
@@ -914,6 +997,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 922: // extsh, extsh.
+					fixed_point_decode_result.execute_logical = true;
 					log_decoded.operation = logical::EXTEND_SIGN_HALFWORD;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = true;
@@ -927,6 +1011,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 954: // extsb, extsb.
+					fixed_point_decode_result.execute_logical = true;
 					log_decoded.operation = logical::EXTEND_SIGN_BYTE;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = true;
@@ -944,6 +1029,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				// X Form shift instructions
 				case 24: // slw, slw.
+					fixed_point_decode_result.execute_shift = true;
 					shift_decoded.shift_imm = false;
 					shift_decoded.shift_immediate = 0;
 					shift_decoded.shift_reg_address = instruction.X_Form.RB;
@@ -966,6 +1052,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					// NOT SUPPORTED!!!
 					break;
 				case 536: // srw, srw.
+					fixed_point_decode_result.execute_shift = true;
 					shift_decoded.shift_imm = false;
 					shift_decoded.shift_immediate = 0;
 					shift_decoded.shift_reg_address = instruction.X_Form.RB;
@@ -984,6 +1071,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					// NOT SUPPORTED!!!
 					break;
 				case 792: // sraw, sraw.
+					fixed_point_decode_result.execute_shift = true;
 					shift_decoded.shift_imm = false;
 					shift_decoded.shift_immediate = 0;
 					shift_decoded.shift_reg_address = instruction.X_Form.RB;
@@ -1002,6 +1090,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					// NOT SUPPORTED!!!
 					break;
 				case 824: // srawi, srawi.
+					fixed_point_decode_result.execute_shift = true;
 					shift_decoded.shift_imm = true;
 					shift_decoded.shift_immediate = instruction.X_Form.RB;
 					shift_decoded.shift_reg_address = 0;
@@ -1018,6 +1107,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				// XFX Form move system register instructions
 				case 19: // mfcr
+					fixed_point_decode_result.execute_system = true;
 					if((instruction.XFX_Form.spr >> 9) == 1) break; // Field has to be 0
 					system_decoded.operation = system_ppc::MOVE_FROM_CR;
 					system_decoded.RS_RT = instruction.XFX_Form.RT;
@@ -1025,6 +1115,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					system_decoded.FXM = 0;
 					break;
 				case 144: // mtcrf
+					fixed_point_decode_result.execute_system = true;
 					if((instruction.XFX_Form.spr >> 9) == 1) break; // Field has to be 0
 					system_decoded.operation = system_ppc::MOVE_TO_CR;
 					system_decoded.RS_RT = instruction.XFX_Form.RT;
@@ -1032,12 +1123,14 @@ decode_result_t decode(uint32_t instruction_port) {
 					system_decoded.FXM = instruction.XFX_Form.spr >> 1;
 					break;
 				case 339: // mfspr
+					fixed_point_decode_result.execute_system = true;
 					system_decoded.operation = system_ppc::MOVE_FROM_SPR;
 					system_decoded.RS_RT = instruction.XFX_Form.RT;
 					system_decoded.SPR = instruction.XFX_Form.spr;
 					system_decoded.FXM = 0;
 					break;
 				case 467: // mtspr
+					fixed_point_decode_result.execute_system = true;
 					system_decoded.operation = system_ppc::MOVE_TO_SPR;
 					system_decoded.RS_RT = instruction.XFX_Form.RT;
 					system_decoded.SPR = instruction.XFX_Form.spr;
@@ -1045,30 +1138,39 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				// X Form floating point Load/Store instructions
 				case 535: // lfsx
+					floating_point_decode_result.execute_load = true;
 					decode_load_store_and_zero_x_form(float_load_store_decoded, instruction, 4)
 					break;
 				case 567: // lfsux
+					floating_point_decode_result.execute_load = true;
 					decode_load_store_and_zero_with_update_x_form(float_load_store_decoded, instruction, 4)
 					break;
 				case 599: // lfdx
+					floating_point_decode_result.execute_load = true;
 					decode_load_store_and_zero_x_form(float_load_store_decoded, instruction, 8)
 					break;
 				case 631: // lfdux
+					floating_point_decode_result.execute_load = true;
 					decode_load_store_and_zero_with_update_x_form(float_load_store_decoded, instruction, 8)
 					break;
 				case 663: // stfsx
+					floating_point_decode_result.execute_store = true;
 					decode_load_store_and_zero_x_form(float_load_store_decoded, instruction, 4)
 					break;
 				case 695: // stfsux
+					floating_point_decode_result.execute_store = true;
 					decode_load_store_and_zero_with_update_x_form(float_load_store_decoded, instruction, 4)
 					break;
 				case 727: // stfdx
+					floating_point_decode_result.execute_store = true;
 					decode_load_store_and_zero_x_form(float_load_store_decoded, instruction, 8)
 					break;
 				case 759: // stfdux
+					floating_point_decode_result.execute_store = true;
 					decode_load_store_and_zero_with_update_x_form(float_load_store_decoded, instruction, 8)
 					break;
 				case 983: // stfiwx
+					floating_point_decode_result.execute_store = true;
 					// Load decode is used here to be able to reduce the amount of macros, sign extend means that float should be stored as integer
 					decode_load_algebraic_x_form(float_load_store_decoded, instruction, 4)
 					break;
@@ -1076,46 +1178,60 @@ decode_result_t decode(uint32_t instruction_port) {
 			break;
 		// D Form load instructions
 		case 32: // lwz
+			fixed_point_decode_result.execute_load = true;
 			decode_load_store_and_zero(load_store_decoded, instruction, 4)
 			break;
 		case 33: // lwzu
+			fixed_point_decode_result.execute_load = true;
 			decode_load_store_and_zero_with_update(load_store_decoded, instruction, 4)
 			break;
 		case 34: // lbz
+			fixed_point_decode_result.execute_load = true;
 			decode_load_store_and_zero(load_store_decoded, instruction, 1)
 			break;
 		case 35: // lbzu
+			fixed_point_decode_result.execute_load = true;
 			decode_load_store_and_zero_with_update(load_store_decoded, instruction, 1)
 			break;
 		case 40: // lhz
+			fixed_point_decode_result.execute_load = true;
 			decode_load_store_and_zero(load_store_decoded, instruction, 2)
 			break;
 		case 41: // lhzu
+			fixed_point_decode_result.execute_load = true;
 			decode_load_store_and_zero_with_update(load_store_decoded, instruction, 2)
 			break;
 		case 42: // lha
+			fixed_point_decode_result.execute_load = true;
 			decode_load_algebraic(load_store_decoded, instruction, 2);
 			break;
 		case 43: // lhau
+			fixed_point_decode_result.execute_load = true;
 			decode_load_algebraic_with_update(load_store_decoded, instruction, 2)
 			break;
 		// D Form store instructions
 		case 36: // stw
+			fixed_point_decode_result.execute_store = true;
 			decode_load_store_and_zero(load_store_decoded, instruction, 4)
 			break;
 		case 37: // stwu
+			fixed_point_decode_result.execute_store = true;
 			decode_load_store_and_zero_with_update(load_store_decoded, instruction, 4)
 			break;
 		case 38: // stb
+			fixed_point_decode_result.execute_store = true;
 			decode_load_store_and_zero(load_store_decoded, instruction, 1)
 			break;
 		case 39: // stbu
+			fixed_point_decode_result.execute_store = true;
 			decode_load_store_and_zero_with_update(load_store_decoded, instruction, 1)
 			break;
 		case 44: // sth
+			fixed_point_decode_result.execute_store = true;
 			decode_load_store_and_zero(load_store_decoded, instruction, 2)
 			break;
 		case 45: // sthu
+			fixed_point_decode_result.execute_store = true;
 			decode_load_store_and_zero_with_update(load_store_decoded, instruction, 2)
 			break;
 		case 58:
@@ -1151,6 +1267,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			break;
 		// D Form Add/Sub instructions
 		case 8: // subfic
+			fixed_point_decode_result.execute_add_sub = true;
 			add_sub_decoded.subtract = true;
 			add_sub_decoded.op1_imm = false;
 			add_sub_decoded.op1_immediate = 0;
@@ -1166,6 +1283,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			add_sub_decoded.sub_one = false;
 			break;
 		case 12: // addic
+			fixed_point_decode_result.execute_add_sub = true;
 			add_sub_decoded.subtract = false;
 			add_sub_decoded.op1_imm = false;
 			add_sub_decoded.op1_immediate = 0;
@@ -1181,6 +1299,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			add_sub_decoded.sub_one = false;
 			break;
 		case 13: // addic.
+			fixed_point_decode_result.execute_add_sub = true;
 			add_sub_decoded.subtract = false;
 			add_sub_decoded.op1_imm = false;
 			add_sub_decoded.op1_immediate = 0;
@@ -1196,6 +1315,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			add_sub_decoded.sub_one = false;
 			break;
 		case 14: // addi
+			fixed_point_decode_result.execute_add_sub = true;
 			add_sub_decoded.subtract = false;
 			if(instruction.D_Form.RA == 0) {
 				add_sub_decoded.op1_imm = true;
@@ -1217,6 +1337,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			add_sub_decoded.sub_one = false;
 			break;
 		case 15: // addis
+			fixed_point_decode_result.execute_add_sub = true;
 			add_sub_decoded.subtract = false;
 			if(instruction.D_Form.RA == 0) {
 				add_sub_decoded.op1_imm = true;
@@ -1239,6 +1360,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			break;
 		// D Form Mul instructions
 		case 7: // mulli
+			fixed_point_decode_result.execute_mul = true;
 			mul_decoded.op1_reg_address = instruction.D_Form.RA;
 			mul_decoded.op2_imm = true;
 			mul_decoded.op2_immediate = instruction.D_Form.D;
@@ -1251,6 +1373,7 @@ decode_result_t decode(uint32_t instruction_port) {
 		// D Form Cmp instructions
 		case 10: // cmpli
 			{
+				fixed_point_decode_result.execute_compare = true;
 				uint8_t BF = instruction.D_Form.RT >> 2;
 				cmp_decoded.cmp_signed = false;
 				cmp_decoded.op1_reg_address = instruction.D_Form.RA;
@@ -1262,6 +1385,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			break;
 		case 11: // cmpi
 			{
+				fixed_point_decode_result.execute_compare = true;
 				uint8_t L = instruction.D_Form.RT & 0b00001;
 				uint8_t BF = instruction.D_Form.RT >> 2;
 				if(L == 1) {
@@ -1281,6 +1405,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			// NOT SUPPORTED!!!
 			break;
 		case 3: // twi
+			fixed_point_decode_result.execute_trap = true;
 			trap_decoded.op1_reg_address = instruction.D_Form.RA;
 			trap_decoded.op2_imm = true;
 			trap_decoded.op2_immediate = instruction.D_Form.D;
@@ -1289,6 +1414,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			break;
 		// D Form Logical instructions
 		case 24: // ori
+			fixed_point_decode_result.execute_logical = true;
 			log_decoded.operation = logical::OR;
 			log_decoded.op1_reg_address = instruction.D_Form.RT;
 			log_decoded.op2_imm = true;
@@ -1298,6 +1424,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			log_decoded.alter_CR0 = false;
 			break;
 		case 25: // oris
+			fixed_point_decode_result.execute_logical = true;
 			log_decoded.operation = logical::OR;
 			log_decoded.op1_reg_address = instruction.D_Form.RT;
 			log_decoded.op2_imm = true;
@@ -1307,6 +1434,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			log_decoded.alter_CR0 = false;
 			break;
 		case 26: // xori
+			fixed_point_decode_result.execute_logical = true;
 			log_decoded.operation = logical::XOR;
 			log_decoded.op1_reg_address = instruction.D_Form.RT;
 			log_decoded.op2_imm = true;
@@ -1316,6 +1444,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			log_decoded.alter_CR0 = false;
 			break;
 		case 27: // xoris
+			fixed_point_decode_result.execute_logical = true;
 			log_decoded.operation = logical::XOR;
 			log_decoded.op1_reg_address = instruction.D_Form.RT;
 			log_decoded.op2_imm = true;
@@ -1325,6 +1454,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			log_decoded.alter_CR0 = false;
 			break;
 		case 28: // andi.
+			fixed_point_decode_result.execute_logical = true;
 			log_decoded.operation = logical::AND;
 			log_decoded.op1_reg_address = instruction.D_Form.RT;
 			log_decoded.op2_imm = true;
@@ -1334,6 +1464,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			log_decoded.alter_CR0 = true;
 			break;
 		case 29: // andis.
+			fixed_point_decode_result.execute_logical = true;
 			log_decoded.operation = logical::AND;
 			log_decoded.op1_reg_address = instruction.D_Form.RT;
 			log_decoded.op2_imm = true;
@@ -1344,33 +1475,42 @@ decode_result_t decode(uint32_t instruction_port) {
 			break;
 		// D Form floating point Load/Store instructions
 		case 48: // lfs
+			floating_point_decode_result.execute_load = true;
 			decode_load_store_and_zero(float_load_store_decoded, instruction, 4)
 			break;
 		case 49: // lfsu
+			floating_point_decode_result.execute_load = true;
 			decode_load_store_and_zero_with_update(float_load_store_decoded, instruction, 4)
 			break;
 		case 50: // lfd
+			floating_point_decode_result.execute_load = true;
 			decode_load_store_and_zero(float_load_store_decoded, instruction, 8)
 			break;
 		case 51: // lfdu
+			floating_point_decode_result.execute_load = true;
 			decode_load_store_and_zero_with_update(float_load_store_decoded, instruction, 8)
 			break;
 		case 52: // stfs
+			floating_point_decode_result.execute_store = true;
 			decode_load_store_and_zero(float_load_store_decoded, instruction, 4)
 			break;
 		case 53: // stfsu
+			floating_point_decode_result.execute_store = true;
 			decode_load_store_and_zero_with_update(float_load_store_decoded, instruction, 4)
 			break;
 		case 54: // stfd
+			floating_point_decode_result.execute_store = true;
 			decode_load_store_and_zero(float_load_store_decoded, instruction, 8)
 			break;
 		case 55: // stfdu
+			floating_point_decode_result.execute_store = true;
 			decode_load_store_and_zero_with_update(float_load_store_decoded, instruction, 8)
 			break;
 		case 63:
 			switch(instruction.X_Form.XO) {
 				// X Form floating point Move instructions
 				case 40: // fneg, fneg.
+					floating_point_decode_result.execute_move = true;
 					float_move_decoded.operation = NEGATE;
 					float_move_decoded.source_reg_address = instruction.X_Form.RB;
 					float_move_decoded.target_reg_address = instruction.X_Form.RT;
@@ -1381,6 +1521,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 72: // fmr, fmr.
+					floating_point_decode_result.execute_move = true;
 					float_move_decoded.operation = MOVE;
 					float_move_decoded.source_reg_address = instruction.X_Form.RB;
 					float_move_decoded.target_reg_address = instruction.X_Form.RT;
@@ -1391,6 +1532,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 136: // fnabs, fnabs.
+					floating_point_decode_result.execute_move = true;
 					float_move_decoded.operation = NEGATIVE_ABSOLUTE;
 					float_move_decoded.source_reg_address = instruction.X_Form.RB;
 					float_move_decoded.target_reg_address = instruction.X_Form.RT;
@@ -1401,6 +1543,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 264: // fabs, fabs.
+					floating_point_decode_result.execute_move = true;
 					float_move_decoded.operation = ABSOLUTE;
 					float_move_decoded.source_reg_address = instruction.X_Form.RB;
 					float_move_decoded.target_reg_address = instruction.X_Form.RT;
@@ -1412,6 +1555,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				// X Form floating point Convert instructions
 				case 12: // frsp, frsp.
+					floating_point_decode_result.execute_convert = true;
 					float_convert_decoded.source_reg_address = instruction.X_Form.RB;
 					float_convert_decoded.target_reg_address = instruction.X_Form.RT;
 					float_convert_decoded.round_to_single = true;
@@ -1424,6 +1568,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 14: // fctiw, fctiw.
+					floating_point_decode_result.execute_convert = true;
 					float_convert_decoded.source_reg_address = instruction.X_Form.RB;
 					float_convert_decoded.target_reg_address = instruction.X_Form.RT;
 					float_convert_decoded.round_to_single = false;
@@ -1436,6 +1581,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 15: // fctiwz, fctiwz.
+					floating_point_decode_result.execute_convert = true;
 					float_convert_decoded.source_reg_address = instruction.X_Form.RB;
 					float_convert_decoded.target_reg_address = instruction.X_Form.RT;
 					float_convert_decoded.round_to_single = false;
@@ -1458,12 +1604,14 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				// X Form floating point compare instructions
 				case 0: // fcmpu
+					floating_point_decode_result.execute_compare = true;
 					float_compare_decoded.FRA = instruction.X_Form.RA;
 					float_compare_decoded.FRA = instruction.X_Form.RB;
 					float_compare_decoded.BF = instruction.X_Form.RT >> 2;
 					float_compare_decoded.unordered = true;
 					break;
 				case 63: // fcmpo
+					floating_point_decode_result.execute_compare = true;
 					float_compare_decoded.FRA = instruction.X_Form.RA;
 					float_compare_decoded.FRA = instruction.X_Form.RB;
 					float_compare_decoded.BF = instruction.X_Form.RT >> 2;
@@ -1471,6 +1619,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				// X Form floating point status instructions
 				case 38: // mtfsb1, mtfsb1.
+					floating_point_decode_result.execute_status = true;
 					float_status_decoded.FRT_FRB = 0;
 					float_status_decoded.BF_BT = instruction.X_Form.RT;
 					float_status_decoded.BFA = 0;
@@ -1489,6 +1638,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 64: // mcrfs
+					floating_point_decode_result.execute_status = true;
 					float_status_decoded.FRT_FRB = 0;
 					float_status_decoded.BF_BT = instruction.X_Form.RT >> 2;
 					float_status_decoded.BFA = instruction.X_Form.RA >> 2;
@@ -1503,6 +1653,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					float_status_decoded.alter_CR1 = false;
 					break;
 				case 70: // mtfsb0, mtfsb0.
+					floating_point_decode_result.execute_status = true;
 					float_status_decoded.FRT_FRB = 0;
 					float_status_decoded.BF_BT = instruction.X_Form.RT;
 					float_status_decoded.BFA = 0;
@@ -1521,6 +1672,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 134: // mtfsfi, mtfsfi.
+					floating_point_decode_result.execute_status = true;
 					float_status_decoded.FRT_FRB = 0;
 					float_status_decoded.BF_BT = instruction.X_Form.RT >> 2;
 					float_status_decoded.BFA = 0;
@@ -1539,6 +1691,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 583: // mffs, mffs.
+					floating_point_decode_result.execute_status = true;
 					float_status_decoded.FRT_FRB = instruction.X_Form.RT;
 					float_status_decoded.BF_BT = 0;
 					float_status_decoded.BFA = 0;
@@ -1558,6 +1711,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				// XFL Form floating point status instructions
 				case 711: // mtfsf, mtfsf.
+					floating_point_decode_result.execute_status = true;
 					float_status_decoded.FRT_FRB = instruction.XFL_Form.FRB;
 					float_status_decoded.BF_BT = 0;
 					float_status_decoded.BFA = 0;
@@ -1580,6 +1734,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			switch(instruction.A_Form.XO) {
 				// A Form floating point Arithmetic instructions
 				case 18: // fdiv, fdiv.
+					floating_point_decode_result.execute_arithmetic = true;
 					float_arithmetic_decoded.operation = floating_point::DIVIDE;
 					float_arithmetic_decoded.op1_reg_address = instruction.A_Form.FRA;
 					float_arithmetic_decoded.op2_reg_address = instruction.A_Form.FRB;
@@ -1592,6 +1747,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 20: // fsub, fsub.
+					floating_point_decode_result.execute_arithmetic = true;
 					float_arithmetic_decoded.operation = floating_point::SUBTRACT;
 					float_arithmetic_decoded.op1_reg_address = instruction.A_Form.FRA;
 					float_arithmetic_decoded.op2_reg_address = instruction.A_Form.FRB;
@@ -1604,6 +1760,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 21: // fadd, fadd.
+					floating_point_decode_result.execute_arithmetic = true;
 					float_arithmetic_decoded.operation = floating_point::ADD;
 					float_arithmetic_decoded.op1_reg_address = instruction.A_Form.FRA;
 					float_arithmetic_decoded.op2_reg_address = instruction.A_Form.FRB;
@@ -1616,6 +1773,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 25: // fmul, fmul.
+					floating_point_decode_result.execute_arithmetic = true;
 					float_arithmetic_decoded.operation = floating_point::MULTIPLY;
 					float_arithmetic_decoded.op1_reg_address = instruction.A_Form.FRA;
 					float_arithmetic_decoded.op2_reg_address = instruction.A_Form.FRB;
@@ -1630,6 +1788,7 @@ decode_result_t decode(uint32_t instruction_port) {
 
 				// A Form floating point Madd instructions
 				case 28: // fmsub, fmsub.
+					floating_point_decode_result.execute_madd = true;
 					float_madd_decoded.mul1_reg_address = instruction.A_Form.FRA;
 					float_madd_decoded.mul2_reg_address = instruction.A_Form.FRC;
 					float_madd_decoded.add_reg_address = instruction.A_Form.FRB;
@@ -1643,6 +1802,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 29: // fmadd, fmadd.
+					floating_point_decode_result.execute_madd = true;
 					float_madd_decoded.mul1_reg_address = instruction.A_Form.FRA;
 					float_madd_decoded.mul2_reg_address = instruction.A_Form.FRC;
 					float_madd_decoded.add_reg_address = instruction.A_Form.FRB;
@@ -1656,6 +1816,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 30: // fnmsub, fnmsub.
+					floating_point_decode_result.execute_madd = true;
 					float_madd_decoded.mul1_reg_address = instruction.A_Form.FRA;
 					float_madd_decoded.mul2_reg_address = instruction.A_Form.FRC;
 					float_madd_decoded.add_reg_address = instruction.A_Form.FRB;
@@ -1669,6 +1830,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 31: // fnmadd, fnmadd.
+					floating_point_decode_result.execute_madd = true;
 					float_madd_decoded.mul1_reg_address = instruction.A_Form.FRA;
 					float_madd_decoded.mul2_reg_address = instruction.A_Form.FRC;
 					float_madd_decoded.add_reg_address = instruction.A_Form.FRB;
@@ -1688,6 +1850,7 @@ decode_result_t decode(uint32_t instruction_port) {
 				switch(instruction.A_Form.XO) {
 					// A Form floating point Arithmetic instructions
 					case 18: // fdivs, fdivs.
+						floating_point_decode_result.execute_arithmetic = true;
 						float_arithmetic_decoded.operation = floating_point::DIVIDE;
 						float_arithmetic_decoded.op1_reg_address = instruction.A_Form.FRA;
 						float_arithmetic_decoded.op2_reg_address = instruction.A_Form.FRB;
@@ -1700,6 +1863,7 @@ decode_result_t decode(uint32_t instruction_port) {
 						}
 						break;
 					case 20: // fsubs, fsubs.
+						floating_point_decode_result.execute_arithmetic = true;
 						float_arithmetic_decoded.operation = floating_point::SUBTRACT;
 						float_arithmetic_decoded.op1_reg_address = instruction.A_Form.FRA;
 						float_arithmetic_decoded.op2_reg_address = instruction.A_Form.FRB;
@@ -1712,6 +1876,7 @@ decode_result_t decode(uint32_t instruction_port) {
 						}
 						break;
 					case 21: // fadds, fadds.
+						floating_point_decode_result.execute_arithmetic = true;
 						float_arithmetic_decoded.operation = floating_point::ADD;
 						float_arithmetic_decoded.op1_reg_address = instruction.A_Form.FRA;
 						float_arithmetic_decoded.op2_reg_address = instruction.A_Form.FRB;
@@ -1724,6 +1889,7 @@ decode_result_t decode(uint32_t instruction_port) {
 						}
 						break;
 					case 25: // fmuls, fmuls.
+						floating_point_decode_result.execute_arithmetic = true;
 						float_arithmetic_decoded.operation = floating_point::MULTIPLY;
 						float_arithmetic_decoded.op1_reg_address = instruction.A_Form.FRA;
 						float_arithmetic_decoded.op2_reg_address = instruction.A_Form.FRB;
@@ -1737,6 +1903,7 @@ decode_result_t decode(uint32_t instruction_port) {
 						break;
 					// A Form floating point Madd instructions
 					case 28: // fmsubs, fmsubs.
+						floating_point_decode_result.execute_madd = true;
 						float_madd_decoded.mul1_reg_address = instruction.A_Form.FRA;
 						float_madd_decoded.mul2_reg_address = instruction.A_Form.FRC;
 						float_madd_decoded.add_reg_address = instruction.A_Form.FRB;
@@ -1750,6 +1917,7 @@ decode_result_t decode(uint32_t instruction_port) {
 						}
 						break;
 					case 29: // fmadds, fmadds.
+						floating_point_decode_result.execute_madd = true;
 						float_madd_decoded.mul1_reg_address = instruction.A_Form.FRA;
 						float_madd_decoded.mul2_reg_address = instruction.A_Form.FRC;
 						float_madd_decoded.add_reg_address = instruction.A_Form.FRB;
@@ -1763,6 +1931,7 @@ decode_result_t decode(uint32_t instruction_port) {
 						}
 						break;
 					case 30: // fnmsubs, fnmsubs.
+						floating_point_decode_result.execute_madd = true;
 						float_madd_decoded.mul1_reg_address = instruction.A_Form.FRA;
 						float_madd_decoded.mul2_reg_address = instruction.A_Form.FRC;
 						float_madd_decoded.add_reg_address = instruction.A_Form.FRB;
@@ -1776,6 +1945,7 @@ decode_result_t decode(uint32_t instruction_port) {
 						}
 						break;
 					case 31: // fnmadds, fnmadds.
+						floating_point_decode_result.execute_madd = true;
 						float_madd_decoded.mul1_reg_address = instruction.A_Form.FRA;
 						float_madd_decoded.mul2_reg_address = instruction.A_Form.FRC;
 						float_madd_decoded.add_reg_address = instruction.A_Form.FRB;

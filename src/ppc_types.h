@@ -201,8 +201,11 @@ typedef struct {
 } condition_decode_t;
 
 typedef struct {
+	bool execute_branch;
 	branch_decode_t branch_decoded;
+	bool execute_system_call;
 	system_call_decode_t system_call_decoded;
+	bool execute_condition;
 	condition_decode_t condition_decoded;
 } branch_decode_result_t;
 
@@ -331,15 +334,26 @@ typedef struct {
 } system_decode_t;
 
 typedef struct {
+	bool execute_load;
+	bool execute_store;
 	load_store_decode_t load_store_decoded;
+	bool execute_add_sub;
 	add_sub_decode_t add_sub_decoded;
+	bool execute_mul;
 	mul_decode_t mul_decoded;
+	bool execute_div;
 	div_decode_t div_decoded;
+	bool execute_compare;
 	cmp_decode_t cmp_decoded;
+	bool execute_trap;
 	trap_decode_t trap_decoded;
+	bool execute_logical;
 	log_decode_t log_decoded;
+	bool execute_rotate;
 	rotate_decode_t rotate_decoded;
+	bool execute_shift;
 	shift_decode_t shift_decoded;
+	bool execute_system;
 	system_decode_t system_decoded;
 } fixed_point_decode_result_t;
 
@@ -423,12 +437,20 @@ typedef struct {
 } float_status_decode_t;
 
 typedef struct {
+	bool execute_load;
+	bool execute_store;
 	float_load_store_decode_t float_load_store_decoded;
+	bool execute_move;
 	float_move_decode_t float_move_decoded;
+	bool execute_arithmetic;
 	float_arithmetic_decode_t float_arithmetic_decoded;
+	bool execute_madd;
 	float_madd_decode_t float_madd_decoded;
+	bool execute_convert;
 	float_convert_decode_t float_convert_decoded;
+	bool execute_compare;
 	float_compare_decode_t float_compare_decoded;
+	bool execute_status;
 	float_status_decode_t float_status_decoded;
 } floating_point_decode_result_t;
 
