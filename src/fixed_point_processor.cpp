@@ -347,10 +347,21 @@ void fixed_point::multiply(bool execute, mul_decode_t decoded, registers_t &regi
 				}
 			} else {
 				// Unsigned
-				if (op_result(32,65) != 0) {
-					overflow = 1;
+				if(decoded.mul_signed) {
+					// On signed multiplication, the MSB of the 32 bit
+					// result has to be checked as well
+					// (if it's one, the result would be signed, which is incorrect)
+					if (op_result(31,65) != 0) {
+						overflow = 1;
+					} else {
+						overflow = 0;
+					}
 				} else {
-					overflow = 0;
+					if (op_result(32,65) != 0) {
+						overflow = 1;
+					} else {
+						overflow = 0;
+					}
 				}
 			}
 
