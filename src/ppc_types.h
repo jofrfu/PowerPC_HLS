@@ -33,14 +33,14 @@
 typedef union {
 	uint32_t instruction_bits;
 
-	struct {
+	struct __attribute__ ((__packed__)) {
 		uint8_t LK:1;
 		uint8_t AA:1;
 		uint32_t LI:24;
 		uint8_t OPCD:6;
 	} I_Form;
 
-	struct {
+	struct __attribute__ ((__packed__)) {
 		uint8_t LK:1;
 		uint8_t AA:1;
 		uint16_t BD:14;
@@ -49,7 +49,7 @@ typedef union {
 		uint8_t OPCD:6;
 	} B_Form;
 
-	struct {
+	struct __attribute__ ((__packed__)) {
 		uint8_t UNUSED_5:1;
 		uint8_t ALWAYS_ONE:1;
 		uint8_t UNUSED_4:3;
@@ -60,14 +60,14 @@ typedef union {
 		uint8_t OPCD:6;
 	} SC_Form;
 
-	struct {
+	struct __attribute__ ((__packed__)) {
 		uint16_t D:16;
 		uint8_t RA:5;
 		uint8_t RT:5;
 		uint8_t OPCD:6;
 	} D_Form;
 
-	struct {
+	struct __attribute__ ((__packed__)) {
 		uint8_t XO:2;
 		uint16_t DS:14;
 		uint8_t RA:5;
@@ -75,7 +75,7 @@ typedef union {
 		uint8_t OPCD:6;
 	} DS_Form;
 
-	struct {
+	struct __attribute__ ((__packed__)) {
 		uint8_t Rc:1;
 		uint16_t XO:10;
 		uint8_t RB:5;
@@ -84,7 +84,7 @@ typedef union {
 		uint8_t OPCD:6;
 	} X_Form;
 
-	struct {
+	struct __attribute__ ((__packed__)) {
 		uint8_t LK:1;
 		uint16_t XO:10;
 		uint8_t BB:5;
@@ -93,7 +93,7 @@ typedef union {
 		uint8_t OPCD:6;
 	} XL_Form;
 
-	struct {
+	struct __attribute__ ((__packed__)) {
 		uint8_t UNUSED_1:1;
 		uint16_t XO:10;
 		uint16_t spr:10;
@@ -101,7 +101,7 @@ typedef union {
 		uint8_t OPCD:6;
 	} XFX_Form;
 
-	struct {
+	struct __attribute__ ((__packed__)) {
 		uint8_t Rc:1;
 		uint16_t XO:10;
 		uint8_t FRB:5;
@@ -111,7 +111,7 @@ typedef union {
 		uint8_t OPCD:6;
 	} XFL_Form;
 
-	struct {
+	struct __attribute__ ((__packed__)) {
 		uint8_t Rc:1;
 		uint8_t SH_2:1;
 		uint16_t XO:9;
@@ -121,7 +121,7 @@ typedef union {
 		uint8_t OPCD:6;
 	} XS_Form;
 
-	struct {
+	struct __attribute__ ((__packed__)) {
 		uint8_t Rc:1;
 		uint16_t XO:9;
 		uint8_t OE:1;
@@ -131,7 +131,7 @@ typedef union {
 		uint8_t OPCD:6;
 	} XO_Form;
 
-	struct {
+	struct __attribute__ ((__packed__)) {
 		uint8_t Rc:1;
 		uint8_t XO:5;
 		uint8_t FRC:5;
@@ -141,7 +141,7 @@ typedef union {
 		uint8_t OPCD:6;
 	} A_Form;
 
-	struct {
+	struct __attribute__ ((__packed__)) {
 		uint8_t Rc:1;
 		uint8_t ME:5;
 		uint8_t MB:5;
@@ -151,7 +151,7 @@ typedef union {
 		uint8_t OPCD:6;
 	} M_Form;
 
-	struct {
+	struct __attribute__ ((__packed__)) {
 		uint8_t Rc:1;
 		uint8_t SH_2:1;
 		uint8_t XO:3;
@@ -162,7 +162,7 @@ typedef union {
 		uint8_t OPCD:6;
 	} MD_Form;
 
-	struct {
+	struct __attribute__ ((__packed__)) {
 		uint8_t Rc:1;
 		uint8_t XO:4;
 		uint8_t MB:6;

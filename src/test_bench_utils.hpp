@@ -24,11 +24,12 @@
 #define __test_bench_utils__
 
 #include "registers.hpp"
+#include <ap_int.h>
 
-int32_t read_byte_code(uint8_t *file_name, uint32_t *instruction_memory, ap_uint<32> memory_size);
+int32_t read_byte_code(const char *file_name, uint32_t *instruction_memory, uint32_t memory_size);
 
-void execute_single_instruction(uint32_t instruction, registers_t &registers, uint32_t *data_memory);
+void execute_single_instruction(uint32_t instruction, registers_t &registers, ap_uint<32> *data_memory);
 
-void execute_program(uint32_t *instruction_memory, uint32_t size, registers_t &registers, uint32_t *data_memory);
+void execute_program(uint32_t *instruction_memory, uint32_t size, registers_t &registers, ap_uint<32> *data_memory);
 
 #endif

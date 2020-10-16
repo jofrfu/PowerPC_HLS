@@ -30,7 +30,11 @@
 int32_t read_byte_code(const char *file_name, uint32_t *instruction_memory, uint32_t memory_size) {
 	std::ifstream byte_code(file_name, std::ios::binary);
 	if(byte_code.is_open()) {
-		std::streampos size = byte_code.tellg();
+		std::ios::streampos begin = byte_code.tellg();
+		byte_code.seekg(0, std::ios::end);
+		std::ios::streampos end = byte_code.tellg();
+		byte_code.seekg(0, std::ios::beg);
+		std::ios::streampos size = end - begin;
 		if(size % 4 != 0) {
 			std::cout << "File size is not divisible by 4, therefore these aren't proper instructions!" << std::endl;
 			byte_code.close();
@@ -48,6 +52,18 @@ int32_t read_byte_code(const char *file_name, uint32_t *instruction_memory, uint
 		byte_code.close();
 
 		std::cout << "Successfully stored all instructions into the instruction memory!" << std::endl;
+
+		// Little endian to big endian conversion
+		for(uint32_t i = 0; i < size/4; i++) {
+			ap_uint<32> little = instruction_memory[i];
+			ap_uint<32> big;
+			big(0, 7) = little(24, 31);
+			big(8, 15) = little(16, 23);
+			big(16, 23) = little(8, 15);
+			big(24, 31) = little(0, 7);
+			instruction_memory[i] = big;
+		}
+
 		return 0;
 	} else {
 		std::cout << "Failed to open file " << file_name << "!" << std::endl;

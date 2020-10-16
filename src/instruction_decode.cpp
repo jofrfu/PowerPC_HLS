@@ -1327,7 +1327,7 @@ decode_result_t decode(uint32_t instruction_port) {
 				add_sub_decoded.op1_reg_address = instruction.D_Form.RA;
 			}
 			add_sub_decoded.op2_imm = true;
-			add_sub_decoded.op2_immediate = instruction.D_Form.D;
+			add_sub_decoded.op2_immediate = (int16_t)instruction.D_Form.D;
 			add_sub_decoded.op2_reg_address = 0;
 			add_sub_decoded.result_reg_address = instruction.D_Form.RT;
 			add_sub_decoded.alter_CA = false;
@@ -1346,10 +1346,10 @@ decode_result_t decode(uint32_t instruction_port) {
 			} else {
 				add_sub_decoded.op1_imm = false;
 				add_sub_decoded.op1_immediate = 0;
-				add_sub_decoded.op1_reg_address = instruction.D_Form.RA << 16;
+				add_sub_decoded.op1_reg_address = instruction.D_Form.RA;
 			}
 			add_sub_decoded.op2_imm = true;
-			add_sub_decoded.op2_immediate = instruction.D_Form.D;
+			add_sub_decoded.op2_immediate = (int16_t)instruction.D_Form.D << 16;
 			add_sub_decoded.op2_reg_address = 0;
 			add_sub_decoded.result_reg_address = instruction.D_Form.RT;
 			add_sub_decoded.alter_CA = false;
