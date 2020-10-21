@@ -1,5 +1,5 @@
-#include <stdint.h>
 #include <vector>
+#include <catch.hpp>
 
 #include "test_bench_utils.hpp"
 
@@ -16,7 +16,7 @@ int main(void) {
 	std::vector<test_function_t> function_list;
 
 	test_function_t function = [](uint32_t *i_mem, ap_uint<32> *d_mem, registers_t &registers) {
-			if(read_byte_code("C:/Users/Jonas/Desktop/PowerPC/PowerPC_HLS/tests/addi.bin", i_mem, I_MEM_SIZE)) return -1;
+			if(read_byte_code("../tests/addi.bin", i_mem, I_MEM_SIZE)) return -1;
 			execute_single_instruction(i_mem[0], registers, d_mem);
 			return 0;
 		};
