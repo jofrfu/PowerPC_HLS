@@ -30,11 +30,11 @@
 int32_t read_byte_code(const char *file_name, uint32_t *instruction_memory, uint32_t memory_size) {
 	std::ifstream byte_code(file_name, std::ios::binary);
 	if(byte_code.is_open()) {
-		std::ios::streampos begin = byte_code.tellg();
+		std::ios::pos_type begin = byte_code.tellg();
 		byte_code.seekg(0, std::ios::end);
-		std::ios::streampos end = byte_code.tellg();
+		std::ios::pos_type end = byte_code.tellg();
 		byte_code.seekg(0, std::ios::beg);
-		std::ios::streampos size = end - begin;
+		std::ios::pos_type size = end - begin;
 		if(size % 4 != 0) {
 			std::cout << "File size is not divisible by 4, therefore these aren't proper instructions!" << std::endl;
 			byte_code.close();
@@ -64,7 +64,7 @@ int32_t read_byte_code(const char *file_name, uint32_t *instruction_memory, uint
 			instruction_memory[i] = big;
 		}
 
-		return 0;
+		return size/4;
 	} else {
 		std::cout << "Failed to open file " << file_name << "!" << std::endl;
 		return -1;
