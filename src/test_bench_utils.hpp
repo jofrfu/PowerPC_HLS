@@ -28,6 +28,8 @@
 
 int32_t read_byte_code(const char *file_name, uint32_t *instruction_memory, uint32_t memory_size);
 
+int32_t read_data(const char *file_name, ap_uint<32> *data_memory, uint32_t memory_size);
+
 void execute_single_instruction(uint32_t instruction, registers_t &registers, ap_uint<32> *data_memory);
 
 void execute_program(uint32_t *instruction_memory, uint32_t size, registers_t &registers, ap_uint<32> *data_memory);

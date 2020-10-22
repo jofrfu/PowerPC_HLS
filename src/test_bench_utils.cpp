@@ -71,6 +71,47 @@ int32_t read_byte_code(const char *file_name, uint32_t *instruction_memory, uint
 	}
 }
 
+int32_t read_data(const char *file_name, ap_uint<32> *data_memory, uint32_t memory_size) {
+    std::ifstream byte_code(file_name, std::ios::binary);
+    if(byte_code.is_open()) {
+        std::ios::pos_type begin = byte_code.tellg();
+        byte_code.seekg(0, std::ios::end);
+        std::ios::pos_type end = byte_code.tellg();
+        byte_code.seekg(0, std::ios::beg);
+        std::ios::pos_type size = end - begin;
+
+        if(size > memory_size*4) {
+            std::cout << "The data memory is not big enough!" << std::endl;
+            byte_code.close();
+            return -1;
+        }
+
+        // Pad to word boundary
+        uint32_t temp_size = size + size % 4;
+        char temp[temp_size];
+
+        byte_code.seekg(0, std::ios::beg);
+        byte_code.read(temp, size);
+        byte_code.close();
+
+        for(uint32_t i = 0; i < temp_size/4; i++) {
+            ap_uint<32> big;
+            big(0, 7) = temp[i*4+3];
+            big(8, 15) = temp[i*4+2];
+            big(16, 23) = temp[i*4+1];
+            big(24, 31) = temp[i*4+0];
+            data_memory[i] = big;
+        }
+
+        std::cout << "Successfully stored all instructions into the instruction memory!" << std::endl;
+
+        return size;
+    } else {
+        std::cout << "Failed to open file " << file_name << "!" << std::endl;
+        return -1;
+    }
+}
+
 void execute_single_instruction(uint32_t instruction, registers_t &registers, ap_uint<32> *data_memory) {
 	decode_result_t decoded = decode(instruction);
 	fixed_point::load(
