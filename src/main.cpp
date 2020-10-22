@@ -137,14 +137,14 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                 auto GPR = before["GPR"];
                 auto FPR = before["FPR"];
                 auto CR = before["CR"];
-                auto XER = before["FPR"];
+                auto XER = before["XER"];
                 auto LR = before["LR"];
 
                 // Check GPRs
                 if(!GPR.is_null()) {
                     for(uint32_t i = 0; i < 32; i++) {
-                        if(!GPR[i].is_null()) {
-                            registers.GPR[i] = GPR[i].get<int32_t>();
+                        if(!GPR[std::to_string(i)].is_null()) {
+                            registers.GPR[i] = GPR[std::to_string(i)].get<int32_t>();
                         }
                     }
                 }
@@ -152,8 +152,8 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                 // Check FPRs
                 if(!FPR.is_null()) {
                     for(uint32_t i = 0; i < 32; i++) {
-                        if(!FPR[i].is_null()) {
-                            registers.FPR[i] = FPR[i].get<uint32_t>();
+                        if(!FPR[std::to_string(i)].is_null()) {
+                            registers.FPR[i] = FPR[std::to_string(i)].get<uint32_t>();
                         }
                     }
                 }
@@ -178,8 +178,8 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                 auto sa_data = before["Data"];
                 if(!data.is_null()) {
                     for (uint32_t i = 0; i < D_MEM_SIZE; i++) {
-                        if (!data[i*4].is_null()) {
-                            ap_uint<32> little = sa_data[i*4].get<int32_t>();
+                        if (!data[std::to_string(i*4)].is_null()) {
+                            ap_uint<32> little = sa_data[std::to_string(i*4)].get<int32_t>();
                             ap_uint<32> big;
                             big(0, 7) = little(24, 31);
                             big(8, 15) = little(16, 23);
@@ -200,15 +200,15 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                 auto GPR = after["GPR"];
                 auto FPR = after["FPR"];
                 auto CR = after["CR"];
-                auto XER = after["FPR"];
+                auto XER = after["XER"];
                 auto LR = after["LR"];
 
                 // Check GPRs
                 if (!GPR.is_null()) {
                     for (uint32_t i = 0; i < 32; i++) {
-                        if (!GPR[i].is_null()) {
+                        if (!GPR[std::to_string(i)].is_null()) {
                             INFO("Checking GPR" + std::to_string(i) + ".");
-                            REQUIRE((int32_t) registers.GPR[i] == GPR[i].get<int32_t>());
+                            REQUIRE((int32_t) registers.GPR[i] == GPR[std::to_string(i)].get<int32_t>());
                             INFO("Check successful.");
                         }
                     }
@@ -217,9 +217,9 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                 // Check FPRs
                 if (!FPR.is_null()) {
                     for (uint32_t i = 0; i < 32; i++) {
-                        if (!FPR[i].is_null()) {
+                        if (!FPR[std::to_string(i)].is_null()) {
                             INFO("Checking FPR" + std::to_string(i) + ".");
-                            REQUIRE(registers.FPR[i] == FPR[i].get<uint32_t>());
+                            REQUIRE(registers.FPR[i] == FPR[std::to_string(i)].get<uint32_t>());
                             INFO("Check successful.");
                         }
                     }
@@ -251,7 +251,7 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                 auto sa_data = after["Data"];
                 if (!data.is_null()) {
                     for (uint32_t i = 0; i < D_MEM_SIZE; i++) {
-                        if (!data[i * 4].is_null()) {
+                        if (!data[std::to_string(i * 4)].is_null()) {
                             ap_uint<32> little = sa_data[i * 4].get<int32_t>();
                             ap_uint<32> big;
                             big(0, 7) = little(24, 31);
