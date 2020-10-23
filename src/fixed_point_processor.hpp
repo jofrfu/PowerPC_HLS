@@ -23,7 +23,7 @@
 #ifndef __FIXED_POINT_PROCESSOR__
 #define __FIXED_POINT_PROCESSOR__
 
-#include <stdint.h>
+#include <cstdint>
 #include <ap_int.h>
 #include "ppc_types.h"
 

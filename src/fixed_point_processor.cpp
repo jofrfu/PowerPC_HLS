@@ -433,25 +433,24 @@ void fixed_point::compare(bool execute, cmp_decode_t decoded, registers_t &regis
 			}
 		}
 
-		// Convert, because the fields lie in opposite order
-		ap_uint<3> BF = 7 - decoded.BF;
+        condition_field_t &CR = fixed_point::select_CR(decoded.BF, registers);
 
 		if(op1 < op2) {
-			registers.condition_reg.CR[BF].condition_fixed_point.LT = 1;
-			registers.condition_reg.CR[BF].condition_fixed_point.GT = 0;
-			registers.condition_reg.CR[BF].condition_fixed_point.EQ = 0;
+            CR.condition_fixed_point.LT = 1;
+            CR.condition_fixed_point.GT = 0;
+            CR.condition_fixed_point.EQ = 0;
 		} else if(op1 > op2) {
-			registers.condition_reg.CR[BF].condition_fixed_point.LT = 0;
-			registers.condition_reg.CR[BF].condition_fixed_point.GT = 1;
-			registers.condition_reg.CR[BF].condition_fixed_point.EQ = 0;
+            CR.condition_fixed_point.LT = 0;
+            CR.condition_fixed_point.GT = 1;
+            CR.condition_fixed_point.EQ = 0;
 		} else { // op1 == op2
-			registers.condition_reg.CR[BF].condition_fixed_point.LT = 0;
-			registers.condition_reg.CR[BF].condition_fixed_point.GT = 0;
-			registers.condition_reg.CR[BF].condition_fixed_point.EQ = 1;
+            CR.condition_fixed_point.LT = 0;
+            CR.condition_fixed_point.GT = 0;
+            CR.condition_fixed_point.EQ = 1;
 		}
 
 		// Copy SO into the given SPR
-		registers.condition_reg.CR[decoded.BF].condition_fixed_point.SO = registers.fixed_exception_reg.exception_fields.SO;
+        CR.condition_fixed_point.SO = registers.fixed_exception_reg.exception_fields.SO;
 	}
 }
 

@@ -23,11 +23,11 @@
 #ifndef __REGISTERS__
 #define __REGISTERS__
 
-#include <stdint.h>
+#include <cstdint>
 #include <ap_int.h>
 
 typedef union {
-	struct {
+	struct __attribute__ ((__packed__)) {
 		uint8_t SO:1; // Bit 3
 		uint8_t EQ:1; // Bit 2
 		uint8_t GT:1; // Bit 1
@@ -35,14 +35,14 @@ typedef union {
 	} condition_fixed_point;
 
 	// Special type for CR1
-	struct {
+	struct __attribute__ ((__packed__)) {
 		uint8_t OX:1; 	// Bit 7
 		uint8_t VX:1; 	// Bit 6
 		uint8_t FEX:1;	// Bit 5
 		uint8_t FX:1; 	// Bit 4
 	} condition_floating_point;
 
-	struct {
+	struct __attribute__ ((__packed__)) {
 		uint8_t FU:1; // Bit 3
 		uint8_t FE:1; // Bit 2
 		uint8_t FG:1; // Bit 1
@@ -52,14 +52,22 @@ typedef union {
 
 typedef union {
 	uint32_t condition_bits;
-	condition_field_t CR[8]; // CRs are in reverse order,
-							 // which means CR0 is at position 7
-							 // and CR7 is at position 0, etc.
+	// Unfortunately, an array doesn't work here, because of the byte boundary (each element is 4 Bit packed)
+	struct __attribute__ ((__packed__)) {
+        condition_field_t CR7;
+        condition_field_t CR6;
+        condition_field_t CR5;
+        condition_field_t CR4;
+        condition_field_t CR3;
+        condition_field_t CR2;
+        condition_field_t CR1;
+        condition_field_t CR0;
+    } CR;
 } condition_reg_t;
 
 typedef union {
 	uint32_t exception_bits;
-	struct {
+	struct __attribute__ ((__packed__)) {
 		uint8_t string_bytes:7; // For load/store string
 		uint32_t RESERVED_2:22; // Reserved
 		uint8_t CA:1; 			// Carry bit

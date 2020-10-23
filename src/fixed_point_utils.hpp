@@ -23,11 +23,13 @@
 #ifndef __FIXED_POINT_UTILS__
 #define __FIXED_POINT_UTILS__
 
-#include <stdint.h>
+#include <cstdint>
 #include <ap_int.h>
 #include "ppc_types.h"
 
 namespace fixed_point {
+
+condition_field_t& select_CR(ap_uint<3> address, registers_t &registers);
 
 void check_condition(int32_t result, registers_t &registers);
 

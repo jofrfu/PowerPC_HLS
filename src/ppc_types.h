@@ -27,7 +27,7 @@
 #ifndef __PPC_TYPES__
 #define __PPC_TYPES__
 
-#include <stdint.h>
+#include <cstdint>
 #include "registers.hpp"
 
 typedef union {
