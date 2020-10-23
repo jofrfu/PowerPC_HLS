@@ -165,7 +165,7 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                         for(uint32_t i = 0; i < 8; i++) {
                             auto CR_i = CR["CR" + std::to_string(i)];
                             if (CR_i.is_object()) {
-                                condition_field_t &reg = fixed_point::select_CR(i, registers);
+                                condition_field_t &reg = registers.condition_reg[i];
                                 // Fixed Point conditions
                                 if(CR_i["LT"].is_boolean()) {
                                     reg.condition_fixed_point.LT = CR_i["LT"].get<bool>();
@@ -210,7 +210,7 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                             }
                         }
                     } else {
-                        registers.condition_reg.condition_bits = CR.get<uint32_t>();
+                        registers.condition_reg.setCR(CR.get<uint32_t>());
                     }
                 }
 
@@ -292,7 +292,7 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                         for(uint32_t i = 0; i < 8; i++) {
                             auto CR_i = CR["CR" + std::to_string(i)];
                             if (CR_i.is_object()) {
-                                condition_field_t &reg = fixed_point::select_CR(i, registers);
+                                condition_field_t &reg = registers.condition_reg[i];
                                 // Fixed Point conditions
                                 if(CR_i["LT"].is_boolean()) {
                                     INFO("Checking CR" + std::to_string(i) + " LT bit.")
@@ -350,7 +350,7 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                         }
                     } else {
                         INFO("Checking CRs.");
-                        REQUIRE(registers.condition_reg.condition_bits == CR.get<uint32_t>());
+                        REQUIRE(registers.condition_reg.getCR() == CR.get<uint32_t>());
                     }
                 }
 

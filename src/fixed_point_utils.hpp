@@ -29,8 +29,6 @@
 
 namespace fixed_point {
 
-condition_field_t& select_CR(ap_uint<3> address, registers_t &registers);
-
 void check_condition(int32_t result, registers_t &registers);
 
 void copy_summary_overflow(registers_t &registers);

@@ -50,19 +50,36 @@ typedef union {
 	} condition_floating_point_compare;
 } condition_field_t;
 
-typedef union {
-	uint32_t condition_bits;
-	// Unfortunately, an array doesn't work here, because of the byte boundary (each element is 4 Bit packed)
-	struct __attribute__ ((__packed__)) {
-        condition_field_t CR7;
-        condition_field_t CR6;
-        condition_field_t CR5;
-        condition_field_t CR4;
-        condition_field_t CR3;
-        condition_field_t CR2;
-        condition_field_t CR1;
-        condition_field_t CR0;
-    } CR;
+typedef struct condition_reg {
+public:
+    void setCR(uint32_t value) {
+        ap_uint<32> temp = value;
+        for(uint32_t i = 0; i < 8; i++) {
+#pragma HLS unroll
+            CR[i].condition_fixed_point.SO = temp[i*4+0];
+            CR[i].condition_fixed_point.EQ = temp[i*4+1];
+            CR[i].condition_fixed_point.GT = temp[i*4+2];
+            CR[i].condition_fixed_point.LT = temp[i*4+3];
+        }
+    }
+
+    uint32_t getCR() {
+        ap_uint<32> temp;
+        for(uint32_t i = 0; i < 8; i++) {
+#pragma HLS unroll
+            temp[i*4+0] = CR[i].condition_fixed_point.SO;
+            temp[i*4+1] = CR[i].condition_fixed_point.EQ;
+            temp[i*4+2] = CR[i].condition_fixed_point.GT;
+            temp[i*4+3] = CR[i].condition_fixed_point.LT;
+        }
+        return temp;
+    }
+
+    condition_field_t& operator[](uint32_t i) {
+        return CR[i];
+    }
+private:
+	condition_field_t CR[8];
 } condition_reg_t;
 
 typedef union {

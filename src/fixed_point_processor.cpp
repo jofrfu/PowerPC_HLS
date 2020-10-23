@@ -433,7 +433,7 @@ void fixed_point::compare(bool execute, cmp_decode_t decoded, registers_t &regis
 			}
 		}
 
-        condition_field_t &CR = fixed_point::select_CR(decoded.BF, registers);
+        condition_field_t &CR = registers.condition_reg[decoded.BF];
 
 		if(op1 < op2) {
             CR.condition_fixed_point.LT = 1;
@@ -713,7 +713,7 @@ void fixed_point::system(bool execute, system_decode_t decoded, registers_t &reg
 						registers.link_register = registers.GPR[decoded.RS_RT];
 						break;
 					case 9:
-						registers.condition_reg.condition_bits = registers.GPR[decoded.RS_RT];
+						registers.condition_reg.setCR(registers.GPR[decoded.RS_RT]);
 						break;
 				}
 				break;
@@ -726,15 +726,15 @@ void fixed_point::system(bool execute, system_decode_t decoded, registers_t &reg
 						registers.GPR[decoded.RS_RT] = registers.link_register;
 						break;
 					case 9:
-						registers.GPR[decoded.RS_RT] = registers.condition_reg.condition_bits;
+						registers.GPR[decoded.RS_RT] = registers.condition_reg.getCR();
 						break;
 				}
 				break;
 			case system_ppc::MOVE_TO_CR:
-				registers.condition_reg.condition_bits = (registers.GPR[decoded.RS_RT] & mask) | (registers.condition_reg.condition_bits & ~mask);
+				registers.condition_reg.setCR((registers.GPR[decoded.RS_RT] & mask) | (registers.condition_reg.getCR() & ~mask));
 				break;
 			case system_ppc::MOVE_FROM_CR:
-				registers.GPR[decoded.RS_RT] = registers.condition_reg.condition_bits;
+				registers.GPR[decoded.RS_RT] = registers.condition_reg.getCR();
 				break;
 		}
 	}
