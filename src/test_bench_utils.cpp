@@ -51,7 +51,7 @@ int32_t read_byte_code(const char *file_name, uint32_t *instruction_memory, uint
 		byte_code.read((char *)instruction_memory, size);
 		byte_code.close();
 
-		std::cout << "Successfully stored all instructions into the instruction memory!" << std::endl;
+		//std::cout << "Successfully stored all instructions into the instruction memory!" << std::endl;
 
 		// Little endian to big endian conversion
 		for(uint32_t i = 0; i < size/4; i++) {
@@ -103,7 +103,7 @@ int32_t read_data(const char *file_name, ap_uint<32> *data_memory, uint32_t memo
             data_memory[i] = big;
         }
 
-        std::cout << "Successfully stored all instructions into the instruction memory!" << std::endl;
+        //std::cout << "Successfully stored all data into the data memory!" << std::endl;
 
         return size;
     } else {
