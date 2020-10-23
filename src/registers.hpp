@@ -73,7 +73,7 @@ typedef union {
 		uint8_t CA:1; 			// Carry bit
 		uint8_t OV:1; 			// Overflow bit
 		uint8_t SO:1; 			// Summary overflow bit
-		uint32_t RESERVED_1; 	// Reserved
+		//uint32_t RESERVED_1; 	// Reserved
 	} exception_fields;
 } fixed_point_exception_reg_t;
 

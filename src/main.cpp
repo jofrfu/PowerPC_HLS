@@ -28,6 +28,7 @@
 #include <string>
 
 #include "test_bench_utils.hpp"
+#include "fixed_point_utils.hpp"
 
 #define PROGRAM_PATH "../tests/programs"
 
@@ -160,12 +161,74 @@ TEST_CASE("Automatic program execution", "[program execution]") {
 
                 // Check CRs
                 if(!CR.is_null()) {
-                    registers.condition_reg.condition_bits = CR.get<uint32_t>();
+                    if(CR.is_object()) {
+                        for(uint32_t i = 0; i < 8; i++) {
+                            auto CR_i = CR["CR" + std::to_string(i)];
+                            if (CR_i.is_object()) {
+                                condition_field_t &reg = fixed_point::select_CR(i, registers);
+                                // Fixed Point conditions
+                                if(CR_i["LT"].is_boolean()) {
+                                    reg.condition_fixed_point.LT = CR_i["LT"].get<bool>();
+                                }
+                                if(CR_i["GT"].is_boolean()) {
+                                    reg.condition_fixed_point.GT = CR_i["GT"].get<bool>();
+                                }
+                                if(CR_i["EQ"].is_boolean()) {
+                                    reg.condition_fixed_point.EQ = CR_i["EQ"].get<bool>();
+                                }
+                                if(CR_i["SO"].is_boolean()) {
+                                    reg.condition_fixed_point.SO = CR_i["SO"].get<bool>();
+                                }
+                                // Floating Point conditions
+                                if(CR_i["FL"].is_boolean()) {
+                                    reg.condition_floating_point_compare.FL = CR_i["FL"].get<bool>();
+                                }
+                                if(CR_i["FG"].is_boolean()) {
+                                    reg.condition_floating_point_compare.FG = CR_i["FG"].get<bool>();
+                                }
+                                if(CR_i["FE"].is_boolean()) {
+                                    reg.condition_floating_point_compare.FE = CR_i["FE"].get<bool>();
+                                }
+                                if(CR_i["FU"].is_boolean()) {
+                                    reg.condition_floating_point_compare.FU = CR_i["FU"].get<bool>();
+                                }
+                                // Floating Point conditions CR1
+                                if(i == 1) {
+                                    if(CR_i["OX"].is_boolean()) {
+                                        reg.condition_floating_point.OX = CR_i["OX"].get<bool>();
+                                    }
+                                    if(CR_i["VX"].is_boolean()) {
+                                        reg.condition_floating_point.VX = CR_i["VX"].get<bool>();
+                                    }
+                                    if(CR_i["FEX"].is_boolean()) {
+                                        reg.condition_floating_point.FEX = CR_i["FEX"].get<bool>();
+                                    }
+                                    if(CR_i["FX"].is_boolean()) {
+                                        reg.condition_floating_point.FX = CR_i["FX"].get<bool>();
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        registers.condition_reg.condition_bits = CR.get<uint32_t>();
+                    }
                 }
 
                 // Check XER
                 if(!XER.is_null()) {
-                    registers.fixed_exception_reg.exception_bits = XER.get<uint32_t>();
+                    if(XER.is_object()) {
+                        if(XER["SO"].is_boolean()) {
+                            registers.fixed_exception_reg.exception_fields.SO = XER["SO"].get<bool>();
+                        }
+                        if(XER["OV"].is_boolean()) {
+                            registers.fixed_exception_reg.exception_fields.OV = XER["OV"].get<bool>();
+                        }
+                        if(XER["CA"].is_boolean()) {
+                            registers.fixed_exception_reg.exception_fields.CA = XER["CA"].get<bool>();
+                        }
+                    } else {
+                        registers.fixed_exception_reg.exception_bits = XER.get<uint32_t>();
+                    }
                 }
 
                 // Check LR
@@ -209,7 +272,6 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                         if (!GPR[std::to_string(i)].is_null()) {
                             INFO("Checking GPR" + std::to_string(i) + ".");
                             REQUIRE((int32_t) registers.GPR[i] == GPR[std::to_string(i)].get<int32_t>());
-                            INFO("Check successful.");
                         }
                     }
                 }
@@ -220,30 +282,103 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                         if (!FPR[std::to_string(i)].is_null()) {
                             INFO("Checking FPR" + std::to_string(i) + ".");
                             REQUIRE(registers.FPR[i] == FPR[std::to_string(i)].get<uint32_t>());
-                            INFO("Check successful.");
                         }
                     }
                 }
 
                 // Check CRs
                 if (!CR.is_null()) {
-                    INFO("Checking CRs.");
-                    REQUIRE(registers.condition_reg.condition_bits == CR.get<uint32_t>());
-                    INFO("Check successful.");
+                    if(CR.is_object()) {
+                        for(uint32_t i = 0; i < 8; i++) {
+                            auto CR_i = CR["CR" + std::to_string(i)];
+                            if (CR_i.is_object()) {
+                                condition_field_t &reg = fixed_point::select_CR(i, registers);
+                                // Fixed Point conditions
+                                if(CR_i["LT"].is_boolean()) {
+                                    INFO("Checking CR" + std::to_string(i) + " LT bit.")
+                                    REQUIRE(reg.condition_fixed_point.LT == CR_i["LT"].get<bool>());
+                                }
+                                if(CR_i["GT"].is_boolean()) {
+                                    INFO("Checking CR" + std::to_string(i) + " GT bit.")
+                                    REQUIRE(reg.condition_fixed_point.GT == CR_i["GT"].get<bool>());
+                                }
+                                if(CR_i["EQ"].is_boolean()) {
+                                    INFO("Checking CR" + std::to_string(i) + " EQ bit.")
+                                    REQUIRE(reg.condition_fixed_point.EQ == CR_i["EQ"].get<bool>());
+                                }
+                                if(CR_i["SO"].is_boolean()) {
+                                    INFO("Checking CR" + std::to_string(i) + " SO bit.")
+                                    REQUIRE(reg.condition_fixed_point.SO == CR_i["SO"].get<bool>());
+                                }
+                                // Floating Point conditions
+                                if(CR_i["FL"].is_boolean()) {
+                                    INFO("Checking CR" + std::to_string(i) + " FL bit.")
+                                    REQUIRE(reg.condition_floating_point_compare.FL == CR_i["FL"].get<bool>());
+                                }
+                                if(CR_i["FG"].is_boolean()) {
+                                    INFO("Checking CR" + std::to_string(i) + " FG bit.")
+                                    REQUIRE(reg.condition_floating_point_compare.FG == CR_i["FG"].get<bool>());
+                                }
+                                if(CR_i["FE"].is_boolean()) {
+                                    INFO("Checking CR" + std::to_string(i) + " FE bit.")
+                                    REQUIRE(reg.condition_floating_point_compare.FE == CR_i["FE"].get<bool>());
+                                }
+                                if(CR_i["FU"].is_boolean()) {
+                                    INFO("Checking CR" + std::to_string(i) + " FU bit.")
+                                    REQUIRE(reg.condition_floating_point_compare.FU == CR_i["FU"].get<bool>());
+                                }
+                                // Floating Point conditions CR1
+                                if(i == 1) {
+                                    if(CR_i["OX"].is_boolean()) {
+                                        INFO("Checking CR" + std::to_string(i) + " OX bit.")
+                                        REQUIRE(reg.condition_floating_point.OX == CR_i["OX"].get<bool>());
+                                    }
+                                    if(CR_i["VX"].is_boolean()) {
+                                        INFO("Checking CR" + std::to_string(i) + " VX bit.")
+                                        REQUIRE(reg.condition_floating_point.VX == CR_i["VX"].get<bool>());
+                                    }
+                                    if(CR_i["FEX"].is_boolean()) {
+                                        INFO("Checking CR" + std::to_string(i) + " FEX bit.")
+                                        REQUIRE(reg.condition_floating_point.FEX == CR_i["FEX"].get<bool>());
+                                    }
+                                    if(CR_i["FX"].is_boolean()) {
+                                        INFO("Checking CR" + std::to_string(i) + " FX bit.")
+                                        REQUIRE(reg.condition_floating_point.FX == CR_i["FX"].get<bool>());
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        INFO("Checking CRs.");
+                        REQUIRE(registers.condition_reg.condition_bits == CR.get<uint32_t>());
+                    }
                 }
 
                 // Check XER
                 if (!XER.is_null()) {
-                    INFO("Checking XER.");
-                    REQUIRE(registers.fixed_exception_reg.exception_bits == XER.get<uint32_t>());
-                    INFO("Check successful.");
+                    if(XER.is_object()) {
+                        if(XER["SO"].is_boolean()) {
+                            INFO("Checking XER SO bit.");
+                            REQUIRE(registers.fixed_exception_reg.exception_fields.SO == XER["SO"].get<bool>());
+                        }
+                        if(XER["OV"].is_boolean()) {
+                            INFO("Checking XER OV bit.");
+                            REQUIRE(registers.fixed_exception_reg.exception_fields.OV == XER["OV"].get<bool>());
+                        }
+                        if(XER["CA"].is_boolean()) {
+                            INFO("Checking XER CA bit.");
+                            REQUIRE(registers.fixed_exception_reg.exception_fields.CA == XER["CA"].get<bool>());
+                        }
+                    } else {
+                        INFO("Checking XER.");
+                        REQUIRE(registers.fixed_exception_reg.exception_bits == XER.get<uint32_t>());
+                    }
                 }
 
                 // Check LR
                 if (!LR.is_null()) {
                     INFO("Checking LR.");
                     REQUIRE(registers.link_register == LR.get<uint32_t>());
-                    INFO("Check successful.");
                 }
 
                 // Compare data (single addressed data support)
@@ -260,7 +395,6 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                             big(24, 31) = little(0, 7);
                             INFO("Checking data memory address " + std::to_string(i*4) + ".");
                             REQUIRE(d_mem[i] == big);
-                            INFO("Check successful.");
                         }
                     }
                 }
