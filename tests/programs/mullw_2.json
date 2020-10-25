@@ -1,0 +1,29 @@
+{
+    "_comment" : "Multiplication of -6 x -4 (Multiply Low Word)",
+    "Before" : {
+        "GPR" : {
+            "1" : 0,
+            "2" : -6,
+            "3" : -4
+        },
+        
+        "CR" : 0,
+        "XER" : 0,
+        "LR" : 0
+    },
+    
+    "After" : {
+        "GPR" : {
+            "1" : 24,
+            "2" : -6,
+            "3" : -4
+        },
+        "CR" : 0,
+        "XER" : 0,
+        "LR" : 0
+    },
+    
+    "Assembly" :
+        "mullw 1, 2, 3"
+
+}

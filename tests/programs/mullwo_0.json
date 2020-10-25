@@ -1,0 +1,49 @@
+{
+    "_comment" : "Multiplication of INT32_MAX x INT32_MAX with unsigned overflow",
+    "Before" : {
+        "GPR" : {
+            "1" : 0,
+            "2" : 2147483647,
+            "3" : 2147483647
+        },
+
+        "CR" : {
+            "CR0" : {
+                "LT" : false,
+                "GT" : false,
+                "EQ" : false,
+                "SO" : false
+            }
+        },
+        "XER" : {
+            "OV" : false,
+            "SO" : false
+        },
+        "LR" : 0
+    },
+    
+    "After" : {
+        "GPR" : {
+            "1" : 1,
+            "2" : 2147483647,
+            "3" : 2147483647
+        },
+        "CR" : {
+            "CR0" : {
+                "LT" : false,
+                "GT" : true,
+                "EQ" : false,
+                "SO" : true
+            }
+        },
+        "XER" : {
+            "OV" : true,
+            "SO" : true
+        },
+        "LR" : 0
+    },
+    
+    "Assembly" :
+        "mullwo. 1, 2, 3"
+
+}
