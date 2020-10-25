@@ -54,7 +54,7 @@ typedef struct condition_reg {
 public:
     void setCR(uint32_t value) {
         ap_uint<32> temp = value;
-        for(uint32_t i = 0; i < 8; i++) {
+        for(int32_t i = 0; i < 8; i++) {
 #pragma HLS unroll
             CR[i].condition_fixed_point.SO = temp[i*4+0];
             CR[i].condition_fixed_point.EQ = temp[i*4+1];
@@ -65,7 +65,7 @@ public:
 
     uint32_t getCR() {
         ap_uint<32> temp;
-        for(uint32_t i = 0; i < 8; i++) {
+        for(int32_t i = 0; i < 8; i++) {
 #pragma HLS unroll
             temp[i*4+0] = CR[i].condition_fixed_point.SO;
             temp[i*4+1] = CR[i].condition_fixed_point.EQ;

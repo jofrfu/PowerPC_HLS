@@ -373,8 +373,8 @@ void fixed_point::divide(bool execute, div_decode_t decoded, registers_t &regist
 	if(execute) {
 		ap_int<33> signed_dividend;
 		ap_int<33> signed_divisor;
-		signed_dividend(0, 31) = registers.GPR[decoded.dividend_reg_address];
-		signed_divisor(0, 31) = registers.GPR[decoded.divisor_reg_address];
+		signed_dividend(31, 0) = registers.GPR[decoded.dividend_reg_address];
+		signed_divisor(31, 0) = registers.GPR[decoded.divisor_reg_address];
 		if(decoded.div_signed) {
 			// sign extend
 			signed_dividend[32] = signed_dividend[31];
@@ -391,7 +391,7 @@ void fixed_point::divide(bool execute, div_decode_t decoded, registers_t &regist
 
 		ap_uint<1> overflow;
 
-		if(signed_divisor == 0 || (signed_divisor == -1 && signed_dividend(0, 31) == 0x80000000)) {
+		if(signed_divisor == 0 || (signed_divisor == -1 && signed_dividend(31, 0) == 0x80000000)) {
 			// divide by zero and the most negative number divided by -1 (the result wouldn't fit in 32 bits) is undefined
 			overflow = registers.fixed_exception_reg.exception_fields.OV = 1;
 		} else {
@@ -414,11 +414,11 @@ void fixed_point::compare(bool execute, cmp_decode_t decoded, registers_t &regis
 	if(execute) {
 		ap_int<33> op1, op2;
 
-		op1(0, 31) = registers.GPR[decoded.op1_reg_address];
+		op1(31, 0) = registers.GPR[decoded.op1_reg_address];
 		if(decoded.op2_imm) {
-			op2(0, 31) = decoded.op2_immediate;
+			op2(31, 0) = decoded.op2_immediate;
 		} else {
-			op2(0, 31) = registers.GPR[decoded.op2_reg_address];
+			op2(31, 0) = registers.GPR[decoded.op2_reg_address];
 		}
 
 		if(decoded.cmp_signed) {
@@ -521,23 +521,23 @@ void fixed_point::logical(bool execute, log_decode_t decoded, registers_t &regis
 				result = op1 | ~op2;
 				break;
 			case logical::EXTEND_SIGN_BYTE:
-				result(0, 7) = op1(0, 7);
+				result(7, 0) = op1(7, 0);
 				if(result[7] == 1) {
 					// sign extend
-					result(8, 31) = 0xFFFFFF;
+					result(31, 0) = 0xFFFFFF;
 				} else {
 					// zero extend
-					result(8, 31) = 0;
+					result(31, 8) = 0;
 				}
 				break;
 			case logical:: EXTEND_SIGN_HALFWORD:
-				result(0, 15) = op1(0, 15);
+				result(15, 0) = op1(15, 0);
 				if(result[15] == 1) {
 					// sign extend
-					result(15, 31) = 0xFFFF;
+					result(31, 15) = 0xFFFF;
 				} else {
 					// zero extend
-					result(15, 31) = 0;
+					result(31, 15) = 0;
 				}
 				break;
 			case logical::COUNT_LEDING_ZEROS_WORD:
@@ -553,17 +553,17 @@ void fixed_point::logical(bool execute, log_decode_t decoded, registers_t &regis
 				}
 				break;
 			case logical::POPULATION_COUNT_BYTES:
-				for(uint32_t b = 0; b < 4; b++) {
+				for(int32_t b = 0; b < 4; b++) {
 #pragma HLS unroll
 					ap_uint<4> count = 0;
-					ap_uint<8> byte = op1(b*8, (b+1)*8);
+					ap_uint<8> byte = op1((b+1)*8, b*8);
 					for(uint32_t i = 0; i < 8; i++) {
 #pragma HLS unroll
 						if(byte[i] == 1) {
 							count++;
 						}
 					}
-					result(b*8, (b+1)*8) = count;
+					result((b+1)*8, b*8) = count;
 				}
 		}
 

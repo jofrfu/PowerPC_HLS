@@ -239,9 +239,9 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                 // Initialize data (single addressed data support)
                 // Address is supplied on a per byte basis
                 auto sa_data = before["Data"];
-                if(!data.is_null()) {
+                if(!sa_data.is_null()) {
                     for (uint32_t i = 0; i < D_MEM_SIZE; i++) {
-                        if (!data[std::to_string(i*4)].is_null()) {
+                        if (!sa_data[std::to_string(i*4)].is_null()) {
                             ap_uint<32> little = sa_data[std::to_string(i*4)].get<int32_t>();
                             ap_uint<32> big;
                             big(0, 7) = little(24, 31);
@@ -384,9 +384,9 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                 // Compare data (single addressed data support)
                 // Address is supplied on a per byte basis
                 auto sa_data = after["Data"];
-                if (!data.is_null()) {
+                if (!sa_data.is_null()) {
                     for (uint32_t i = 0; i < D_MEM_SIZE; i++) {
-                        if (!data[std::to_string(i * 4)].is_null()) {
+                        if (!sa_data[std::to_string(i * 4)].is_null()) {
                             ap_uint<32> little = sa_data[i * 4].get<int32_t>();
                             ap_uint<32> big;
                             big(0, 7) = little(24, 31);
