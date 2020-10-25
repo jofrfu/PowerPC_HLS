@@ -1,5 +1,5 @@
 {
-    "_comment" : "Multiplication of 6 x 4",
+    "_comment" : "Multiplication of -6 x 4 (Negative immediate)",
     "Before" : {
         "GPR" : {
             "1" : 0,
@@ -13,7 +13,7 @@
     
     "After" : {
         "GPR" : {
-            "1" : 24,
+            "1" : -24,
             "2" : 4
         },
         "CR" : 0,
@@ -22,6 +22,6 @@
     },
     
     "Assembly" :
-        "mulli 1, 2, 6"
+        "mulli 1, 2, -6"
 
 }

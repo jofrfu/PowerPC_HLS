@@ -1,9 +1,9 @@
 {
-    "_comment" : "Multiplication of 6 x 4",
+    "_comment" : "Multiplication of -4 x 6 (Negative register and immediate)",
     "Before" : {
         "GPR" : {
             "1" : 0,
-            "2" : 4
+            "2" : -4
         },
         
         "CR" : 0,
@@ -14,7 +14,7 @@
     "After" : {
         "GPR" : {
             "1" : 24,
-            "2" : 4
+            "2" : -4
         },
         "CR" : 0,
         "XER" : 0,
@@ -22,6 +22,6 @@
     },
     
     "Assembly" :
-        "mulli 1, 2, 6"
+        "mulli 1, 2, -6"
 
 }
