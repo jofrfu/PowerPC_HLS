@@ -332,7 +332,7 @@ void fixed_point::multiply(bool execute, mul_decode_t decoded, registers_t &regi
 		if (decoded.alter_OV) {
 			// If one operand is signed
 			if ((op1[32] == 1) ^ (op2[32] == 1)) {
-				if (op_result(32,65) != 0x3FFFFFFFF) {
+				if (op_result(65,31) != 0x7FFFFFFFF) {
 					overflow = 1;
 				} else {
 					overflow = 0;
@@ -343,13 +343,13 @@ void fixed_point::multiply(bool execute, mul_decode_t decoded, registers_t &regi
 					// On signed multiplication, the MSB of the 32 bit
 					// result has to be checked as well
 					// (if it's one, the result would be signed, which is incorrect)
-					if (op_result(31,65) != 0) {
+					if (op_result(65,31) != 0) {
 						overflow = 1;
 					} else {
 						overflow = 0;
 					}
 				} else {
-					if (op_result(32,65) != 0) {
+					if (op_result(65,32) != 0) {
 						overflow = 1;
 					} else {
 						overflow = 0;
