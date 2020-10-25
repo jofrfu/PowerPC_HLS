@@ -303,11 +303,11 @@ void fixed_point::multiply(bool execute, mul_decode_t decoded, registers_t &regi
 	if (execute) {
 		ap_int<33> op1, op2;
 
-		op1(0, 31) = registers.GPR[decoded.op1_reg_address];
+		op1 = registers.GPR[decoded.op1_reg_address];
 		if (decoded.op2_imm) {
-			op2(0, 31) = decoded.op2_immediate;
+			op2 = decoded.op2_immediate;
 		} else {
-			op2(0, 31) = registers.GPR[decoded.op2_reg_address];
+			op2 = registers.GPR[decoded.op2_reg_address];
 		}
 
 		if (decoded.mul_signed) {
@@ -322,7 +322,7 @@ void fixed_point::multiply(bool execute, mul_decode_t decoded, registers_t &regi
 
 		ap_int<66> op_result = op1 * op2;
 		// Choose upper or lower part of result
-		uint32_t result = decoded.mul_higher ? op_result(31,63) : op_result(0,31);
+		uint32_t result = decoded.mul_higher ? op_result(63,32) : op_result(31,0);
 		ap_uint<1> overflow;
 
 		registers.GPR[decoded.result_reg_address] = result;

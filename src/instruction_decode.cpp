@@ -1365,6 +1365,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			mul_decoded.op2_imm = true;
 			mul_decoded.op2_immediate = instruction.D_Form.D;
 			mul_decoded.op2_reg_address = 0;
+			mul_decoded.result_reg_address = instruction.D_Form.RT;
 			mul_decoded.mul_signed = true;
 			mul_decoded.mul_higher = false;
 			mul_decoded.alter_CR0 = false;
