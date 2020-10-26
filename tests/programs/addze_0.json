@@ -1,0 +1,47 @@
+{
+  "Before" : {
+    "GPR" : {
+      "14" : 15,
+      "7" : 0
+    },
+
+    "CR" : {
+      "CR0" : {
+        "LT" : false,
+        "GT" : false,
+        "EQ" : false,
+        "SO" : false
+      }
+    },
+    "XER" : {
+      "OV" : false,
+      "SO" : false,
+      "CA" : false
+    },
+    "LR" : 0
+  },
+
+  "After" : {
+    "GPR" : {
+      "14" : 15,
+      "7" : 15
+    },
+    "CR" : {
+      "CR0" : {
+        "LT" : false,
+        "GT" : true,
+        "EQ" : false,
+        "SO" : false
+      }
+    },
+    "XER" : {
+      "OV" : false,
+      "SO" : false,
+      "CA" : false
+    },
+    "LR" : 0
+  },
+
+  "Assembly" :
+  "addze. 7, 14"
+}
