@@ -524,7 +524,7 @@ void fixed_point::logical(bool execute, log_decode_t decoded, registers_t &regis
 				result(7, 0) = op1(7, 0);
 				if(result[7] == 1) {
 					// sign extend
-					result(31, 0) = 0xFFFFFF;
+					result(31, 8) = 0xFFFFFF;
 				} else {
 					// zero extend
 					result(31, 8) = 0;
@@ -546,7 +546,7 @@ void fixed_point::logical(bool execute, log_decode_t decoded, registers_t &regis
 					for(uint32_t i = 31; i >= 0; i--) {
 #pragma HLS unroll
 						if(op1[i] == 0) {
-						count++;
+						    count++;
 						}
 					}
 					result = count;
