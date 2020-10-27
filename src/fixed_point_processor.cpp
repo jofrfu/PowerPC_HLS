@@ -238,13 +238,12 @@ void fixed_point::add_sub(bool execute, add_sub_decode_t decoded, registers_t &r
                 // 1 - 1 = 0
                 op3 = 0;
             } else {
-                // 0 - 1 = 0
+                // 0 - 1 = -1
                 op3 = -1;
             }
         } else {
             if(decoded.add_CA && registers.fixed_exception_reg.exception_fields.CA == 1) {
                 // 1 - 0 = 1
-                // This case should never happen
                 op3 = 1;
             } else {
                 // 0 - 0 = 0
