@@ -691,18 +691,18 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				// XO Form Mul instructions
 				case 9 | 0b1000000000:
-				case 9: // mullhdu, mullhdu.
+				case 9: // mulhdu, mulhdu.
 					// NOT SUPPORTED!!!
 					break;
 				case 11 | 0b1000000000:
-				case 11: // mullhwu, mullhwu.
+				case 11: // mulhwu, mulhwu.
 					fixed_point_decode_result.execute_mul = true;
 					mul_decoded.op1_reg_address = instruction.XO_Form.RA;
 					mul_decoded.op2_imm = false;
 					mul_decoded.op2_immediate = 0;
 					mul_decoded.op2_reg_address = instruction.XO_Form.RB;
                     mul_decoded.result_reg_address = instruction.XO_Form.RT;
-					mul_decoded.mul_signed = true;
+					mul_decoded.mul_signed = false;
 					mul_decoded.mul_higher = true;
 					if(instruction.XO_Form.Rc == 1) {
 						mul_decoded.alter_CR0 = true;
@@ -712,11 +712,11 @@ decode_result_t decode(uint32_t instruction_port) {
 					mul_decoded.alter_OV = false;
 					break;
 				case 73 | 0b1000000000:
-				case 73: // mullhd, mullhd., mullhdo, mullhdo.
+				case 73: // mulhd, mulhd., mulhdo, mulhdo.
 					// NOT SUPPORTED!!!
 					break;
 				case 75 | 0b1000000000:
-				case 75: // mullhw, mullhw., mullhwo, mullhwo.
+				case 75: // mulhw, mulhw., mulhwo, mulhwo.
 					fixed_point_decode_result.execute_mul = true;
 					mul_decoded.op1_reg_address = instruction.XO_Form.RA;
 					mul_decoded.op2_imm = false;

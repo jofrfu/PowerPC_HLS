@@ -1,0 +1,49 @@
+{
+    "_comment" : "Multiplication of INT32_MAX x INT32_MAX returning high word - sets CR0",
+    "Before" : {
+        "GPR" : {
+            "1" : 0,
+            "2" : 2147483647,
+            "3" : 2147483647
+        },
+
+        "CR" : {
+            "CR0" : {
+                "LT" : false,
+                "GT" : false,
+                "EQ" : false,
+                "SO" : false
+            }
+        },
+        "XER" : {
+            "OV" : false,
+            "SO" : false
+        },
+        "LR" : 0
+    },
+    
+    "After" : {
+        "GPR" : {
+            "1" : 1073741823,
+            "2" : 2147483647,
+            "3" : 2147483647
+        },
+        "CR" : {
+            "CR0" : {
+                "LT" : false,
+                "GT" : true,
+                "EQ" : false,
+                "SO" : false
+            }
+        },
+        "XER" : {
+            "OV" : false,
+            "SO" : false
+        },
+        "LR" : 0
+    },
+    
+    "Assembly" :
+        "mulhwu. 1, 2, 3"
+
+}
