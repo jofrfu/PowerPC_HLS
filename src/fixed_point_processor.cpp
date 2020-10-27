@@ -236,7 +236,6 @@ void fixed_point::add_sub(bool execute, add_sub_decode_t decoded, registers_t &r
         if(decoded.sub_one) {
             if(decoded.add_CA && registers.fixed_exception_reg.exception_fields.CA == 1) {
                 // 1 - 1 = 0
-                // This case should never happen
                 op3 = 0;
             } else {
                 // 0 - 1 = 0
