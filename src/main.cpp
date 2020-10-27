@@ -44,7 +44,7 @@ TEST_CASE("Automatic program execution", "[program execution]") {
     registers_t registers;
 
     std::vector<std::filesystem::path> filenames;
-    for (const auto &entry : std::filesystem::directory_iterator(PROGRAM_PATH)) {
+    for (const auto &entry : std::filesystem::recursive_directory_iterator(PROGRAM_PATH)) {
         auto &path = entry.path();
         if(path.extension() == ".json") {
             // File is a json configuration
