@@ -548,7 +548,7 @@ decode_result_t decode(uint32_t instruction_port) {
 						add_sub_decoded.alter_OV = false;
 					}
 					add_sub_decoded.add_CA = true;
-					add_sub_decoded.sub_one = false;
+					add_sub_decoded.sub_one = true;
 					break;
 				case 138 | 0b1000000000:
 				case 138: // adde, adde., addeo, addeo.

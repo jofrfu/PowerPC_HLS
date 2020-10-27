@@ -226,51 +226,36 @@ void fixed_point::add_sub(bool execute, add_sub_decode_t decoded, registers_t &r
 		}
 
 		ap_uint<33> result;
-		ap_int<3> op3;
+		ap_int<2> op3;
 
 		if(decoded.subtract) {
-			// Two's complement
-			op1 = ~op1;
-			if(decoded.sub_one) {
-				if(decoded.add_CA && registers.fixed_exception_reg.exception_fields.CA == 1) {
-					// 1 - 1 + 1 == 1
-					op3 = 1;
-				} else {
-					// 1 - 1 + 0 == 0
-					op3 = 0;
-				}
-			} else {
-				if(decoded.add_CA && registers.fixed_exception_reg.exception_fields.CA == 1) {
-					// 1 - 0 + 1 == 2
-					op3 = 2;
-				} else {
-					// 1 - 0 + 0 == 1
-					op3 = 1;
-				}
-			}
-		} else {
-			if(decoded.sub_one) {
-				if(decoded.add_CA && registers.fixed_exception_reg.exception_fields.CA == 1) {
-					// 0 - 1 + 1 == 0
-					op3 = 0;
-				} else {
-					// 0 - 1 + 0 == -1
-					op3 = -1;
-				}
-			} else {
-				if(decoded.add_CA && registers.fixed_exception_reg.exception_fields.CA == 1) {
-					// 0 - 0 + 1 == 1
-					op3 = 1;
-				} else {
-					// 0 - 0 + 0 == 0
-					op3 = 0;
-				}
-			}
-		}
+            // Two's complement
+            op1 = ~op1 + 1;
+        }
+
+        if(decoded.sub_one) {
+            if(decoded.add_CA && registers.fixed_exception_reg.exception_fields.CA == 1) {
+                // 1 - 1 = 0
+                // This case should never happen
+                op3 = 0;
+            } else {
+                // 0 - 1 = 0
+                op3 = -1;
+            }
+        } else {
+            if(decoded.add_CA && registers.fixed_exception_reg.exception_fields.CA == 1) {
+                // 1 - 0 = 1
+                // This case should never happen
+                op3 = 1;
+            } else {
+                // 0 - 0 = 0
+                op3 = 0;
+            }
+        }
 
 		result = op1 + op2 + op3;
 
-		registers.GPR[decoded.result_reg_address] = result;registers.GPR[decoded.result_reg_address] = result;
+		registers.GPR[decoded.result_reg_address] = result;
 
 		ap_uint<1> carry = result[32];
 		ap_uint<1> overflow;
