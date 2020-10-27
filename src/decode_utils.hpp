@@ -229,8 +229,7 @@
 	decoded_struct.alter_CA = false;		\
 	decoded_struct.alter_CR0 = false;		\
 	decoded_struct.alter_OV = false;		\
-	decoded_struct.add_CA = false;			\
-	decoded_struct.sub_one = false;
+	decoded_struct.add_CA = false;
 
 #define init_mul(decoded_struct)			\
 	decoded_struct.op1_reg_address = 0;		\

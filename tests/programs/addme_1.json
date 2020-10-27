@@ -37,7 +37,7 @@
     "XER" : {
       "OV" : false,
       "SO" : false,
-      "CA" : false
+      "CA" : true
     },
     "LR" : 0
   },

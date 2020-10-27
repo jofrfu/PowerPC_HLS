@@ -237,7 +237,6 @@ typedef struct {
 	bool alter_CR0;
 	bool alter_OV;
 	bool add_CA;
-	bool sub_one;
 } add_sub_decode_t;
 
 typedef struct {

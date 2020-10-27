@@ -225,57 +225,35 @@ void fixed_point::add_sub(bool execute, add_sub_decode_t decoded, registers_t &r
 			op2 = registers.GPR[decoded.op2_reg_address];
 		}
 
-		ap_uint<33> result;
-		ap_int<2> op3;
-
+        ap_uint<1> carry_in;
 		if(decoded.subtract) {
             // Two's complement
-            op1 = ~op1 + 1;
-        }
-
-        if(decoded.sub_one) {
-            if(decoded.add_CA && registers.fixed_exception_reg.exception_fields.CA == 1) {
-                // 1 - 1 = 0
-                op3 = 0;
+            op1 = ~op1;
+            if(decoded.add_CA) {
+                carry_in = registers.fixed_exception_reg.exception_fields.CA;
             } else {
-                // 0 - 1 = -1
-                op3 = -1;
+                carry_in = 1;
             }
-        } else {
-            if(decoded.add_CA && registers.fixed_exception_reg.exception_fields.CA == 1) {
-                // 1 - 0 = 1
-                op3 = 1;
-            } else {
-                // 0 - 0 = 0
-                op3 = 0;
-            }
-        }
-
-		result = op1 + op2 + op3;
-
-		registers.GPR[decoded.result_reg_address] = result;
-
-		ap_uint<1> carry = result[32];
-		ap_uint<1> overflow;
-
-		// Because there is no way to access the carry bits directly, this is used as a workaround
-		if(	(op1[31] == 1 && op2[31] == 1 && result[31] == 0) ||
-			(op1[31] == 0 && op2[31] == 0 && result[31] == 1)) {
-			overflow = 1;
+		} else if(decoded.add_CA) {
+		    carry_in = registers.fixed_exception_reg.exception_fields.CA;
 		} else {
-			overflow = 0;
+		    carry_in = 0;
 		}
 
+        fixed_point::add_result<32> result = fixed_point::add<32>(op1, op2, carry_in);
+
+		registers.GPR[decoded.result_reg_address] = result.sum;
+
 		if(decoded.alter_CA) {
-			registers.fixed_exception_reg.exception_fields.CA = carry;
+			registers.fixed_exception_reg.exception_fields.CA = result.carry;
 		}
 
 		if(decoded.alter_OV) {
-			fixed_point::set_overflow(overflow, registers);
+			fixed_point::set_overflow(result.overflow, registers);
 		}
 
 		if(decoded.alter_CR0) {
-			fixed_point::check_condition(result, registers);
+			fixed_point::check_condition(result.sum, registers);
 			// Copy the SO field from XER into CR0
 			fixed_point::copy_summary_overflow(registers);
 		}

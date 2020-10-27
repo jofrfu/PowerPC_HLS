@@ -426,7 +426,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				// XO Form Add/Sub instructions
 				case 8 | 0b1000000000:
-				case 8: // addc, addc., addco, addco.
+				case 8: // subfc, subfc., subfco, subfco.
 					fixed_point_decode_result.execute_add_sub = true;
 					add_sub_decoded.subtract = true;
 					add_sub_decoded.op1_imm = false;
@@ -448,7 +448,6 @@ decode_result_t decode(uint32_t instruction_port) {
 						add_sub_decoded.alter_OV = false;
 					}
 					add_sub_decoded.add_CA = false;
-					add_sub_decoded.sub_one = false;
 					break;
 				case 10 | 0b1000000000:
 				case 10: // addc, addc., addco, addco.
@@ -473,7 +472,6 @@ decode_result_t decode(uint32_t instruction_port) {
 						add_sub_decoded.alter_OV = false;
 					}
 					add_sub_decoded.add_CA = false;
-					add_sub_decoded.sub_one = false;
 					break;
 				case 40 | 0b1000000000:
 				case 40: // subf, subf., subfo, subfo.
@@ -498,7 +496,6 @@ decode_result_t decode(uint32_t instruction_port) {
 						add_sub_decoded.alter_OV = false;
 					}
 					add_sub_decoded.add_CA = false;
-					add_sub_decoded.sub_one = false;
 					break;
 				case 104 | 0b1000000000:
 				case 104: // neg, neg., nego, nego.
@@ -523,7 +520,6 @@ decode_result_t decode(uint32_t instruction_port) {
 						add_sub_decoded.alter_OV = false;
 					}
 					add_sub_decoded.add_CA = false;
-					add_sub_decoded.sub_one = false;
 					break;
 				case 136 | 0b1000000000:
 				case 136: // subfe, subfe., subfeo, subfeo.
@@ -548,7 +544,6 @@ decode_result_t decode(uint32_t instruction_port) {
 						add_sub_decoded.alter_OV = false;
 					}
 					add_sub_decoded.add_CA = true;
-					add_sub_decoded.sub_one = true;
 					break;
 				case 138 | 0b1000000000:
 				case 138: // adde, adde., addeo, addeo.
@@ -573,7 +568,6 @@ decode_result_t decode(uint32_t instruction_port) {
 						add_sub_decoded.alter_OV = false;
 					}
 					add_sub_decoded.add_CA = true;
-					add_sub_decoded.sub_one = false;
 					break;
 				case 200 | 0b1000000000:
 				case 200: // subfze, subfze., subfzeo, subfzeo.
@@ -598,7 +592,6 @@ decode_result_t decode(uint32_t instruction_port) {
 						add_sub_decoded.alter_OV = false;
 					}
 					add_sub_decoded.add_CA = true;
-					add_sub_decoded.sub_one = true;
 					break;
 				case 202 | 0b1000000000:
 				case 202: // addze, addze., addzeo, addzeo.
@@ -623,7 +616,6 @@ decode_result_t decode(uint32_t instruction_port) {
 						add_sub_decoded.alter_OV = false;
 					}
 					add_sub_decoded.add_CA = true;
-					add_sub_decoded.sub_one = false;
 					break;
 				case 232 | 0b1000000000:
 				case 232: // subfme, subfme., subfmeo, subfmeo.
@@ -633,7 +625,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					add_sub_decoded.op1_immediate = 0;
 					add_sub_decoded.op1_reg_address = instruction.XO_Form.RA;
 					add_sub_decoded.op2_imm = true;
-					add_sub_decoded.op2_immediate = 0;
+					add_sub_decoded.op2_immediate = 0xFFFFFFFF;
 					add_sub_decoded.op2_reg_address = 0;
 					add_sub_decoded.result_reg_address = instruction.XO_Form.RT;
 					add_sub_decoded.alter_CA = true;
@@ -648,7 +640,6 @@ decode_result_t decode(uint32_t instruction_port) {
 						add_sub_decoded.alter_OV = false;
 					}
 					add_sub_decoded.add_CA = true;
-					add_sub_decoded.sub_one = true;
 					break;
 				case 234 | 0b1000000000:
 				case 234: // addme, addme., addmeo, addmeo.
@@ -658,7 +649,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					add_sub_decoded.op1_immediate = 0;
 					add_sub_decoded.op1_reg_address = instruction.XO_Form.RA;
 					add_sub_decoded.op2_imm = true;
-					add_sub_decoded.op2_immediate = 0;
+					add_sub_decoded.op2_immediate = 0xFFFFFFFF;
 					add_sub_decoded.op2_reg_address = 0;
 					add_sub_decoded.result_reg_address = instruction.XO_Form.RT;
 					add_sub_decoded.alter_CA = true;
@@ -673,7 +664,6 @@ decode_result_t decode(uint32_t instruction_port) {
 						add_sub_decoded.alter_OV = false;
 					}
 					add_sub_decoded.add_CA = true;
-					add_sub_decoded.sub_one = true;
 					break;
 				case 266 | 0b1000000000:
 				case 266: // add, add., addo, addo.
@@ -698,7 +688,6 @@ decode_result_t decode(uint32_t instruction_port) {
 						add_sub_decoded.alter_OV = false;
 					}
 					add_sub_decoded.add_CA = false;
-					add_sub_decoded.sub_one = false;
 					break;
 				// XO Form Mul instructions
 				case 9 | 0b1000000000:
@@ -1281,7 +1270,6 @@ decode_result_t decode(uint32_t instruction_port) {
 			add_sub_decoded.alter_CR0 = false;
 			add_sub_decoded.alter_OV = false;
 			add_sub_decoded.add_CA = false;
-			add_sub_decoded.sub_one = false;
 			break;
 		case 12: // addic
 			fixed_point_decode_result.execute_add_sub = true;
@@ -1297,7 +1285,6 @@ decode_result_t decode(uint32_t instruction_port) {
 			add_sub_decoded.alter_CR0 = false;
 			add_sub_decoded.alter_OV = false;
 			add_sub_decoded.add_CA = false;
-			add_sub_decoded.sub_one = false;
 			break;
 		case 13: // addic.
 			fixed_point_decode_result.execute_add_sub = true;
@@ -1313,7 +1300,6 @@ decode_result_t decode(uint32_t instruction_port) {
 			add_sub_decoded.alter_CR0 = true;
 			add_sub_decoded.alter_OV = false;
 			add_sub_decoded.add_CA = false;
-			add_sub_decoded.sub_one = false;
 			break;
 		case 14: // addi
 			fixed_point_decode_result.execute_add_sub = true;
@@ -1335,7 +1321,6 @@ decode_result_t decode(uint32_t instruction_port) {
 			add_sub_decoded.alter_CR0 = false;
 			add_sub_decoded.alter_OV = false;
 			add_sub_decoded.add_CA = false;
-			add_sub_decoded.sub_one = false;
 			break;
 		case 15: // addis
 			fixed_point_decode_result.execute_add_sub = true;
@@ -1357,7 +1342,6 @@ decode_result_t decode(uint32_t instruction_port) {
 			add_sub_decoded.alter_CR0 = false;
 			add_sub_decoded.alter_OV = false;
 			add_sub_decoded.add_CA = false;
-			add_sub_decoded.sub_one = false;
 			break;
 		// D Form Mul instructions
 		case 7: // mulli
