@@ -701,6 +701,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					mul_decoded.op2_imm = false;
 					mul_decoded.op2_immediate = 0;
 					mul_decoded.op2_reg_address = instruction.XO_Form.RB;
+                    mul_decoded.result_reg_address = instruction.XO_Form.RT;
 					mul_decoded.mul_signed = true;
 					mul_decoded.mul_higher = true;
 					if(instruction.XO_Form.Rc == 1) {
@@ -721,6 +722,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					mul_decoded.op2_imm = false;
 					mul_decoded.op2_immediate = 0;
 					mul_decoded.op2_reg_address = instruction.XO_Form.RB;
+                    mul_decoded.result_reg_address = instruction.XO_Form.RT;
 					mul_decoded.mul_signed = true;
 					mul_decoded.mul_higher = true;
 					if(instruction.XO_Form.Rc == 1) {
@@ -745,7 +747,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					mul_decoded.op2_imm = false;
 					mul_decoded.op2_immediate = 0;
 					mul_decoded.op2_reg_address = instruction.XO_Form.RB;
-                    mul_decoded.result_reg_address = instruction.D_Form.RT;
+                    mul_decoded.result_reg_address = instruction.XO_Form.RT;
 					mul_decoded.mul_signed = true;
 					mul_decoded.mul_higher = false;
 					if(instruction.XO_Form.Rc == 1) {

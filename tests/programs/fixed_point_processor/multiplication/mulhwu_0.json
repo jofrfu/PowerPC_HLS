@@ -1,9 +1,9 @@
 {
-    "_comment" : "Multiplication of INT32_MAX x INT32_MAX with signed overflow",
+    "_comment" : "Multiplication of INT32_MAX x INT32_MAX returning high word",
     "Before" : {
         "GPR" : {
             "1" : 0,
-            "2" : -2147483647,
+            "2" : 2147483647,
             "3" : 2147483647
         },
 
@@ -24,26 +24,26 @@
     
     "After" : {
         "GPR" : {
-            "1" : -1,
-            "2" : -2147483647,
+            "1" : 1073741823,
+            "2" : 2147483647,
             "3" : 2147483647
         },
         "CR" : {
             "CR0" : {
-                "LT" : true,
+                "LT" : false,
                 "GT" : false,
                 "EQ" : false,
-                "SO" : true
+                "SO" : false
             }
         },
         "XER" : {
-            "OV" : true,
-            "SO" : true
+            "OV" : false,
+            "SO" : false
         },
         "LR" : 0
     },
     
     "Assembly" :
-        "mullwo. 1, 2, 3"
+        "mulhwu 1, 2, 3"
 
 }

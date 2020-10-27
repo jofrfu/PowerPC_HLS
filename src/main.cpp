@@ -44,13 +44,27 @@ TEST_CASE("Automatic program execution", "[program execution]") {
     registers_t registers;
 
     std::vector<std::filesystem::path> filenames;
+
+    // Use environment variable [PROGRAM_TO_DEBUG] to ONLY execute a single test for one JSON program file
+    // Usage: PROGRAM_TO_DEBUG=my_test.json
+    const char* program_to_debug_env = std::getenv("PROGRAM_TO_DEBUG");
+
+
     for (const auto &entry : std::filesystem::recursive_directory_iterator(PROGRAM_PATH)) {
         auto &path = entry.path();
-        if(path.extension() == ".json") {
+        if (path.extension() == ".json") {
+
+            // Only add single program to debug if required ; Skip all other tests
+            if (program_to_debug_env != nullptr) {
+                if (path.filename() != program_to_debug_env) {
+                    continue;
+                }
+            }
             // File is a json configuration
             filenames.push_back(path);
         }
     }
+
 
     for(const auto &file : filenames) {
         SECTION("Testing file " + file.string()) {
