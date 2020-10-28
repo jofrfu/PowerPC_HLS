@@ -47,10 +47,8 @@ void fixed_point::load(bool execute, load_store_decode_t decoded, registers_t &r
 			case 0: // Byte
 				interm = data_memory[upper_address];
 				result(7, 0) = interm((lower_address+1)*8-1, lower_address*8);
-				if(decoded.sign_extend) {
-					for(uint32_t i = 8; i < 32; i++) {
-						result[i] = result[7];
-					}
+				if(decoded.sign_extend && result[7] == 1) {
+					result(31, 8) = 0xFFFFFF;
 				}
 				break;
 			case 1: // Halfword
@@ -75,10 +73,8 @@ void fixed_point::load(bool execute, load_store_decode_t decoded, registers_t &r
 						break;
 				}
 
-				if(decoded.sign_extend) {
-					for(uint32_t i = 16; i < 32; i++) {
-						result[i] = result[15];
-					}
+				if(decoded.sign_extend && result[15] == 1) {
+					result(31, 16) = 0xFFFF;
 				}
 				break;
 			case 2: // Unsupported (3 bytes)
@@ -148,25 +144,25 @@ void fixed_point::store(bool execute, load_store_decode_t decoded, registers_t &
 
 		switch(decoded.word_size) {
 			case 0: // Byte
-				data_memory[upper_address](lower_address*8, (lower_address+1)*8-1) = result(0, 7);
+				data_memory[upper_address]((lower_address+1)*8-1, lower_address+1) = result(7, 0);
 				break;
 			case 1: // Halfword
 				switch(lower_address) {
 					case 0: // Halfword lies in the first two bytes of this word
-						data_memory[upper_address](0, 7) = result(8, 15);
-						data_memory[upper_address](8, 15) = result(0, 7);
+						data_memory[upper_address](7, 0) = result(15, 8);
+						data_memory[upper_address](15, 8) = result(7, 0);
 						break;
 					case 1: // Halfword lies in the second and third byte
-						data_memory[upper_address](8, 15) = result(8, 15);
-						data_memory[upper_address](16, 23) = result(0, 7);
+						data_memory[upper_address](15, 8) = result(15, 8);
+						data_memory[upper_address](23, 16) = result(7, 0);
 						break;
 					case 2: // Halfword lies in the last two bytes
-						data_memory[upper_address](16, 23) = result(8, 15);
-						data_memory[upper_address](24, 31) = result(0, 7);
+						data_memory[upper_address](23, 16) = result(15, 8);
+						data_memory[upper_address](31, 24) = result(7, 0);
 						break;
 					case 3: // Halfword lies in the last byte of this word AND the first byte of the next word
-						data_memory[upper_address](24, 31) = result(8, 15);
-						data_memory[upper_address+1](0, 7) = result(0, 7);
+						data_memory[upper_address](31, 24) = result(15, 8);
+						data_memory[upper_address+1](7, 0) = result(7, 0);
 						break;
 				}
 				break;
@@ -175,28 +171,28 @@ void fixed_point::store(bool execute, load_store_decode_t decoded, registers_t &
 			case 3: // Word
 				switch(lower_address) {
 					case 0: // Word lies in the four bytes of this word
-						data_memory[upper_address](0, 7) = result(24, 31);
-						data_memory[upper_address](8, 15) = result(16, 23);
-						data_memory[upper_address](16, 23) = result(8, 15);
-						data_memory[upper_address](24, 31) = result(0, 7);
+						data_memory[upper_address](7, 0) = result(31, 24);
+						data_memory[upper_address](15, 8) = result(23, 16);
+						data_memory[upper_address](23, 16) = result(15, 8);
+						data_memory[upper_address](31, 24) = result(7, 0);
 						break;
 					case 1: // Word lies in the last three bytes of this word AND in the first byte of the next word
-						data_memory[upper_address](8, 15) = result(24, 31);
-						data_memory[upper_address](16, 23) = result(16, 23);
-						data_memory[upper_address](24, 31) = result(8, 15);
-						data_memory[upper_address+1](0, 7) = result(0, 7);
+						data_memory[upper_address](15, 8) = result(31, 24);
+						data_memory[upper_address](23, 16) = result(23, 16);
+						data_memory[upper_address](31, 24) = result(15, 8);
+						data_memory[upper_address+1](7, 0) = result(7, 0);
 						break;
 					case 2: // Word lies in the last two bytes of this word AND in the first two bytes of the next word
-						data_memory[upper_address](16, 23) = result(24, 31);
-						data_memory[upper_address](24, 31) = result(16, 23);
-						data_memory[upper_address+1](0, 7) = result(8, 15);
-						data_memory[upper_address+1](8, 15) = result(0, 7);
+						data_memory[upper_address](23, 16) = result(31, 24);
+						data_memory[upper_address](31, 24) = result(23, 16);
+						data_memory[upper_address+1](7, 0) = result(15, 8);
+						data_memory[upper_address+1](15, 8) = result(7, 0);
 						break;
 					case 3: // Word lies in the last byte of this word AND in the first three bytes of the next word
-						data_memory[upper_address](24, 31) = result(24, 31);
-						data_memory[upper_address+1](0, 7) = result(16, 23);
-						data_memory[upper_address+1](8, 15) = result(8, 15);
-						data_memory[upper_address+1](16, 23) = result(0, 7);
+						data_memory[upper_address](31, 24) = result(31, 24);
+						data_memory[upper_address+1](7, 0) = result(23, 16);
+						data_memory[upper_address+1](15, 8) = result(15, 8);
+						data_memory[upper_address+1](23, 16) = result(7, 0);
 						break;
 				}
 				break;
@@ -487,10 +483,10 @@ void fixed_point::logical(bool execute, log_decode_t decoded, registers_t &regis
 				result(15, 0) = op1(15, 0);
 				if(result[15] == 1) {
 					// sign extend
-					result(31, 15) = 0xFFFF;
+					result(31, 16) = 0xFFFF;
 				} else {
 					// zero extend
-					result(31, 15) = 0;
+					result(31, 16) = 0;
 				}
 				break;
 			case logical::COUNT_LEDING_ZEROS_WORD:
@@ -509,14 +505,14 @@ void fixed_point::logical(bool execute, log_decode_t decoded, registers_t &regis
 				for(int32_t b = 0; b < 4; b++) {
 #pragma HLS unroll
 					ap_uint<4> count = 0;
-					ap_uint<8> byte = op1((b+1)*8, b*8);
+					ap_uint<8> byte = op1((b+1)*8-1, b*8);
 					for(uint32_t i = 0; i < 8; i++) {
 #pragma HLS unroll
 						if(byte[i] == 1) {
 							count++;
 						}
 					}
-					result((b+1)*8, b*8) = count;
+					result((b+1)*8-1, b*8) = count;
 				}
 		}
 
