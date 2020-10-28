@@ -400,8 +400,8 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                 auto sa_data = after["Data"];
                 if (!sa_data.is_null()) {
                     for (uint32_t i = 0; i < D_MEM_SIZE; i++) {
-                        if (!sa_data[std::to_string(i * 4)].is_null()) {
-                            ap_uint<32> little = sa_data[i * 4].get<int32_t>();
+                        if (!sa_data[std::to_string(i*4)].is_null()) {
+                            ap_uint<32> little = sa_data[std::to_string(i*4)].get<int32_t>();
                             ap_uint<32> big;
                             big(7, 0) = little(31, 24);
                             big(15, 8) = little(23, 16);

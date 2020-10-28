@@ -144,7 +144,7 @@ void fixed_point::store(bool execute, load_store_decode_t decoded, registers_t &
 
 		switch(decoded.word_size) {
 			case 0: // Byte
-				data_memory[upper_address]((lower_address+1)*8-1, lower_address+1) = result(7, 0);
+				data_memory[upper_address]((lower_address+1)*8-1, lower_address*8) = result(7, 0);
 				break;
 			case 1: // Halfword
 				switch(lower_address) {

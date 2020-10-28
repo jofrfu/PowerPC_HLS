@@ -1,13 +1,13 @@
 {
-  "_comment" : "Load byte at address 7 (which is 70, remember BIG-endian) to registers 7.",
+  "_comment" : "Store byte to address 9 (which is 70, remember BIG-endian) from registers 7.",
   "Before" : {
     "GPR" : {
-      "0" : 9,
-      "7" : 0
+      "14" : 5,
+      "7" : 70
     },
 
     "Data" : {
-      "4" : 70
+      "8" : 0
     },
 
     "CR" : 0,
@@ -17,14 +17,19 @@
 
   "After" : {
     "GPR" : {
-      "0" : 9,
+      "14" : 5,
       "7" : 70
     },
+
+    "Data" : {
+      "8" : 4587520
+    },
+
     "CR" : 0,
     "XER" : 0,
     "LR" : 0
   },
 
   "Assembly" :
-  "lbz 7, 7(0)"
+  "stb 7, 4(14)"
 }
