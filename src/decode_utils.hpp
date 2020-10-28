@@ -73,7 +73,7 @@
 	decoded_struct.sum2_imm = false;												\
 	decoded_struct.sum2_immediate = 0;												\
 	decoded_struct.sum2_reg_address = instruction_struct.X_Form.RB;					\
-	decoded_struct.word_size = 0;													\
+	decoded_struct.word_size = bytes-1;												\
 	decoded_struct.result_reg_address = instruction_struct.X_Form.RT;				\
 	decoded_struct.write_ea = false;												\
 	decoded_struct.ea_reg_address = 0;												\
@@ -149,7 +149,7 @@
 	decoded_struct.sum2_imm = false;												\
 	decoded_struct.sum2_immediate = 0;												\
 	decoded_struct.sum2_reg_address = instruction_struct.X_Form.RB;					\
-	decoded_struct.word_size = 0;													\
+	decoded_struct.word_size = bytes-1;													\
 	decoded_struct.result_reg_address = instruction_struct.X_Form.RT;				\
 	decoded_struct.write_ea = false;												\
 	decoded_struct.ea_reg_address = 0;												\
