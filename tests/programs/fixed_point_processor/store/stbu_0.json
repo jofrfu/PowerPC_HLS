@@ -1,0 +1,35 @@
+{
+  "_comment" : "Store byte to address 8 (which is 255, remember BIG-endian) from registers 7.",
+  "Before" : {
+    "GPR" : {
+      "15" : 6,
+      "7" : 255
+    },
+
+    "Data" : {
+      "8" : 0
+    },
+
+    "CR" : 0,
+    "XER" : 0,
+    "LR" : 0
+  },
+
+  "After" : {
+    "GPR" : {
+      "15" : 8,
+      "7" : 255
+    },
+
+    "Data" : {
+      "8" : 4278190080
+    },
+
+    "CR" : 0,
+    "XER" : 0,
+    "LR" : 0
+  },
+
+  "Assembly" :
+  "stbu 7, 2(15)"
+}
