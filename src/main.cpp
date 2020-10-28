@@ -46,7 +46,7 @@ TEST_CASE("Automatic program execution", "[program execution]") {
     std::vector<std::filesystem::path> filenames;
 
     // Use environment variable [PROGRAM_TO_DEBUG] to ONLY execute a single test for one JSON program file
-    // Usage: PROGRAM_TO_DEBUG=my_test.json
+    // Usage: PROGRAM_TO_DEBUG=[my_test.json | test_directory]
     const char* program_to_debug_env = std::getenv("PROGRAM_TO_DEBUG");
 
 
@@ -54,12 +54,13 @@ TEST_CASE("Automatic program execution", "[program execution]") {
         auto &path = entry.path();
         if (path.extension() == ".json") {
 
-            // Only add single program to debug if required ; Skip all other tests
+            // Only add single program or directory to debug if required ; Skip all other tests
             if (program_to_debug_env != nullptr) {
-                if (path.filename() != program_to_debug_env) {
+                if (path.filename() != program_to_debug_env && path.parent_path().filename() != program_to_debug_env) {
                     continue;
                 }
             }
+
             // File is a json configuration
             filenames.push_back(path);
         }
