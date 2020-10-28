@@ -135,14 +135,14 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                 for(uint32_t i = 0; i < (binary.size()+3)/4; i++) {
                     ap_uint<32> big;
                     if(i*4+3 > binary.size())
-                        big(0, 7) = binary[i*4+3];
+                        big(7, 0) = binary[i*4+3];
                     if(i*4+2 > binary.size())
-                        big(8, 15) = binary[i*4+2];
+                        big(15, 8) = binary[i*4+2];
                     if(i*4+1 > binary.size())
-                        big(16, 23) = binary[i*4+1];
+                        big(23, 16) = binary[i*4+1];
 
                     // Always in bounds
-                    big(24, 31) = binary[i*4+0];
+                    big(31, 24) = binary[i*4+0];
                 }
             }
 
@@ -258,10 +258,10 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                         if (!sa_data[std::to_string(i*4)].is_null()) {
                             ap_uint<32> little = sa_data[std::to_string(i*4)].get<int32_t>();
                             ap_uint<32> big;
-                            big(0, 7) = little(24, 31);
-                            big(8, 15) = little(16, 23);
-                            big(16, 23) = little(8, 15);
-                            big(24, 31) = little(0, 7);
+                            big(7, 0) = little(31, 24);
+                            big(15, 8) = little(23, 16);
+                            big(23, 16) = little(15, 8);
+                            big(31, 24) = little(7, 0);
                             d_mem[i] = big;
                         }
                     }
@@ -403,10 +403,10 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                         if (!sa_data[std::to_string(i * 4)].is_null()) {
                             ap_uint<32> little = sa_data[i * 4].get<int32_t>();
                             ap_uint<32> big;
-                            big(0, 7) = little(24, 31);
-                            big(8, 15) = little(16, 23);
-                            big(16, 23) = little(8, 15);
-                            big(24, 31) = little(0, 7);
+                            big(7, 0) = little(31, 24);
+                            big(15, 8) = little(23, 16);
+                            big(23, 16) = little(15, 8);
+                            big(31, 24) = little(7, 0);
                             INFO("Checking data memory address " + std::to_string(i*4) + ".");
                             REQUIRE(d_mem[i] == big);
                         }
