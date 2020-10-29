@@ -46,129 +46,134 @@ namespace fixed_point {
 
             ap_uint<32> interm;
             ap_uint<32> result = 0;
-            switch (decoded.word_size) {
-                case 0: // Byte
-                    interm = data_memory[upper_address];
-                    result(7, 0) = interm((lower_address + 1) * 8 - 1, lower_address * 8);
-                    if (decoded.sign_extend && result[7] == 1) {
-                        result(31, 8) = 0xFFFFFF;
-                    }
-                    break;
-                case 1: // Halfword
-                    interm = data_memory[upper_address];
-                    switch (lower_address) {
-                        case 0: // Halfword lies in the first two bytes of this word
-                            if(decoded.little_endian) {
-                                result(7, 0) = interm(7, 0);
-                                result(15, 8) = interm(15, 8);
-                            } else {
-                                result(15, 8) = interm(7, 0);
-                                result(7, 0) = interm(15, 8);
-                            }
-                            break;
-                        case 1: // Halfword lies in the second and third byte
-                            if(decoded.little_endian) {
-                                result(7, 0) = interm(15, 8);
-                                result(15, 8) = interm(23, 16);
-                            } else {
-                                result(15, 8) = interm(15, 8);
-                                result(7, 0) = interm(23, 16);
-                            }
-                            break;
-                        case 2: // Halfword lies in the last two bytes
-                            if(decoded.little_endian) {
-                                result(7, 0) = interm(23, 16);
-                                result(15, 8) = interm(31, 24);
-                            } else {
-                                result(15, 8) = interm(23, 16);
-                                result(7, 0) = interm(31, 24);
-                            }
-                            break;
-                        case 3: // Halfword lies in the last byte of this word AND the first byte of the next word
-                            if(decoded.little_endian) {
-                                result(7, 0) = interm(31, 24);
-                                interm = data_memory[upper_address + 1];
-                                result(15, 8) = interm(7, 0);
-                            } else {
-                                result(15, 8) = interm(31, 24);
-                                interm = data_memory[upper_address + 1];
-                                result(7, 0) = interm(7, 0);
-                            }
-                            break;
-                    }
 
-                    if (decoded.sign_extend && result[15] == 1) {
-                        result(31, 16) = 0xFFFF;
-                    }
-                    break;
-                case 2: // Unsupported (3 bytes)
-                    break;
-                case 3: // Word
-                    interm = data_memory[upper_address];
-                    switch (lower_address) {
-                        case 0: // Word lies in the four bytes of this word
-                            if(decoded.little_endian) {
-                                result(7, 0) = interm(7, 0);
-                                result(15, 8) = interm(15, 8);
-                                result(23, 16) = interm(23, 16);
-                                result(31, 24) = interm(31, 24);
-                            } else {
-                                result(31, 24) = interm(7, 0);
-                                result(23, 16) = interm(15, 8);
-                                result(15, 8) = interm(23, 16);
-                                result(7, 0) = interm(31, 24);
-                            }
-                            break;
-                        case 1: // Word lies in the last three bytes of this word AND in the first byte of the next word
-                            if(decoded.little_endian) {
-                                result(7, 0) = interm(15, 8);
-                                result(15, 8) = interm(23, 16);
-                                result(23, 16) = interm(31, 24);
-                                interm = data_memory[upper_address + 1];
-                                result(31, 24) = interm(7, 0);
-                            } else {
-                                result(31, 24) = interm(15, 8);
-                                result(23, 16) = interm(23, 16);
-                                result(15, 8) = interm(31, 24);
-                                interm = data_memory[upper_address + 1];
-                                result(7, 0) = interm(7, 0);
-                            }
-                            break;
-                        case 2: // Word lies in the last two bytes of this word AND in the first two bytes of the next word
-                            if(decoded.little_endian) {
-                                result(7, 0) = interm(23, 16);
-                                result(15, 8) = interm(31, 24);
-                                interm = data_memory[upper_address + 1];
-                                result(23, 16) = interm(7, 0);
-                                result(31, 24) = interm(15, 8);
-                            } else {
-                                result(31, 24) = interm(23, 16);
-                                result(23, 16) = interm(31, 24);
-                                interm = data_memory[upper_address + 1];
-                                result(15, 8) = interm(7, 0);
-                                result(7, 0) = interm(15, 8);
-                            }
-                            break;
-                        case 3: // Word lies in the last byte of this word AND in the first three bytes of the next word
-                            if(decoded.little_endian) {
-                                result(7, 0) = interm(31, 24);
-                                interm = data_memory[upper_address + 1];
-                                result(15, 8) = interm(7, 0);
-                                result(23, 16) = interm(15, 8);
-                                result(31, 24) = interm(23, 16);
-                            } else {
-                                result(31, 24) = interm(31, 24);
-                                interm = data_memory[upper_address + 1];
-                                result(23, 16) = interm(7, 0);
-                                result(15, 8) = interm(15, 8);
-                                result(7, 0) = interm(23, 16);
-                            }
-                            break;
-                    }
-                    break;
+            int32_t n = decoded.multiple ? 32 : decoded.result_reg_address+1;
+            for(int32_t i = decoded.result_reg_address; i < n; i++) {
+                switch (decoded.word_size) {
+                    case 0: // Byte
+                        interm = data_memory[upper_address];
+                        result(7, 0) = interm((lower_address + 1) * 8 - 1, lower_address * 8);
+                        if (decoded.sign_extend && result[7] == 1) {
+                            result(31, 8) = 0xFFFFFF;
+                        }
+                        break;
+                    case 1: // Halfword
+                        interm = data_memory[upper_address];
+                        switch (lower_address) {
+                            case 0: // Halfword lies in the first two bytes of this word
+                                if (decoded.little_endian) {
+                                    result(7, 0) = interm(7, 0);
+                                    result(15, 8) = interm(15, 8);
+                                } else {
+                                    result(15, 8) = interm(7, 0);
+                                    result(7, 0) = interm(15, 8);
+                                }
+                                break;
+                            case 1: // Halfword lies in the second and third byte
+                                if (decoded.little_endian) {
+                                    result(7, 0) = interm(15, 8);
+                                    result(15, 8) = interm(23, 16);
+                                } else {
+                                    result(15, 8) = interm(15, 8);
+                                    result(7, 0) = interm(23, 16);
+                                }
+                                break;
+                            case 2: // Halfword lies in the last two bytes
+                                if (decoded.little_endian) {
+                                    result(7, 0) = interm(23, 16);
+                                    result(15, 8) = interm(31, 24);
+                                } else {
+                                    result(15, 8) = interm(23, 16);
+                                    result(7, 0) = interm(31, 24);
+                                }
+                                break;
+                            case 3: // Halfword lies in the last byte of this word AND the first byte of the next word
+                                if (decoded.little_endian) {
+                                    result(7, 0) = interm(31, 24);
+                                    interm = data_memory[upper_address + 1];
+                                    result(15, 8) = interm(7, 0);
+                                } else {
+                                    result(15, 8) = interm(31, 24);
+                                    interm = data_memory[upper_address + 1];
+                                    result(7, 0) = interm(7, 0);
+                                }
+                                break;
+                        }
+
+                        if (decoded.sign_extend && result[15] == 1) {
+                            result(31, 16) = 0xFFFF;
+                        }
+                        break;
+                    case 2: // Unsupported (3 bytes)
+                        break;
+                    case 3: // Word
+                        interm = data_memory[upper_address];
+                        switch (lower_address) {
+                            case 0: // Word lies in the four bytes of this word
+                                if (decoded.little_endian) {
+                                    result(7, 0) = interm(7, 0);
+                                    result(15, 8) = interm(15, 8);
+                                    result(23, 16) = interm(23, 16);
+                                    result(31, 24) = interm(31, 24);
+                                } else {
+                                    result(31, 24) = interm(7, 0);
+                                    result(23, 16) = interm(15, 8);
+                                    result(15, 8) = interm(23, 16);
+                                    result(7, 0) = interm(31, 24);
+                                }
+                                break;
+                            case 1: // Word lies in the last three bytes of this word AND in the first byte of the next word
+                                if (decoded.little_endian) {
+                                    result(7, 0) = interm(15, 8);
+                                    result(15, 8) = interm(23, 16);
+                                    result(23, 16) = interm(31, 24);
+                                    interm = data_memory[upper_address + 1];
+                                    result(31, 24) = interm(7, 0);
+                                } else {
+                                    result(31, 24) = interm(15, 8);
+                                    result(23, 16) = interm(23, 16);
+                                    result(15, 8) = interm(31, 24);
+                                    interm = data_memory[upper_address + 1];
+                                    result(7, 0) = interm(7, 0);
+                                }
+                                break;
+                            case 2: // Word lies in the last two bytes of this word AND in the first two bytes of the next word
+                                if (decoded.little_endian) {
+                                    result(7, 0) = interm(23, 16);
+                                    result(15, 8) = interm(31, 24);
+                                    interm = data_memory[upper_address + 1];
+                                    result(23, 16) = interm(7, 0);
+                                    result(31, 24) = interm(15, 8);
+                                } else {
+                                    result(31, 24) = interm(23, 16);
+                                    result(23, 16) = interm(31, 24);
+                                    interm = data_memory[upper_address + 1];
+                                    result(15, 8) = interm(7, 0);
+                                    result(7, 0) = interm(15, 8);
+                                }
+                                break;
+                            case 3: // Word lies in the last byte of this word AND in the first three bytes of the next word
+                                if (decoded.little_endian) {
+                                    result(7, 0) = interm(31, 24);
+                                    interm = data_memory[upper_address + 1];
+                                    result(15, 8) = interm(7, 0);
+                                    result(23, 16) = interm(15, 8);
+                                    result(31, 24) = interm(23, 16);
+                                } else {
+                                    result(31, 24) = interm(31, 24);
+                                    interm = data_memory[upper_address + 1];
+                                    result(23, 16) = interm(7, 0);
+                                    result(15, 8) = interm(15, 8);
+                                    result(7, 0) = interm(23, 16);
+                                }
+                                break;
+                        }
+                        break;
+                }
+
+                registers.GPR[i] = result;
+                upper_address++;
             }
-
-            registers.GPR[decoded.result_reg_address] = result;
 
             if (decoded.write_ea) {
                 registers.GPR[decoded.ea_reg_address] = effective_address;
@@ -307,4 +312,7 @@ namespace fixed_point {
             }
         }
     }
+
+    template<typename T>
+    void load_string();
 }

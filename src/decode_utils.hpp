@@ -41,7 +41,8 @@
 	decoded_struct.ea_reg_address = 0;		\
 	decoded_struct.result_reg_address = 0;	\
 	decoded_struct.write_ea = false;        \
-    decoded_struct.little_endian = false;
+    decoded_struct.little_endian = false;   \
+    decoded_struct.multiple = false;
 
 #define decode_load_store_and_zero(decoded_struct, instruction_struct, bytes) 		\
 	if(instruction_struct.D_Form.RA == 0) { 										\
@@ -60,7 +61,8 @@
 	decoded_struct.write_ea = false;												\
 	decoded_struct.ea_reg_address = 0;												\
 	decoded_struct.sign_extend = false;                                             \
-    decoded_struct.little_endian = false;
+    decoded_struct.little_endian = false;                                           \
+    decoded_struct.multiple = false;
 
 #define decode_load_store_and_zero_x_form(decoded_struct, instruction_struct, bytes)\
 	if(instruction_struct.X_Form.RA == 0) {											\
@@ -80,7 +82,8 @@
 	decoded_struct.write_ea = false;												\
 	decoded_struct.ea_reg_address = 0;												\
 	decoded_struct.sign_extend = false;                                             \
-    decoded_struct.little_endian = false;
+    decoded_struct.little_endian = false;                                           \
+    decoded_struct.multiple = false;
 
 #define decode_load_store_and_zero_with_update(decoded_struct, instruction_struct, bytes)	\
 	decoded_struct.sum1_imm = false;												\
@@ -94,7 +97,8 @@
 	decoded_struct.write_ea = true;													\
 	decoded_struct.ea_reg_address = instruction_struct.D_Form.RA;					\
 	decoded_struct.sign_extend = false;                                             \
-    decoded_struct.little_endian = false;
+    decoded_struct.little_endian = false;                                           \
+    decoded_struct.multiple = false;
 
 #define decode_load_store_and_zero_with_update_x_form(decoded_struct, instruction_struct, bytes)	\
 	decoded_struct.sum1_imm = false;												\
@@ -108,7 +112,8 @@
 	decoded_struct.write_ea = true;													\
 	decoded_struct.ea_reg_address = instruction_struct.D_Form.RA;					\
 	decoded_struct.sign_extend = false;                                             \
-    decoded_struct.little_endian = false;
+    decoded_struct.little_endian = false;                                           \
+    decoded_struct.multiple = false;
 
 #define decode_load_algebraic(decoded_struct, instruction_struct, bytes) 			\
 	if(instruction_struct.D_Form.RA == 0) { 										\
@@ -127,7 +132,8 @@
 	decoded_struct.write_ea = false;												\
 	decoded_struct.ea_reg_address = 0;												\
 	decoded_struct.sign_extend = true;                                              \
-    decoded_struct.little_endian = false;
+    decoded_struct.little_endian = false;                                           \
+    decoded_struct.multiple = false;
 
 #define decode_load_algebraic_with_update(decoded_struct, instruction_struct, bytes)\
 	decoded_struct.sum1_imm = false;												\
@@ -140,8 +146,9 @@
 	decoded_struct.result_reg_address = instruction_struct.D_Form.RT;				\
 	decoded_struct.write_ea = true;													\
 	decoded_struct.ea_reg_address = instruction_struct.D_Form.RA;					\
-	decoded_struct.sign_extend = true;                                                 \
-    decoded_struct.little_endian = false;
+	decoded_struct.sign_extend = true;                                              \
+    decoded_struct.little_endian = false;                                           \
+    decoded_struct.multiple = false;
 
 #define decode_load_algebraic_x_form(decoded_struct, instruction_struct, bytes)		\
 	if(instruction_struct.X_Form.RA == 0) {											\
@@ -161,7 +168,8 @@
 	decoded_struct.write_ea = false;												\
 	decoded_struct.ea_reg_address = 0;												\
 	decoded_struct.sign_extend = true;                                              \
-    decoded_struct.little_endian = false;
+    decoded_struct.little_endian = false;                                           \
+    decoded_struct.multiple = false;
 
 #define decode_load_algebraic_with_update_x_form(decoded_struct, instruction_struct, bytes)	\
 	decoded_struct.sum1_imm = false;												\
@@ -175,7 +183,8 @@
 	decoded_struct.write_ea = true;													\
 	decoded_struct.ea_reg_address = instruction_struct.D_Form.RA;					\
 	decoded_struct.sign_extend = true;                                              \
-    decoded_struct.little_endian = false;
+    decoded_struct.little_endian = false;                                           \
+    decoded_struct.multiple = false;
 
 #define decode_load_algebraic_ds_form(decoded_struct, instruction_struct, bytes) 	\
 	if(instruction_struct.DS_Form.RA == 0) { 										\
@@ -193,8 +202,9 @@
 	decoded_struct.result_reg_address = instruction_struct.DS_Form.RT;				\
 	decoded_struct.write_ea = false;												\
 	decoded_struct.ea_reg_address = 0;												\
-	decoded_struct.sign_extend = true;                                               \
-    decoded_struct.little_endian = false;
+	decoded_struct.sign_extend = true;                                              \
+    decoded_struct.little_endian = false;                                           \
+    decoded_struct.multiple = false;
 
 #define decode_load_store_ds_form(decoded_struct, instruction_struct, bytes) 		\
 	if(instruction_struct.DS_Form.RA == 0) { 										\
@@ -212,8 +222,9 @@
 	decoded_struct.result_reg_address = instruction_struct.DS_Form.RT;				\
 	decoded_struct.write_ea = false;												\
 	decoded_struct.ea_reg_address = 0;												\
-	decoded_struct.sign_extend = false;                                           \
-    decoded_struct.little_endian = false;
+	decoded_struct.sign_extend = false;                                             \
+    decoded_struct.little_endian = false;                                           \
+    decoded_struct.multiple = false;
 
 #define decode_load_store_with_update_ds_form(decoded_struct, instruction_struct, bytes) 	\
 	decoded_struct.sum1_imm = false;												\
@@ -227,7 +238,8 @@
 	decoded_struct.write_ea = true;													\
 	decoded_struct.ea_reg_address = instruction_struct.DS_Form.RA;					\
 	decoded_struct.sign_extend = false;                                             \
-    decoded_struct.little_endian = false;
+    decoded_struct.little_endian = false;                                           \
+    decoded_struct.multiple = false;
 
 #define decode_load_store_reversed_x_form(decoded_struct, instruction_struct, bytes)\
 	if(instruction_struct.X_Form.RA == 0) {											\
@@ -247,7 +259,28 @@
 	decoded_struct.write_ea = false;												\
 	decoded_struct.ea_reg_address = 0;												\
 	decoded_struct.sign_extend = false;                                             \
-    decoded_struct.little_endian = true;
+    decoded_struct.little_endian = true;                                            \
+    decoded_struct.multiple = false;
+
+#define decode_load_store_multiple(decoded_struct, instruction_struct) 		        \
+	if(instruction_struct.D_Form.RA == 0) { 										\
+		decoded_struct.sum1_imm = true; 											\
+		decoded_struct.sum1_immediate = 0;											\
+		decoded_struct.sum1_reg_address = 0;										\
+	} else {																		\
+		decoded_struct.sum1_imm = false;											\
+		decoded_struct.sum1_reg_address = instruction_struct.D_Form.RA; 			\
+		decoded_struct.sum1_immediate = 0;											\
+	}																				\
+	decoded_struct.sum2_imm = true;													\
+	decoded_struct.sum2_immediate = (int16_t)instruction_struct.D_Form.D;			\
+	decoded_struct.word_size = 3;												    \
+	decoded_struct.result_reg_address = instruction_struct.D_Form.RT;				\
+	decoded_struct.write_ea = false;												\
+	decoded_struct.ea_reg_address = 0;												\
+	decoded_struct.sign_extend = false;                                             \
+    decoded_struct.little_endian = false;                                           \
+    decoded_struct.multiple = true;
 
 #define init_add(decoded_struct)			\
 	decoded_struct.subtract = false;		\

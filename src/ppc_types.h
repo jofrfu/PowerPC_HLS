@@ -223,6 +223,7 @@ typedef struct {
 	uint8_t result_reg_address:5;
 	bool sign_extend;
 	bool little_endian;
+	bool multiple;
 } load_store_decode_t;
 
 typedef struct {
@@ -371,6 +372,7 @@ typedef struct {
 	uint8_t result_reg_address:5;
 	bool sign_extend; // Sign extend means, store as integer word for floating point
 	bool little_endian; // Unused for floating point
+	bool multiple; // Unused for floating point
 } float_load_store_decode_t;
 
 typedef enum {MOVE, NEGATE, ABSOLUTE, NEGATIVE_ABSOLUTE} float_move_op_t;
