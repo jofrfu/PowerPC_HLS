@@ -1,0 +1,33 @@
+{
+  "_comment" : "Load reversed halfword at address 11 (which is 65243, remember Little-endian) to registers 7. Second byte is at address 12",
+  "Before" : {
+    "GPR" : {
+      "14" : 5,
+      "15" : 6,
+      "7" : 0
+    },
+
+    "Data" : {
+      "8" : 219,
+      "12" : 4261412864
+    },
+
+    "CR" : 0,
+    "XER" : 0,
+    "LR" : 0
+  },
+
+  "After" : {
+    "GPR" : {
+      "14" : 5,
+      "15" : 6,
+      "7" : 65243
+    },
+    "CR" : 0,
+    "XER" : 0,
+    "LR" : 0
+  },
+
+  "Assembly" :
+  "lhbrx 7, 15, 14"
+}

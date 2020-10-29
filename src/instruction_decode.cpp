@@ -400,16 +400,20 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				// Load/Store reverse order (little endian)
 				case 534: // lwbrx
-					// NOT SUPPORTED!!! TODO: Support
+                    fixed_point_decode_result.execute_load = true;
+                    decode_load_store_reversed_x_form(load_store_decoded, instruction, 4)
 					break;
 				case 662: // stwbrx
-					// NOT SUPPORTED!!! TODO: Support
+                    fixed_point_decode_result.execute_store = true;
+                    decode_load_store_reversed_x_form(load_store_decoded, instruction, 4)
 					break;
 				case 790: // lhbrx
-					// NOT SUPPORTED!!! TODO: Support
+                    fixed_point_decode_result.execute_load = true;
+                    decode_load_store_reversed_x_form(load_store_decoded, instruction, 2)
 					break;
 				case 918: // sthbrx
-					// NOT SUPPORTED!!! TODO: Support
+                    fixed_point_decode_result.execute_store = true;
+                    decode_load_store_reversed_x_form(load_store_decoded, instruction, 2)
 					break;
 				// Load/Store string word
 				case 533: // lswx

@@ -1,0 +1,37 @@
+{
+  "_comment" : "Store reversed halfword to address 9 (which is 65243, remember Little-endian) from registers 7.",
+  "Before" : {
+    "GPR" : {
+      "14" : 5,
+      "15" : 4,
+      "7" : 65243
+    },
+
+    "Data" : {
+      "8" : 0
+    },
+
+    "CR" : 0,
+    "XER" : 0,
+    "LR" : 0
+  },
+
+  "After" : {
+    "GPR" : {
+      "14" : 5,
+      "15" : 4,
+      "7" : 65243
+    },
+
+    "Data" : {
+      "8" : 14417408
+    },
+
+    "CR" : 0,
+    "XER" : 0,
+    "LR" : 0
+  },
+
+  "Assembly" :
+  "sthbrx 7, 15, 14"
+}
