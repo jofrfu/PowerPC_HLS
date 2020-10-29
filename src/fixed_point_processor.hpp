@@ -26,28 +26,25 @@
 #include <cstdint>
 #include <ap_int.h>
 #include "ppc_types.h"
+#include "fixed_point_processor.tpp"
 
 namespace fixed_point {
-void load(bool execute, load_store_decode_t decoded, registers_t &registers, ap_uint<32> *data_memory);
+    void add_sub(bool execute, add_sub_decode_t decoded, registers_t &registers);
 
-void store(bool execute, load_store_decode_t decoded, registers_t &registers, ap_uint<32> *data_memory);
+    void multiply(bool execute, mul_decode_t decoded, registers_t &registers);
 
-void add_sub(bool execute, add_sub_decode_t decoded, registers_t &registers);
+    void divide(bool execute, div_decode_t decoded, registers_t &registers);
 
-void multiply(bool execute, mul_decode_t decoded, registers_t &registers);
+    void compare(bool execute, cmp_decode_t decoded, registers_t &registers);
 
-void divide(bool execute, div_decode_t decoded, registers_t &registers);
+    bool trap(bool execute, trap_decode_t decoded, registers_t &registers);
 
-void compare(bool execute, cmp_decode_t decoded, registers_t &registers);
+    void logical(bool execute, log_decode_t decoded, registers_t &registers);
 
-bool trap(bool execute, trap_decode_t decoded, registers_t &registers);
+    void rotate(bool execute, rotate_decode_t decoded, registers_t &registers);
 
-void logical(bool execute, log_decode_t decoded, registers_t &registers);
+    void shift(bool execute, shift_decode_t decoded, registers_t &registers);
 
-void rotate(bool execute, rotate_decode_t decoded, registers_t &registers);
-
-void shift(bool execute, shift_decode_t decoded, registers_t &registers);
-
-void system(bool execute, system_decode_t decoded, registers_t &registers);
+    void system(bool execute, system_decode_t decoded, registers_t &registers);
 }
 #endif

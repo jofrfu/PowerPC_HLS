@@ -114,11 +114,11 @@ int32_t read_data(const char *file_name, ap_uint<32> *data_memory, uint32_t memo
 
 void execute_single_instruction(uint32_t instruction, registers_t &registers, ap_uint<32> *data_memory) {
 	decode_result_t decoded = decode(instruction);
-	fixed_point::load(
+	fixed_point::load<ap_uint<32>*>(
 			decoded.fixed_point_decode_result.execute_load,
 			decoded.fixed_point_decode_result.load_store_decoded,
 			registers, data_memory);
-	fixed_point::store(
+	fixed_point::store<ap_uint<32>*>(
 			decoded.fixed_point_decode_result.execute_store,
 			decoded.fixed_point_decode_result.load_store_decoded,
 			registers, data_memory);
