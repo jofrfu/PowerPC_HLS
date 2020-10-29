@@ -1256,10 +1256,12 @@ decode_result_t decode(uint32_t instruction_port) {
 			}
 			break;
 		case 46: // lmw
-			// Load Multiple Word not supported!!! TODO: Support
+		    fixed_point_decode_result.execute_load = true;
+            decode_load_store_multiple(load_store_decoded, instruction)
 			break;
 		case 47: // stmw
-			// Store Multiple Word not supported!!! TODO: Support
+            fixed_point_decode_result.execute_store = true;
+            decode_load_store_multiple(load_store_decoded, instruction)
 			break;
 		// D Form Add/Sub instructions
 		case 8: // subfic
