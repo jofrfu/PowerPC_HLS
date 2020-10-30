@@ -51,6 +51,8 @@ decode_result_t decode(uint32_t instruction_port) {
 	fixed_point_decode_result_t fixed_point_decode_result;
 	fixed_point_decode_result.execute_load = false;
 	fixed_point_decode_result.execute_store = false;
+	fixed_point_decode_result.execute_load_string = false;
+    fixed_point_decode_result.execute_store_string = false;
 	fixed_point_decode_result.execute_add_sub = false;
 	fixed_point_decode_result.execute_mul = false;
 	fixed_point_decode_result.execute_div = false;
@@ -417,16 +419,104 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				// Load/Store string word
 				case 533: // lswx
-					// NOT SUPPORTED!!! TODO: Support
+				    fixed_point_decode_result.execute_load_string = true;
+                    if(instruction.X_Form.RA == 0) {
+                        load_store_decoded.sum1_imm = true;
+                        load_store_decoded.sum1_immediate = 0;
+                        load_store_decoded.sum1_reg_address = 0;
+                    } else {
+                        load_store_decoded.sum1_imm = false;
+                        load_store_decoded.sum1_reg_address = instruction.X_Form.RA;
+                        load_store_decoded.sum1_immediate = 0;
+                    }
+                    load_store_decoded.sum2_imm = false;
+                    load_store_decoded.sum2_reg_address = instruction.X_Form.RB;
+                    load_store_decoded.sum2_immediate = 0;
+                    load_store_decoded.word_size = 3;
+                    load_store_decoded.result_reg_address = instruction.X_Form.RT;
+                    load_store_decoded.write_ea = false;
+                    load_store_decoded.ea_reg_address = 0;
+                    load_store_decoded.sign_extend = false;
+                    load_store_decoded.little_endian = false;
+                    load_store_decoded.multiple = false;
 					break;
 				case 597: // lswi
-					// NOT SUPPORTED!!! TODO: Support
+                    fixed_point_decode_result.execute_load_string = true;
+                    if(instruction.X_Form.RA == 0) {
+                        load_store_decoded.sum1_imm = true;
+                        load_store_decoded.sum1_immediate = 0;
+                        load_store_decoded.sum1_reg_address = 0;
+                    } else {
+                        load_store_decoded.sum1_imm = false;
+                        load_store_decoded.sum1_reg_address = instruction.X_Form.RA;
+                        load_store_decoded.sum1_immediate = 0;
+                    }
+                    if(instruction.X_Form.RB == 0) {
+                        load_store_decoded.sum2_imm = true;
+                        load_store_decoded.sum2_immediate = 32;
+                        load_store_decoded.sum2_reg_address = 0;
+                    } else {
+                        load_store_decoded.sum2_imm = false;
+                        load_store_decoded.sum2_reg_address = instruction.X_Form.RB;
+                        load_store_decoded.sum2_immediate = 0;
+                    }
+                    load_store_decoded.word_size = 3;
+                    load_store_decoded.result_reg_address = instruction.X_Form.RT;
+                    load_store_decoded.write_ea = false;
+                    load_store_decoded.ea_reg_address = 0;
+                    load_store_decoded.sign_extend = false;
+                    load_store_decoded.little_endian = false;
+                    load_store_decoded.multiple = false;
 					break;
 				case 661: // stswx
-					// NOT SUPPORTED!!! TODO: Support
+                    fixed_point_decode_result.execute_store_string = true;
+                    if(instruction.X_Form.RA == 0) {
+                        load_store_decoded.sum1_imm = true;
+                        load_store_decoded.sum1_immediate = 0;
+                        load_store_decoded.sum1_reg_address = 0;
+                    } else {
+                        load_store_decoded.sum1_imm = false;
+                        load_store_decoded.sum1_reg_address = instruction.X_Form.RA;
+                        load_store_decoded.sum1_immediate = 0;
+                    }
+                    load_store_decoded.sum2_imm = false;
+                    load_store_decoded.sum2_reg_address = instruction.X_Form.RB;
+                    load_store_decoded.sum2_immediate = 0;
+                    load_store_decoded.word_size = 3;
+                    load_store_decoded.result_reg_address = instruction.X_Form.RT;
+                    load_store_decoded.write_ea = false;
+                    load_store_decoded.ea_reg_address = 0;
+                    load_store_decoded.sign_extend = false;
+                    load_store_decoded.little_endian = false;
+                    load_store_decoded.multiple = false;
 					break;
 				case 725: // stswi
-					// NOT SUPPORTED!!! TODO: Support
+                    fixed_point_decode_result.execute_store_string = true;
+                    if(instruction.X_Form.RA == 0) {
+                        load_store_decoded.sum1_imm = true;
+                        load_store_decoded.sum1_immediate = 0;
+                        load_store_decoded.sum1_reg_address = 0;
+                    } else {
+                        load_store_decoded.sum1_imm = false;
+                        load_store_decoded.sum1_reg_address = instruction.X_Form.RA;
+                        load_store_decoded.sum1_immediate = 0;
+                    }
+                    if(instruction.X_Form.RB == 0) {
+                        load_store_decoded.sum2_imm = true;
+                        load_store_decoded.sum2_immediate = 32;
+                        load_store_decoded.sum2_reg_address = 0;
+                    } else {
+                        load_store_decoded.sum2_imm = false;
+                        load_store_decoded.sum2_reg_address = instruction.X_Form.RB;
+                        load_store_decoded.sum2_immediate = 0;
+                    }
+                    load_store_decoded.word_size = 3;
+                    load_store_decoded.result_reg_address = instruction.X_Form.RT;
+                    load_store_decoded.write_ea = false;
+                    load_store_decoded.ea_reg_address = 0;
+                    load_store_decoded.sign_extend = false;
+                    load_store_decoded.little_endian = false;
+                    load_store_decoded.multiple = false;
 					break;
 				// XO Form Add/Sub instructions
 				case 8 | 0b1000000000:

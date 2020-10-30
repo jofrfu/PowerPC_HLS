@@ -319,12 +319,12 @@ namespace fixed_point {
     }
 
     template<typename T>
-    void load_string() {
+    void load_string(bool execute, load_store_decode_t decoded, registers_t &registers, T data_memory) {
 
     }
 
     template<typename T>
-    void store_string() {
+    void store_string(bool execute, load_store_decode_t decoded, registers_t &registers, T data_memory) {
 
     }
 }
