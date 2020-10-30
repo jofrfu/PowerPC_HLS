@@ -122,6 +122,15 @@ void execute_single_instruction(uint32_t instruction, registers_t &registers, ap
 			decoded.fixed_point_decode_result.execute_store,
 			decoded.fixed_point_decode_result.load_store_decoded,
 			registers, data_memory);
+	fixed_point::load_string<ap_uint<32>*>(
+            decoded.fixed_point_decode_result.execute_load_string,
+            decoded.fixed_point_decode_result.load_store_decoded,
+            registers, data_memory
+	        );
+    fixed_point::store_string<ap_uint<32>*>(
+            decoded.fixed_point_decode_result.execute_store_string,
+            decoded.fixed_point_decode_result.load_store_decoded,
+            registers, data_memory);
 	fixed_point::add_sub(
 			decoded.fixed_point_decode_result.execute_add_sub,
 			decoded.fixed_point_decode_result.add_sub_decoded,

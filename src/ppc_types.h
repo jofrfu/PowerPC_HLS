@@ -337,6 +337,8 @@ typedef struct {
 typedef struct {
 	bool execute_load;
 	bool execute_store;
+	bool execute_load_string;
+	bool execute_store_string;
 	load_store_decode_t load_store_decoded;
 	bool execute_add_sub;
 	add_sub_decode_t add_sub_decoded;
