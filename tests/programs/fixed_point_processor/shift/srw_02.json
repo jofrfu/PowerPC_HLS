@@ -1,10 +1,10 @@
 {
-    "_comment" : "Empty shift left",
+    "_comment" : "Shift right of UINT32_MAX by 1 bit",
     "Before" : {
         "GPR" : {
             "1" : 0,
-            "2" : 0,
-            "3" : 0
+            "2" : 4294967295,
+            "3" : 1
         },
 
         "CR" : {
@@ -24,11 +24,10 @@
     
     "After" : {
         "GPR" : {
-            "1" : 0,
-            "2" : 0,
-            "3" : 0
+            "1" : 2147483647,
+            "2" : 4294967295,
+            "3" : 1
         },
-
         "CR" : {
             "CR0" : {
                 "LT" : false,
@@ -42,9 +41,8 @@
             "SO" : false
         },
         "LR" : 0
-},
+    },
     
     "Assembly" :
-        "slw 1, 2, 3"
-
+        "srw 1, 2, 3"
 }

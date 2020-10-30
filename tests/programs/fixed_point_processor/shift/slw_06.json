@@ -1,11 +1,12 @@
 {
-    "_comment" : "Empty shift left",
+    "_comment" : "Shift left of 0xF by 1 bit - Set Condition Register",
     "Before" : {
         "GPR" : {
             "1" : 0,
-            "2" : 0,
-            "3" : 0
+            "2" : 15,
+            "3" : 1
         },
+
 
         "CR" : {
             "CR0" : {
@@ -24,15 +25,14 @@
     
     "After" : {
         "GPR" : {
-            "1" : 0,
-            "2" : 0,
-            "3" : 0
+            "1" : 30,
+            "2" : 15,
+            "3" : 1
         },
-
         "CR" : {
             "CR0" : {
                 "LT" : false,
-                "GT" : false,
+                "GT" : true,
                 "EQ" : false,
                 "SO" : false
             }
@@ -42,9 +42,9 @@
             "SO" : false
         },
         "LR" : 0
-},
+    },
     
     "Assembly" :
-        "slw 1, 2, 3"
+        "slw. 1, 2, 3"
 
 }
