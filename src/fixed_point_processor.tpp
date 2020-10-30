@@ -49,6 +49,7 @@ namespace fixed_point {
 
             int32_t n = decoded.multiple ? 32 : decoded.result_reg_address+1;
             for(int32_t i = decoded.result_reg_address; i < n; i++) {
+#pragma HLS loop_tripcount min=1 max=32 avg=16
                 switch (decoded.word_size) {
                     case 0: // Byte
                         interm = data_memory[upper_address];
@@ -201,110 +202,114 @@ namespace fixed_point {
             ap_uint<30> upper_address = effective_address >> 2;
             ap_uint<2> lower_address = effective_address;
 
-            ap_uint<32> result = registers.GPR[decoded.result_reg_address];
-
-            switch(decoded.word_size) {
-                case 0: // Byte
-                    data_memory[upper_address]((lower_address+1)*8-1, lower_address*8) = result(7, 0);
-                    break;
-                case 1: // Halfword
-                    switch(lower_address) {
-                        case 0: // Halfword lies in the first two bytes of this word
-                            if(decoded.little_endian) {
-                                data_memory[upper_address](7, 0) = result(7, 0);
-                                data_memory[upper_address](15, 8) = result(15, 8);
-                            } else {
-                                data_memory[upper_address](7, 0) = result(15, 8);
-                                data_memory[upper_address](15, 8) = result(7, 0);
-                            }
-                            break;
-                        case 1: // Halfword lies in the second and third byte
-                            if(decoded.little_endian) {
-                                data_memory[upper_address](15, 8) = result(7, 0);
-                                data_memory[upper_address](23, 16) = result(15, 8);
-                            } else {
-                                data_memory[upper_address](15, 8) = result(15, 8);
-                                data_memory[upper_address](23, 16) = result(7, 0);
-                            }
-                            break;
-                        case 2: // Halfword lies in the last two bytes
-                            if(decoded.little_endian) {
-                                data_memory[upper_address](23, 16) = result(7, 0);
-                                data_memory[upper_address](31, 24) = result(15, 8);
-                            } else {
-                                data_memory[upper_address](23, 16) = result(15, 8);
-                                data_memory[upper_address](31, 24) = result(7, 0);
-                            }
-                            break;
-                        case 3: // Halfword lies in the last byte of this word AND the first byte of the next word
-                            if(decoded.little_endian) {
-                                data_memory[upper_address](31, 24) = result(7, 0);
-                                data_memory[upper_address + 1](7, 0) = result(15, 8);
-                            } else {
-                                data_memory[upper_address](31, 24) = result(15, 8);
-                                data_memory[upper_address + 1](7, 0) = result(7, 0);
-                            }
-                            break;
-                    }
-                    break;
-                case 2: // Unsupported (3 bytes)
-                    break;
-                case 3: // Word
-                    switch(lower_address) {
-                        case 0: // Word lies in the four bytes of this word
-                            if(decoded.little_endian) {
-                                data_memory[upper_address](7, 0) = result(7, 0);
-                                data_memory[upper_address](15, 8) = result(15, 8);
-                                data_memory[upper_address](23, 16) = result(23, 16);
-                                data_memory[upper_address](31, 24) = result(31, 24);
-                            } else {
-                                data_memory[upper_address](7, 0) = result(31, 24);
-                                data_memory[upper_address](15, 8) = result(23, 16);
-                                data_memory[upper_address](23, 16) = result(15, 8);
-                                data_memory[upper_address](31, 24) = result(7, 0);
-                            }
-                            break;
-                        case 1: // Word lies in the last three bytes of this word AND in the first byte of the next word
-                            if(decoded.little_endian) {
-                                data_memory[upper_address](15, 8) = result(7, 0);
-                                data_memory[upper_address](23, 16) = result(15, 8);
-                                data_memory[upper_address](31, 24) = result(23, 16);
-                                data_memory[upper_address + 1](7, 0) = result(31, 24);
-                            } else {
-                                data_memory[upper_address](15, 8) = result(31, 24);
-                                data_memory[upper_address](23, 16) = result(23, 16);
-                                data_memory[upper_address](31, 24) = result(15, 8);
-                                data_memory[upper_address + 1](7, 0) = result(7, 0);
-                            }
-                            break;
-                        case 2: // Word lies in the last two bytes of this word AND in the first two bytes of the next word
-                            if(decoded.little_endian) {
-                                data_memory[upper_address](23, 16) = result(7, 0);
-                                data_memory[upper_address](31, 24) = result(15, 8);
-                                data_memory[upper_address + 1](7, 0) = result(23, 16);
-                                data_memory[upper_address + 1](15, 8) = result(31, 24);
-                            } else {
-                                data_memory[upper_address](23, 16) = result(31, 24);
-                                data_memory[upper_address](31, 24) = result(23, 16);
-                                data_memory[upper_address + 1](7, 0) = result(15, 8);
-                                data_memory[upper_address + 1](15, 8) = result(7, 0);
-                            }
-                            break;
-                        case 3: // Word lies in the last byte of this word AND in the first three bytes of the next word
-                            if(decoded.little_endian) {
-                                data_memory[upper_address](31, 24) = result(7, 0);
-                                data_memory[upper_address + 1](7, 0) = result(15, 8);
-                                data_memory[upper_address + 1](15, 8) = result(23, 16);
-                                data_memory[upper_address + 1](23, 16) = result(31, 24);
-                            } else {
-                                data_memory[upper_address](31, 24) = result(31, 24);
-                                data_memory[upper_address + 1](7, 0) = result(23, 16);
-                                data_memory[upper_address + 1](15, 8) = result(15, 8);
-                                data_memory[upper_address + 1](23, 16) = result(7, 0);
-                            }
-                            break;
-                    }
-                    break;
+            int32_t n = decoded.multiple ? 32 : decoded.result_reg_address+1;
+            for(int32_t i = decoded.result_reg_address; i < n; i++) {
+#pragma HLS loop_tripcount min=1 max=32 avg=16
+                ap_uint<32> result = registers.GPR[i];
+                switch (decoded.word_size) {
+                    case 0: // Byte
+                        data_memory[upper_address]((lower_address + 1) * 8 - 1, lower_address * 8) = result(7, 0);
+                        break;
+                    case 1: // Halfword
+                        switch (lower_address) {
+                            case 0: // Halfword lies in the first two bytes of this word
+                                if (decoded.little_endian) {
+                                    data_memory[upper_address](7, 0) = result(7, 0);
+                                    data_memory[upper_address](15, 8) = result(15, 8);
+                                } else {
+                                    data_memory[upper_address](7, 0) = result(15, 8);
+                                    data_memory[upper_address](15, 8) = result(7, 0);
+                                }
+                                break;
+                            case 1: // Halfword lies in the second and third byte
+                                if (decoded.little_endian) {
+                                    data_memory[upper_address](15, 8) = result(7, 0);
+                                    data_memory[upper_address](23, 16) = result(15, 8);
+                                } else {
+                                    data_memory[upper_address](15, 8) = result(15, 8);
+                                    data_memory[upper_address](23, 16) = result(7, 0);
+                                }
+                                break;
+                            case 2: // Halfword lies in the last two bytes
+                                if (decoded.little_endian) {
+                                    data_memory[upper_address](23, 16) = result(7, 0);
+                                    data_memory[upper_address](31, 24) = result(15, 8);
+                                } else {
+                                    data_memory[upper_address](23, 16) = result(15, 8);
+                                    data_memory[upper_address](31, 24) = result(7, 0);
+                                }
+                                break;
+                            case 3: // Halfword lies in the last byte of this word AND the first byte of the next word
+                                if (decoded.little_endian) {
+                                    data_memory[upper_address](31, 24) = result(7, 0);
+                                    data_memory[upper_address + 1](7, 0) = result(15, 8);
+                                } else {
+                                    data_memory[upper_address](31, 24) = result(15, 8);
+                                    data_memory[upper_address + 1](7, 0) = result(7, 0);
+                                }
+                                break;
+                        }
+                        break;
+                    case 2: // Unsupported (3 bytes)
+                        break;
+                    case 3: // Word
+                        switch (lower_address) {
+                            case 0: // Word lies in the four bytes of this word
+                                if (decoded.little_endian) {
+                                    data_memory[upper_address](7, 0) = result(7, 0);
+                                    data_memory[upper_address](15, 8) = result(15, 8);
+                                    data_memory[upper_address](23, 16) = result(23, 16);
+                                    data_memory[upper_address](31, 24) = result(31, 24);
+                                } else {
+                                    data_memory[upper_address](7, 0) = result(31, 24);
+                                    data_memory[upper_address](15, 8) = result(23, 16);
+                                    data_memory[upper_address](23, 16) = result(15, 8);
+                                    data_memory[upper_address](31, 24) = result(7, 0);
+                                }
+                                break;
+                            case 1: // Word lies in the last three bytes of this word AND in the first byte of the next word
+                                if (decoded.little_endian) {
+                                    data_memory[upper_address](15, 8) = result(7, 0);
+                                    data_memory[upper_address](23, 16) = result(15, 8);
+                                    data_memory[upper_address](31, 24) = result(23, 16);
+                                    data_memory[upper_address + 1](7, 0) = result(31, 24);
+                                } else {
+                                    data_memory[upper_address](15, 8) = result(31, 24);
+                                    data_memory[upper_address](23, 16) = result(23, 16);
+                                    data_memory[upper_address](31, 24) = result(15, 8);
+                                    data_memory[upper_address + 1](7, 0) = result(7, 0);
+                                }
+                                break;
+                            case 2: // Word lies in the last two bytes of this word AND in the first two bytes of the next word
+                                if (decoded.little_endian) {
+                                    data_memory[upper_address](23, 16) = result(7, 0);
+                                    data_memory[upper_address](31, 24) = result(15, 8);
+                                    data_memory[upper_address + 1](7, 0) = result(23, 16);
+                                    data_memory[upper_address + 1](15, 8) = result(31, 24);
+                                } else {
+                                    data_memory[upper_address](23, 16) = result(31, 24);
+                                    data_memory[upper_address](31, 24) = result(23, 16);
+                                    data_memory[upper_address + 1](7, 0) = result(15, 8);
+                                    data_memory[upper_address + 1](15, 8) = result(7, 0);
+                                }
+                                break;
+                            case 3: // Word lies in the last byte of this word AND in the first three bytes of the next word
+                                if (decoded.little_endian) {
+                                    data_memory[upper_address](31, 24) = result(7, 0);
+                                    data_memory[upper_address + 1](7, 0) = result(15, 8);
+                                    data_memory[upper_address + 1](15, 8) = result(23, 16);
+                                    data_memory[upper_address + 1](23, 16) = result(31, 24);
+                                } else {
+                                    data_memory[upper_address](31, 24) = result(31, 24);
+                                    data_memory[upper_address + 1](7, 0) = result(23, 16);
+                                    data_memory[upper_address + 1](15, 8) = result(15, 8);
+                                    data_memory[upper_address + 1](23, 16) = result(7, 0);
+                                }
+                                break;
+                        }
+                        break;
+                }
+                upper_address++;
             }
 
             if(decoded.write_ea) {
@@ -314,5 +319,12 @@ namespace fixed_point {
     }
 
     template<typename T>
-    void load_string();
+    void load_string() {
+
+    }
+
+    template<typename T>
+    void store_string() {
+
+    }
 }
