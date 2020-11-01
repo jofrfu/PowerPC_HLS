@@ -432,7 +432,7 @@ decode_result_t decode(uint32_t instruction_port) {
                     load_store_decoded.sum2_imm = false;
                     load_store_decoded.sum2_reg_address = instruction.X_Form.RB;
                     load_store_decoded.sum2_immediate = 0;
-                    load_store_decoded.word_size = 3;
+                    load_store_decoded.word_size = 0;
                     load_store_decoded.result_reg_address = instruction.X_Form.RT;
                     load_store_decoded.write_ea = false;
                     load_store_decoded.ea_reg_address = 0;
@@ -451,16 +451,10 @@ decode_result_t decode(uint32_t instruction_port) {
                         load_store_decoded.sum1_reg_address = instruction.X_Form.RA;
                         load_store_decoded.sum1_immediate = 0;
                     }
-                    if(instruction.X_Form.RB == 0) {
-                        load_store_decoded.sum2_imm = true;
-                        load_store_decoded.sum2_immediate = 32;
-                        load_store_decoded.sum2_reg_address = 0;
-                    } else {
-                        load_store_decoded.sum2_imm = false;
-                        load_store_decoded.sum2_reg_address = instruction.X_Form.RB;
-                        load_store_decoded.sum2_immediate = 0;
-                    }
-                    load_store_decoded.word_size = 3;
+                    load_store_decoded.sum2_imm = true;
+                    load_store_decoded.sum2_reg_address = instruction.X_Form.RB;
+                    load_store_decoded.sum2_immediate = 0;
+                    load_store_decoded.word_size = 0;
                     load_store_decoded.result_reg_address = instruction.X_Form.RT;
                     load_store_decoded.write_ea = false;
                     load_store_decoded.ea_reg_address = 0;
@@ -482,7 +476,7 @@ decode_result_t decode(uint32_t instruction_port) {
                     load_store_decoded.sum2_imm = false;
                     load_store_decoded.sum2_reg_address = instruction.X_Form.RB;
                     load_store_decoded.sum2_immediate = 0;
-                    load_store_decoded.word_size = 3;
+                    load_store_decoded.word_size = 0;
                     load_store_decoded.result_reg_address = instruction.X_Form.RT;
                     load_store_decoded.write_ea = false;
                     load_store_decoded.ea_reg_address = 0;
@@ -501,16 +495,10 @@ decode_result_t decode(uint32_t instruction_port) {
                         load_store_decoded.sum1_reg_address = instruction.X_Form.RA;
                         load_store_decoded.sum1_immediate = 0;
                     }
-                    if(instruction.X_Form.RB == 0) {
-                        load_store_decoded.sum2_imm = true;
-                        load_store_decoded.sum2_immediate = 32;
-                        load_store_decoded.sum2_reg_address = 0;
-                    } else {
-                        load_store_decoded.sum2_imm = false;
-                        load_store_decoded.sum2_reg_address = instruction.X_Form.RB;
-                        load_store_decoded.sum2_immediate = 0;
-                    }
-                    load_store_decoded.word_size = 3;
+                    load_store_decoded.sum2_imm = true;
+                    load_store_decoded.sum2_reg_address = instruction.X_Form.RB;
+                    load_store_decoded.sum2_immediate = 0;
+                    load_store_decoded.word_size = 0;
                     load_store_decoded.result_reg_address = instruction.X_Form.RT;
                     load_store_decoded.write_ea = false;
                     load_store_decoded.ea_reg_address = 0;

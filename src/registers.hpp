@@ -95,7 +95,7 @@ typedef union {
 } fixed_point_exception_reg_t;
 
 typedef struct {
-	uint32_t GPR[32]; // General purpose registers
+	ap_uint<32> GPR[32]; // General purpose registers
 	uint64_t FPR[32]; // Floating point registers
 	condition_reg_t condition_reg; // Condition register
 	uint32_t link_register; // Link register

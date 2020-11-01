@@ -241,6 +241,9 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                         if(XER["CA"].is_boolean()) {
                             registers.fixed_exception_reg.exception_fields.CA = XER["CA"].get<bool>();
                         }
+                        if(XER["String_Bytes"].is_number()) {
+                            registers.fixed_exception_reg.exception_fields.string_bytes = XER["String_Bytes"].get<uint8_t>();
+                        }
                     } else {
                         registers.fixed_exception_reg.exception_bits = XER.get<uint32_t>();
                     }
@@ -383,6 +386,10 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                         if(XER["CA"].is_boolean()) {
                             INFO("Checking XER CA bit.");
                             REQUIRE(registers.fixed_exception_reg.exception_fields.CA == XER["CA"].get<bool>());
+                        }
+                        if(XER["String_Bytes"].is_number()) {
+                            INFO("Checking XER string bytes field.");
+                            REQUIRE(registers.fixed_exception_reg.exception_fields.string_bytes == XER["String_Bytes"].get<uint8_t>());
                         }
                     } else {
                         INFO("Checking XER.");

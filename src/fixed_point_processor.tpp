@@ -320,11 +320,82 @@ namespace fixed_point {
 
     template<typename T>
     void load_string(bool execute, load_store_decode_t decoded, registers_t &registers, T data_memory) {
+        if(execute) {
+            uint32_t sum1, sum2;
+            ap_uint<7> n;
+            ap_uint<5> r = decoded.result_reg_address-1;
+            if(decoded.sum1_imm) {
+                sum1 = (int32_t)decoded.sum1_immediate;
+            } else {
+                sum1 = registers.GPR[decoded.sum1_reg_address];
+            }
 
+            if(decoded.sum2_imm) {
+                // Sum 2 is zero, which means this is a lswi instruction
+                sum2 = (int32_t)decoded.sum2_immediate;
+                if(decoded.sum2_reg_address == 0) {
+                    n = 32;
+                } else {
+                    n = decoded.sum2_reg_address;
+                }
+            } else {
+                // lswx instruction
+                sum2 = registers.GPR[decoded.sum2_reg_address];
+                n = registers.fixed_exception_reg.exception_fields.string_bytes;
+            }
+
+            uint32_t ea = sum1 + sum2;
+            for(ap_uint<2> i = 3; n > 0; i--, n--, ea++) {
+//#pragma HLS unroll factor=4 TODO: write the loop in a way, that 4 bytes accesses the memory once
+#pragma HLS loop_tripcount min=1 max=120 avg=32
+                if(i == 3) {
+                    r++;
+                    registers.GPR[r] = 0;
+                }
+                ap_uint<30> upper_address = ea >> 2;
+                ap_uint<2> lower_address = ea;
+                registers.GPR[r]((i+1)*8-1, i*8) = data_memory[upper_address]((lower_address+1)*8-1, lower_address*8);
+            }
+        }
     }
 
     template<typename T>
     void store_string(bool execute, load_store_decode_t decoded, registers_t &registers, T data_memory) {
+        if(execute) {
+            uint32_t sum1, sum2;
+            ap_uint<7> n;
+            ap_uint<5> r = decoded.result_reg_address-1;
+            if(decoded.sum1_imm) {
+                sum1 = (int32_t)decoded.sum1_immediate;
+            } else {
+                sum1 = registers.GPR[decoded.sum1_reg_address];
+            }
 
+            if(decoded.sum2_imm) {
+                // Sum 2 is zero, which means this is a lswi instruction
+                sum2 = (int32_t)decoded.sum2_immediate;
+                if(decoded.sum2_reg_address == 0) {
+                    n = 32;
+                } else {
+                    n = decoded.sum2_reg_address;
+                }
+            } else {
+                // lswx instruction
+                sum2 = registers.GPR[decoded.sum2_reg_address];
+                n = registers.fixed_exception_reg.exception_fields.string_bytes;
+            }
+
+            uint32_t ea = sum1 + sum2;
+            for(ap_uint<2> i = 3; n > 0; i--, n--, ea++) {
+//#pragma HLS unroll factor=4 TODO: write the loop in a way, that 4 bytes accesses the memory once
+#pragma HLS loop_tripcount min=1 max=120 avg=32
+                if(i == 3) {
+                    r++;
+                }
+                ap_uint<30> upper_address = ea >> 2;
+                ap_uint<2> lower_address = ea;
+                data_memory[upper_address]((lower_address+1)*8-1, lower_address*8) = registers.GPR[r]((i+1)*8-1, i*8);
+            }
+        }
     }
 }
