@@ -1,11 +1,12 @@
 {
-    "_comment" : "Empty shift left",
+    "_comment" : "Shift left of UINT32_MAX by 32 bits - Set Condition Register",
     "Before" : {
         "GPR" : {
             "1" : 0,
-            "2" : 0,
-            "3" : 0
+            "2" : 4294967295,
+            "3" : 32
         },
+
 
         "CR" : {
             "CR0" : {
@@ -25,15 +26,14 @@
     "After" : {
         "GPR" : {
             "1" : 0,
-            "2" : 0,
-            "3" : 0
+            "2" : 4294967295,
+            "3" : 32
         },
-
         "CR" : {
             "CR0" : {
                 "LT" : false,
                 "GT" : false,
-                "EQ" : false,
+                "EQ" : true,
                 "SO" : false
             }
         },
@@ -42,9 +42,9 @@
             "SO" : false
         },
         "LR" : 0
-},
+    },
     
     "Assembly" :
-        "slw 1, 2, 3"
+        "slw. 1, 2, 3"
 
 }
