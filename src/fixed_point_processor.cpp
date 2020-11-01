@@ -152,7 +152,13 @@ void fixed_point::divide(bool execute, div_decode_t decoded, registers_t &regist
 			signed_divisor[32] = 0;
 		}
 
-		ap_int<32> quotient = signed_dividend / signed_divisor;
+        ap_int<32> quotient;
+		// avoid division by zero, since this will raise an exception, when executed in software
+		if(signed_divisor != 0) {
+		    quotient = signed_dividend / signed_divisor;
+        } else {
+		    quotient = 0;
+		}
 
 		registers.GPR[decoded.result_reg_address] = quotient;
 
