@@ -316,6 +316,8 @@ void fixed_point::logical(bool execute, log_decode_t decoded, registers_t &regis
 #pragma HLS unroll
 						if(op1[i] == 0) {
 						    count++;
+						} else {
+						    break;
 						}
 					}
 					result = count;

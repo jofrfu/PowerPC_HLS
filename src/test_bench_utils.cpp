@@ -51,8 +51,6 @@ int32_t read_byte_code(const char *file_name, uint32_t *instruction_memory, uint
 		byte_code.read((char *)instruction_memory, size);
 		byte_code.close();
 
-		//std::cout << "Successfully stored all instructions into the instruction memory!" << std::endl;
-
 		// Little endian to big endian conversion
 		for(uint32_t i = 0; i < size/4; i++) {
 			ap_uint<32> little = instruction_memory[i];
@@ -103,8 +101,6 @@ int32_t read_data(const char *file_name, ap_uint<32> *data_memory, uint32_t memo
             data_memory[i] = big;
         }
 
-        //std::cout << "Successfully stored all data into the data memory!" << std::endl;
-
         return size;
     } else {
         std::cout << "Failed to open file " << file_name << "!" << std::endl;
@@ -112,7 +108,7 @@ int32_t read_data(const char *file_name, ap_uint<32> *data_memory, uint32_t memo
     }
 }
 
-void execute_single_instruction(uint32_t instruction, registers_t &registers, ap_uint<32> *data_memory) {
+bool execute_single_instruction(uint32_t instruction, registers_t &registers, ap_uint<32> *data_memory) {
 	decode_result_t decoded = decode(instruction);
 	fixed_point::load<ap_uint<32>*>(
 			decoded.fixed_point_decode_result.execute_load,
@@ -147,12 +143,10 @@ void execute_single_instruction(uint32_t instruction, registers_t &registers, ap
 			decoded.fixed_point_decode_result.execute_compare,
 			decoded.fixed_point_decode_result.cmp_decoded,
 			registers);
-	if(fixed_point::trap(
+	bool trap = fixed_point::trap(
 			decoded.fixed_point_decode_result.execute_trap,
 			decoded.fixed_point_decode_result.trap_decoded,
-			registers)) {
-		std::cout << "Trap instruction encountered!" << std::endl;
-	}
+			registers);
 	fixed_point::logical(
 			decoded.fixed_point_decode_result.execute_logical,
 			decoded.fixed_point_decode_result.log_decoded,
@@ -169,10 +163,14 @@ void execute_single_instruction(uint32_t instruction, registers_t &registers, ap
 			decoded.fixed_point_decode_result.execute_system,
 			decoded.fixed_point_decode_result.system_decoded,
 			registers);
+
+	return trap;
 }
 
-void execute_program(uint32_t *instruction_memory, uint32_t size, registers_t &registers, ap_uint<32> *data_memory) {
+void execute_program(uint32_t *instruction_memory, uint32_t size, registers_t &registers, ap_uint<32> *data_memory, trap_handler_t trap_handler) {
 	for(uint32_t i = 0; i < size; i++) {
-		execute_single_instruction(instruction_memory[i], registers, data_memory);
+		if(execute_single_instruction(instruction_memory[i], registers, data_memory)) {
+		    trap_handler(i);
+		}
 	}
 }

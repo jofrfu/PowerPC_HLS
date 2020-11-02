@@ -272,8 +272,15 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                 }
             }
 
+            bool trap_happened = false;
+            uint32_t trap_instructions_pos = 0;
+            trap_handler_t trap_handler = [&trap_happened, &trap_instructions_pos](uint32_t i) {
+                trap_happened = true;
+                trap_instructions_pos = i;
+            };
+
             // Actual program execution
-            execute_program(i_mem, program_size, registers, d_mem);
+            execute_program(i_mem, program_size, registers, d_mem, trap_handler);
 
             {
                 // Check all values according to the "After" field
@@ -398,9 +405,23 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                 }
 
                 // Check LR
-                if (!LR.is_null()) {
+                if(!LR.is_null()) {
                     INFO("Checking LR.");
                     REQUIRE(registers.link_register == LR.get<uint32_t>());
+                }
+
+                // Check trap handler execution
+                auto trap = after["Trap"];
+                if(trap.is_object()) {
+                    auto trap_bool = trap["Occurred"];
+                    if(trap_bool.is_boolean()) {
+                        INFO("Checking trap occurrence.");
+                        REQUIRE(trap_happened == trap_bool.get<bool>());
+                        if(trap["Position"].is_number()) {
+                            INFO("Checking trap occurrence position.");
+                            REQUIRE(trap_instructions_pos == trap["Position"].get<uint32_t>());
+                        }
+                    }
                 }
 
                 // Compare data (single addressed data support)

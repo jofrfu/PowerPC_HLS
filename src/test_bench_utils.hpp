@@ -25,13 +25,15 @@
 
 #include "registers.hpp"
 #include <ap_int.h>
+#include <functional>
 
 int32_t read_byte_code(const char *file_name, uint32_t *instruction_memory, uint32_t memory_size);
 
 int32_t read_data(const char *file_name, ap_uint<32> *data_memory, uint32_t memory_size);
 
-void execute_single_instruction(uint32_t instruction, registers_t &registers, ap_uint<32> *data_memory);
+bool execute_single_instruction(uint32_t instruction, registers_t &registers, ap_uint<32> *data_memory);
 
-void execute_program(uint32_t *instruction_memory, uint32_t size, registers_t &registers, ap_uint<32> *data_memory);
+typedef std::function<void(uint32_t)> trap_handler_t;
+void execute_program(uint32_t *instruction_memory, uint32_t size, registers_t &registers, ap_uint<32> *data_memory, trap_handler_t trap_handler);
 
 #endif

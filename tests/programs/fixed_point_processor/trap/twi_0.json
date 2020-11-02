@@ -1,0 +1,28 @@
+{
+  "Before" : {
+    "GPR" : {
+      "9" : 70
+    },
+
+    "CR" : 0,
+    "XER" : 0,
+    "LR" : 0
+  },
+
+  "After" : {
+    "GPR" : {
+      "9" : 70
+    },
+
+    "CR" : 0,
+    "XER" : 0,
+    "LR" : 0,
+
+    "Trap" : {
+      "Occurred" : false
+    }
+  },
+
+  "Assembly" :
+  "twi 0, 9, 56"
+}
