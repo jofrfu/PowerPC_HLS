@@ -1,0 +1,45 @@
+{
+  "Before" : {
+    "GPR" : {
+      "24" : -84,
+      "25" : 85
+    },
+
+    "CR" : {
+      "CR4" : {
+        "LT" : false,
+        "GT" : false,
+        "EQ" : false,
+        "SO" : false
+      }
+    },
+    "XER" : {
+      "OV" : false,
+      "SO" : true
+    },
+    "LR" : 0
+  },
+
+  "After" : {
+    "GPR" : {
+      "24" : -84,
+      "25" : 85
+    },
+    "CR" : {
+      "CR4" : {
+        "LT" : true,
+        "GT" : false,
+        "EQ" : false,
+        "SO" : true
+      }
+    },
+    "XER" : {
+      "OV" : false,
+      "SO" : true
+    },
+    "LR" : 0
+  },
+
+  "Assembly" :
+  "cmp 4, 0, 24, 25"
+}

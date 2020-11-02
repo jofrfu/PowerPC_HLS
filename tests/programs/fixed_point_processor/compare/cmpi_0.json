@@ -1,0 +1,43 @@
+{
+  "Before" : {
+    "GPR" : {
+      "24" : -84
+    },
+
+    "CR" : {
+      "CR1" : {
+        "LT" : false,
+        "GT" : false,
+        "EQ" : false,
+        "SO" : false
+      }
+    },
+    "XER" : {
+      "OV" : false,
+      "SO" : true
+    },
+    "LR" : 0
+  },
+
+  "After" : {
+    "GPR" : {
+      "24" : -84
+    },
+    "CR" : {
+      "CR1" : {
+        "LT" : true,
+        "GT" : false,
+        "EQ" : false,
+        "SO" : true
+      }
+    },
+    "XER" : {
+      "OV" : false,
+      "SO" : true
+    },
+    "LR" : 0
+  },
+
+  "Assembly" :
+  "cmpi 1, 0, 24, 85"
+}

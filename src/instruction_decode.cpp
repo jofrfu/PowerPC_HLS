@@ -891,14 +891,10 @@ decode_result_t decode(uint32_t instruction_port) {
 				// X Form Cmp instructions
 				case 0: // cmp
 					{
+					    // L is unused in 32 Bit implementations
 						fixed_point_decode_result.execute_compare = true;
-						uint8_t L = instruction.X_Form.RT & 0b00001;
 						uint8_t BF = instruction.X_Form.RT >> 2;
-						if(L == 1) {
-							cmp_decoded.cmp_signed = true;
-						} else {
-							cmp_decoded.cmp_signed = false;
-						}
+						cmp_decoded.cmp_signed = true;
 						cmp_decoded.op1_reg_address = instruction.X_Form.RA;
 						cmp_decoded.op2_imm = false;
 						cmp_decoded.op2_immediate = 0;
@@ -908,6 +904,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				case 32: // cmpl
 					{
+                        // L is unused in 32 Bit implementations
 						fixed_point_decode_result.execute_compare = true;
 						uint8_t BF = instruction.D_Form.RT >> 2;
 						cmp_decoded.cmp_signed = false;
@@ -1445,6 +1442,7 @@ decode_result_t decode(uint32_t instruction_port) {
 		// D Form Cmp instructions
 		case 10: // cmpli
 			{
+                // L is not used on 32 Bit implementations
 				fixed_point_decode_result.execute_compare = true;
 				uint8_t BF = instruction.D_Form.RT >> 2;
 				cmp_decoded.cmp_signed = false;
@@ -1457,14 +1455,10 @@ decode_result_t decode(uint32_t instruction_port) {
 			break;
 		case 11: // cmpi
 			{
+			    // L is not used on 32 Bit implementations
 				fixed_point_decode_result.execute_compare = true;
-				uint8_t L = instruction.D_Form.RT & 0b00001;
 				uint8_t BF = instruction.D_Form.RT >> 2;
-				if(L == 1) {
-					cmp_decoded.cmp_signed = true;
-				} else {
-					cmp_decoded.cmp_signed = false;
-				}
+				cmp_decoded.cmp_signed = true;
 				cmp_decoded.op1_reg_address = instruction.D_Form.RA;
 				cmp_decoded.op2_imm = true;
 				cmp_decoded.op2_immediate = (int16_t)instruction.D_Form.D;

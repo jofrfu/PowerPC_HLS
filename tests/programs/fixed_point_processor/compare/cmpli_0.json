@@ -1,0 +1,43 @@
+{
+  "Before" : {
+    "GPR" : {
+      "24" : 2147483648
+    },
+
+    "CR" : {
+      "CR7" : {
+        "LT" : false,
+        "GT" : false,
+        "EQ" : false,
+        "SO" : false
+      }
+    },
+    "XER" : {
+      "OV" : false,
+      "SO" : false
+    },
+    "LR" : 0
+  },
+
+  "After" : {
+    "GPR" : {
+      "24" : 2147483648
+    },
+    "CR" : {
+      "CR7" : {
+        "LT" : false,
+        "GT" : true,
+        "EQ" : false,
+        "SO" : false
+      }
+    },
+    "XER" : {
+      "OV" : false,
+      "SO" : false
+    },
+    "LR" : 0
+  },
+
+  "Assembly" :
+  "cmpli 7, 0, 24, 85"
+}

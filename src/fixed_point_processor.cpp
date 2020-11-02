@@ -196,14 +196,10 @@ void fixed_point::compare(bool execute, cmp_decode_t decoded, registers_t &regis
 
 		if(decoded.cmp_signed) {
 			op1[32] = op1[31];
-			op2[32] = op1[31];
+			op2[32] = op2[31];
 		} else {
 			op1[32] = 0;
-			if(decoded.op2_imm) { // If immediate is being used, it will always be sign extended
-				op2[32] = op2[31];
-			} else {
-				op2[32] = 0;
-			}
+			op2[32] = 0;
 		}
 
         condition_field_t &CR = registers.condition_reg[decoded.BF];
