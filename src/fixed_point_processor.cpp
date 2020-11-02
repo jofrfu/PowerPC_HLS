@@ -353,7 +353,7 @@ void fixed_point::logical(bool execute, log_decode_t decoded, registers_t &regis
 void fixed_point::rotate(bool execute, rotate_decode_t decoded, registers_t &registers) {
 	if(execute) {
 		ap_uint<32> source = registers.GPR[decoded.source_reg_address];
-		ap_uint<5> shift;
+		ap_uint<32> shift;
 		if(decoded.shift_imm) {
 			shift = decoded.shift_immediate;
 		} else {
@@ -412,7 +412,7 @@ void fixed_point::rotate(bool execute, rotate_decode_t decoded, registers_t &reg
 void fixed_point::shift(bool execute, shift_decode_t decoded, registers_t &registers) {
 	if(execute) {
 		ap_uint<32> source = registers.GPR[decoded.source_reg_address];
-		ap_uint<6> shift;
+		ap_uint<32> shift;
 		if(decoded.shift_imm) {
 			shift = decoded.shift_immediate;
 		} else {
