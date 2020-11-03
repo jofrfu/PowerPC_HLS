@@ -974,7 +974,9 @@ decode_result_t decode(uint32_t instruction_port) {
 					}
 					break;
 				case 122: // popcntb
-					fixed_point_decode_result.execute_logical = true;
+                    // popcntb doesn't seem to exist on 32 bit implementations, but it's not mentioned anywhere
+					/*
+                    fixed_point_decode_result.execute_logical = true;
 					log_decoded.operation = logical::POPULATION_COUNT_BYTES;
 					log_decoded.op1_reg_address = instruction.X_Form.RT;
 					log_decoded.op2_imm = true;
@@ -982,6 +984,7 @@ decode_result_t decode(uint32_t instruction_port) {
 					log_decoded.op2_reg_address = 0;
 					log_decoded.result_reg_address = instruction.X_Form.RA;
 					log_decoded.alter_CR0 = false;
+					 */
 					break;
 				case 124: // nor, nor.
 					fixed_point_decode_result.execute_logical = true;

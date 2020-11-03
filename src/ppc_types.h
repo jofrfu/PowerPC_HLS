@@ -285,7 +285,7 @@ namespace logical {
 		EQUIVALENT, AND_COMPLEMENT, OR_COMPLEMENT,
 		EXTEND_SIGN_BYTE, EXTEND_SIGN_HALFWORD, // EXTEND_SIGN_WORD is not supported
 		COUNT_LEDING_ZEROS_WORD, // COOUNT_LEADING_ZEROS_DOUBLEWORD is not supported
-		POPULATION_COUNT_BYTES
+		// POPULATION_COUNT_BYTES // popcntb doesn't seem to exist on 32 bit implementations, but it's not mentioned anywhere
 	} logical_op_t;
 }
 

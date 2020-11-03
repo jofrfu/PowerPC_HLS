@@ -28,7 +28,7 @@ void fixed_point::check_condition(int32_t result, registers_t &registers) {
 		CR.condition_fixed_point.LT = 0;
         CR.condition_fixed_point.GT = 0;
         CR.condition_fixed_point.EQ = 1;
-	} else if(result < 0) { // < 0
+	} else if(result < 0) {
 		// CR0 is at position 7
         CR.condition_fixed_point.LT = 1;
         CR.condition_fixed_point.GT = 0;

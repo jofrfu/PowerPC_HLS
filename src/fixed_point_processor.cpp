@@ -323,6 +323,8 @@ void fixed_point::logical(bool execute, log_decode_t decoded, registers_t &regis
 					result = count;
 				}
 				break;
+			// popcntb doesn't seem to exist on 32 bit implementations, but it's not mentioned anywhere
+			/*
 			case logical::POPULATION_COUNT_BYTES:
 				for(int32_t b = 0; b < 4; b++) {
 #pragma HLS unroll
@@ -336,6 +338,7 @@ void fixed_point::logical(bool execute, log_decode_t decoded, registers_t &regis
 					}
 					result((b+1)*8-1, b*8) = count;
 				}
+			 */
 		}
 
 		registers.GPR[decoded.result_reg_address] = result;
