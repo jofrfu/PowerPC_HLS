@@ -180,7 +180,7 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                         for(uint32_t i = 0; i < 8; i++) {
                             auto CR_i = CR["CR" + std::to_string(i)];
                             if (CR_i.is_object()) {
-                                condition_field_t &reg = registers.condition_reg[i];
+                                condition_field &reg = registers.condition_reg[i];
                                 // Fixed Point conditions
                                 if(CR_i["LT"].is_boolean()) {
                                     reg.condition_fixed_point.LT = CR_i["LT"].get<bool>();
@@ -317,7 +317,7 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                         for(uint32_t i = 0; i < 8; i++) {
                             auto CR_i = CR["CR" + std::to_string(i)];
                             if (CR_i.is_object()) {
-                                condition_field_t &reg = registers.condition_reg[i];
+                                condition_field &reg = registers.condition_reg[i];
                                 // Fixed Point conditions
                                 if(CR_i["LT"].is_boolean()) {
                                     INFO("Checking CR" + std::to_string(i) + " LT bit.")

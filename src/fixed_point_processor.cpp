@@ -202,7 +202,7 @@ void fixed_point::compare(bool execute, cmp_decode_t decoded, registers_t &regis
 			op2[32] = 0;
 		}
 
-        condition_field_t &CR = registers.condition_reg[decoded.BF];
+        condition_field &CR = registers.condition_reg[decoded.BF];
 
 		if(op1 < op2) {
             CR.condition_fixed_point.LT = 1;
@@ -466,7 +466,10 @@ void fixed_point::shift(bool execute, shift_decode_t decoded, registers_t &regis
 void fixed_point::system(bool execute, system_decode_t decoded, registers_t &registers) {
 	if(execute) {
 		// The order of the two 5 bit halves is reversed
-		ap_uint<10> SPR = decoded.SPR << 5 | decoded.SPR >> 5;
+		ap_uint<10> SPR;
+		SPR(4, 0) = decoded.SPR(9, 5);
+        SPR(9, 5) = decoded.SPR(4, 0);
+
 		ap_uint<8> FXM = decoded.FXM;
 		ap_uint<32> mask;
 		for(uint32_t n = 0, b = 0; n < 8; n++) {

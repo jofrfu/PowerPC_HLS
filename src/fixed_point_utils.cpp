@@ -22,7 +22,7 @@
 #include "fixed_point_utils.hpp"
 
 void fixed_point::check_condition(int32_t result, registers_t &registers) {
-    condition_field_t &CR = registers.condition_reg[0];
+    condition_field &CR = registers.condition_reg[0];
 	if(result == 0) {
 		// CR0 is at position 7
 		CR.condition_fixed_point.LT = 0;
