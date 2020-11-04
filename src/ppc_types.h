@@ -27,7 +27,7 @@
 #ifndef __PPC_TYPES__
 #define __PPC_TYPES__
 
-#include <cstdint>
+#include <stdint.h>
 #include <ap_int.h>
 #include "registers.hpp"
 

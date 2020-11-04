@@ -27,7 +27,7 @@
 #ifndef __INSTRUCTION_DECODE__
 #define __INSTRUCTION_DECODE__
 
-#include <cstdint>
+#include <stdint.h>
 #include "ppc_types.h"
 
 decode_result_t decode(uint32_t instruction_port);

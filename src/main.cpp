@@ -225,7 +225,7 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                             }
                         }
                     } else {
-                        registers.condition_reg.setCR(CR.get<uint32_t>());
+                        registers.condition_reg = CR.get<uint32_t>();
                     }
                 }
 
@@ -245,7 +245,7 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                             registers.fixed_exception_reg.exception_fields.string_bytes = XER["String_Bytes"].get<uint8_t>();
                         }
                     } else {
-                        registers.fixed_exception_reg.exception_bits = XER.get<uint32_t>();
+                        registers.fixed_exception_reg = XER.get<uint32_t>();
                     }
                 }
 
@@ -400,7 +400,7 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                         }
                     } else {
                         INFO("Checking XER.");
-                        REQUIRE(registers.fixed_exception_reg.exception_bits == XER.get<uint32_t>());
+                        REQUIRE(registers.fixed_exception_reg.getXER() == XER.get<uint32_t>());
                     }
                 }
 

@@ -481,20 +481,20 @@ void fixed_point::system(bool execute, system_decode_t decoded, registers_t &reg
 			case system_ppc::MOVE_TO_SPR:
 				switch(SPR) {
 					case 1:
-						registers.fixed_exception_reg.exception_bits = registers.GPR[decoded.RS_RT];
+						registers.fixed_exception_reg = registers.GPR[decoded.RS_RT];
 						break;
 					case 8:
 						registers.link_register = registers.GPR[decoded.RS_RT];
 						break;
 					case 9:
-						registers.condition_reg.setCR(registers.GPR[decoded.RS_RT]);
+						registers.condition_reg = registers.GPR[decoded.RS_RT];
 						break;
 				}
 				break;
 			case system_ppc::MOVE_FROM_SPR:
 				switch(SPR) {
 					case 1:
-						registers.GPR[decoded.RS_RT] = registers.fixed_exception_reg.exception_bits;
+						registers.GPR[decoded.RS_RT] = registers.fixed_exception_reg.getXER();
 						break;
 					case 8:
 						registers.GPR[decoded.RS_RT] = registers.link_register;
@@ -505,7 +505,7 @@ void fixed_point::system(bool execute, system_decode_t decoded, registers_t &reg
 				}
 				break;
 			case system_ppc::MOVE_TO_CR:
-				registers.condition_reg.setCR((registers.GPR[decoded.RS_RT] & mask) | (registers.condition_reg.getCR() & ~mask));
+				registers.condition_reg = ((registers.GPR[decoded.RS_RT] & mask) | (registers.condition_reg.getCR() & ~mask));
 				break;
 			case system_ppc::MOVE_FROM_CR:
 				registers.GPR[decoded.RS_RT] = registers.condition_reg.getCR();

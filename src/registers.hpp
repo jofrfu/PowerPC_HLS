@@ -23,7 +23,7 @@
 #ifndef __REGISTERS__
 #define __REGISTERS__
 
-#include <cstdint>
+#include <stdint.h>
 #include <ap_int.h>
 
 typedef union {
@@ -52,7 +52,7 @@ typedef union {
 
 typedef struct condition_reg {
 public:
-    void setCR(uint32_t value) {
+    condition_reg& operator=(uint32_t value) {
         ap_uint<32> temp = value;
         for(int32_t i = 0; i < 8; i++) {
 #pragma HLS unroll
@@ -61,9 +61,10 @@ public:
             CR[i].condition_fixed_point.GT = temp[i*4+2];
             CR[i].condition_fixed_point.LT = temp[i*4+3];
         }
+        return *this;
     }
 
-    uint32_t getCR() {
+    ap_uint<32> getCR() {
         ap_uint<32> temp;
         for(int32_t i = 0; i < 8; i++) {
 #pragma HLS unroll
@@ -82,24 +83,41 @@ private:
 	condition_field_t CR[8];
 } condition_reg_t;
 
-typedef union {
-	uint32_t exception_bits;
-	struct __attribute__ ((__packed__)) {
-		uint8_t string_bytes:7; // For load/store string
-		uint32_t RESERVED_2:22; // Reserved
-		uint8_t CA:1; 			// Carry bit
-		uint8_t OV:1; 			// Overflow bit
-		uint8_t SO:1; 			// Summary overflow bit
-		//uint32_t RESERVED_1; 	// Reserved
+struct fixed_point_exception_reg {
+	struct {
+		ap_uint<7> string_bytes; // For load/store string
+		ap_uint<22> RESERVED_2; // Reserved
+		ap_uint<1> CA; 			// Carry bit
+		ap_uint<1> OV; 			// Overflow bit
+		ap_uint<1> SO; 			// Summary overflow bit
+		//ap_uint<32> RESERVED_1; 	// Reserved
 	} exception_fields;
-} fixed_point_exception_reg_t;
+	fixed_point_exception_reg& operator=(uint32_t XER) {
+	    ap_uint<32> val = XER;
+        exception_fields.string_bytes = val(6, 0);
+        exception_fields.RESERVED_2 = val(28, 7);
+        exception_fields.CA = val[29];
+        exception_fields.OV = val[30];
+        exception_fields.SO = val[31];
+	    return *this;
+	}
+	ap_uint<32> getXER() {
+        ap_uint<32> val;
+        val(6, 0) = exception_fields.string_bytes;
+        val(28, 7) = exception_fields.RESERVED_2;
+        val[29] = exception_fields.CA;
+        val[30] = exception_fields.OV;
+        val[31] = exception_fields.SO;
+        return val;
+	}
+};
 
 typedef struct {
 	ap_uint<32> GPR[32]; // General purpose registers
-	uint64_t FPR[32]; // Floating point registers
+	ap_uint<64> FPR[32]; // Floating point registers
 	condition_reg_t condition_reg; // Condition register
-	uint32_t link_register; // Link register
-	fixed_point_exception_reg_t fixed_exception_reg; // Fixed point exception register
+	ap_uint<32> link_register; // Link register
+	fixed_point_exception_reg fixed_exception_reg; // Fixed point exception register
 } registers_t;
 
 #endif

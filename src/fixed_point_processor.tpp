@@ -19,7 +19,7 @@
 // You should have received a copy of the GNU General Public License
 // along with PowerPC_HLS. If not, see <http://www.gnu.org/licenses/>.
 
-#include <cstdint>
+#include <stdint.h>
 #include <ap_int.h>
 #include "ppc_types.h"
 

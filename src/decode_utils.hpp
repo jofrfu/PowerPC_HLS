@@ -55,7 +55,7 @@
 		decoded_struct.sum1_immediate = 0;											\
 	}																				\
 	decoded_struct.sum2_imm = true;													\
-	decoded_struct.sum2_immediate = (int16_t)instruction_struct.D_Form.D;			\
+	decoded_struct.sum2_immediate = instruction_struct.D_Form.D;		            \
 	decoded_struct.word_size = bytes-1;												\
 	decoded_struct.result_reg_address = instruction_struct.D_Form.RT;				\
 	decoded_struct.write_ea = false;												\
@@ -90,7 +90,7 @@
 	decoded_struct.sum1_reg_address = instruction_struct.D_Form.RA;					\
 	decoded_struct.sum1_immediate = 0;												\
 	decoded_struct.sum2_imm = true;													\
-	decoded_struct.sum2_immediate = (int16_t)instruction_struct.D_Form.D;			\
+	decoded_struct.sum2_immediate = instruction_struct.D_Form.D;	            	\
 	decoded_struct.sum2_reg_address = 0;											\
 	decoded_struct.word_size = bytes-1;												\
 	decoded_struct.result_reg_address = instruction_struct.D_Form.RT;				\
@@ -126,7 +126,7 @@
 		decoded_struct.sum1_immediate = 0;											\
 	}																				\
 	decoded_struct.sum2_imm = true;													\
-	decoded_struct.sum2_immediate = (int16_t)instruction_struct.D_Form.D;			\
+	decoded_struct.sum2_immediate = instruction_struct.D_Form.D;			        \
 	decoded_struct.word_size = bytes-1;												\
 	decoded_struct.result_reg_address = instruction_struct.D_Form.RT;				\
 	decoded_struct.write_ea = false;												\
@@ -140,7 +140,7 @@
 	decoded_struct.sum1_reg_address = instruction_struct.D_Form.RA;					\
 	decoded_struct.sum1_immediate = 0;												\
 	decoded_struct.sum2_imm = true;													\
-	decoded_struct.sum2_immediate = (int16_t)instruction_struct.D_Form.D;			\
+	decoded_struct.sum2_immediate = instruction_struct.D_Form.D;			        \
 	decoded_struct.sum2_reg_address = 0;											\
 	decoded_struct.word_size = bytes-1;												\
 	decoded_struct.result_reg_address = instruction_struct.D_Form.RT;				\
@@ -197,7 +197,8 @@
 		decoded_struct.sum1_immediate = 0;											\
 	}																				\
 	decoded_struct.sum2_imm = true;													\
-	decoded_struct.sum2_immediate = ((int16_t)(instruction_struct.DS_Form.DS << 2);	\
+	decoded_struct.sum2_immediate(15, 2) = instruction_struct.DS_Form.DS;           \
+    decoded_struct.sum2_immediate(1, 0) = 0                                         \
 	decoded_struct.word_size = bytes-1;												\
 	decoded_struct.result_reg_address = instruction_struct.DS_Form.RT;				\
 	decoded_struct.write_ea = false;												\
@@ -217,7 +218,8 @@
 		decoded_struct.sum1_immediate = 0;											\
 	}																				\
 	decoded_struct.sum2_imm = true;													\
-	decoded_struct.sum2_immediate = ((int16_t)(instruction_struct.DS_Form.DS << 2);	\
+	decoded_struct.sum2_immediate(15, 2) = instruction_struct.DS_Form.DS;           \
+    decoded_struct.sum2_immediate(1, 0) = 0                                         \
 	decoded_struct.word_size = bytes-1;												\
 	decoded_struct.result_reg_address = instruction_struct.DS_Form.RT;				\
 	decoded_struct.write_ea = false;												\
@@ -231,7 +233,8 @@
 	decoded_struct.sum1_reg_address = instruction_struct.DS_Form.RA;				\
 	decoded_struct.sum1_immediate = 0;												\
 	decoded_struct.sum2_imm = true;													\
-	decoded_struct.sum2_immediate = ((int16_t)(instruction_struct.DS_Form.DS << 2);	\
+	decoded_struct.sum2_immediate(15, 2) = instruction_struct.DS_Form.DS;           \
+    decoded_struct.sum2_immediate(1, 0) = 0                                         \
 	decoded_struct.sum2_reg_address = 0;											\
 	decoded_struct.word_size = bytes-1;												\
 	decoded_struct.result_reg_address = instruction_struct.DS_Form.RT;				\
@@ -273,7 +276,7 @@
 		decoded_struct.sum1_immediate = 0;											\
 	}																				\
 	decoded_struct.sum2_imm = true;													\
-	decoded_struct.sum2_immediate = (int16_t)instruction_struct.D_Form.D;			\
+	decoded_struct.sum2_immediate = instruction_struct.D_Form.D;			        \
 	decoded_struct.word_size = 3;												    \
 	decoded_struct.result_reg_address = instruction_struct.D_Form.RT;				\
 	decoded_struct.write_ea = false;												\
