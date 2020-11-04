@@ -27,7 +27,7 @@
 #include <ap_int.h>
 
 typedef union {
-	struct __attribute__ ((__packed__)) {
+	struct {
 		uint8_t SO:1; // Bit 3
 		uint8_t EQ:1; // Bit 2
 		uint8_t GT:1; // Bit 1
@@ -35,14 +35,14 @@ typedef union {
 	} condition_fixed_point;
 
 	// Special type for CR1
-	struct __attribute__ ((__packed__)) {
+	struct {
 		uint8_t OX:1; 	// Bit 7
 		uint8_t VX:1; 	// Bit 6
 		uint8_t FEX:1;	// Bit 5
 		uint8_t FX:1; 	// Bit 4
 	} condition_floating_point;
 
-	struct __attribute__ ((__packed__)) {
+	struct {
 		uint8_t FU:1; // Bit 3
 		uint8_t FE:1; // Bit 2
 		uint8_t FG:1; // Bit 1

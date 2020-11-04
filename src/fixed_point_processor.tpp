@@ -47,7 +47,13 @@ namespace fixed_point {
             ap_uint<32> interm;
             ap_uint<32> result = 0;
 
-            int32_t n = decoded.multiple ? 32 : decoded.result_reg_address+1;
+            int32_t n;
+            if(decoded.multiple) {
+                n = 32;
+            } else {
+                n = decoded.result_reg_address + 1;
+            }
+
             for(int32_t i = decoded.result_reg_address; i < n; i++) {
 #pragma HLS loop_tripcount min=1 max=32 avg=16
                 switch (decoded.word_size) {
@@ -202,7 +208,13 @@ namespace fixed_point {
             ap_uint<30> upper_address = effective_address >> 2;
             ap_uint<2> lower_address = effective_address;
 
-            int32_t n = decoded.multiple ? 32 : decoded.result_reg_address+1;
+            int32_t n;
+            if(decoded.multiple) {
+                n = 32;
+            } else {
+                n = decoded.result_reg_address+1;
+            }
+
             for(int32_t i = decoded.result_reg_address; i < n; i++) {
 #pragma HLS loop_tripcount min=1 max=32 avg=16
                 ap_uint<32> result = registers.GPR[i];

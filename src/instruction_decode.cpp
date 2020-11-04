@@ -29,7 +29,7 @@
 
 decode_result_t decode(uint32_t instruction_port) {
 	instruction_t instruction;
-	instruction.instruction_bits = instruction_port;
+	instruction = ap_uint<32>(instruction_port);
 
 	decode_result_t decode_result;
 
@@ -893,26 +893,24 @@ decode_result_t decode(uint32_t instruction_port) {
 					{
 					    // L is unused in 32 Bit implementations
 						fixed_point_decode_result.execute_compare = true;
-						uint8_t BF = instruction.X_Form.RT >> 2;
 						cmp_decoded.cmp_signed = true;
 						cmp_decoded.op1_reg_address = instruction.X_Form.RA;
 						cmp_decoded.op2_imm = false;
 						cmp_decoded.op2_immediate = 0;
 						cmp_decoded.op2_reg_address = instruction.X_Form.RB;
-						cmp_decoded.BF = BF;
+						cmp_decoded.BF = instruction.X_Form.RT(4, 2);
 					}
 					break;
 				case 32: // cmpl
 					{
                         // L is unused in 32 Bit implementations
 						fixed_point_decode_result.execute_compare = true;
-						uint8_t BF = instruction.D_Form.RT >> 2;
 						cmp_decoded.cmp_signed = false;
 						cmp_decoded.op1_reg_address = instruction.X_Form.RA;
 						cmp_decoded.op2_imm = false;
 						cmp_decoded.op2_immediate = 0;
 						cmp_decoded.op2_reg_address = instruction.X_Form.RB;
-						cmp_decoded.BF = BF;
+						cmp_decoded.BF = instruction.X_Form.RT(4, 2);
 					}
 					break;
 				// X Form Trap instructions
@@ -1182,7 +1180,7 @@ decode_result_t decode(uint32_t instruction_port) {
 				// XFX Form move system register instructions
 				case 19: // mfcr
 					fixed_point_decode_result.execute_system = true;
-					if((instruction.XFX_Form.spr >> 9) == 1) break; // Field has to be 0
+					if(instruction.XFX_Form.spr[9] == 1) break; // Field has to be 0
 					system_decoded.operation = system_ppc::MOVE_FROM_CR;
 					system_decoded.RS_RT = instruction.XFX_Form.RT;
 					system_decoded.SPR = 0;
@@ -1190,11 +1188,11 @@ decode_result_t decode(uint32_t instruction_port) {
 					break;
 				case 144: // mtcrf
 					fixed_point_decode_result.execute_system = true;
-					if((instruction.XFX_Form.spr >> 9) == 1) break; // Field has to be 0
+					if(instruction.XFX_Form.spr[9] == 1) break; // Field has to be 0
 					system_decoded.operation = system_ppc::MOVE_TO_CR;
 					system_decoded.RS_RT = instruction.XFX_Form.RT;
 					system_decoded.SPR = 0;
-					system_decoded.FXM = instruction.XFX_Form.spr >> 1;
+					system_decoded.FXM = instruction.XFX_Form.spr(8, 1);
 					break;
 				case 339: // mfspr
 					fixed_point_decode_result.execute_system = true;
@@ -1349,7 +1347,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			add_sub_decoded.op1_immediate = 0;
 			add_sub_decoded.op1_reg_address = instruction.D_Form.RA;
 			add_sub_decoded.op2_imm = true;
-			add_sub_decoded.op2_immediate = (int16_t)instruction.D_Form.D;
+			add_sub_decoded.op2_immediate = ap_int<16>(instruction.D_Form.D);
 			add_sub_decoded.op2_reg_address = 0;
 			add_sub_decoded.result_reg_address = instruction.D_Form.RT;
 			add_sub_decoded.alter_CA = true;
@@ -1364,7 +1362,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			add_sub_decoded.op1_immediate = 0;
 			add_sub_decoded.op1_reg_address = instruction.D_Form.RA;
 			add_sub_decoded.op2_imm = true;
-			add_sub_decoded.op2_immediate = (int16_t)instruction.D_Form.D;
+			add_sub_decoded.op2_immediate = ap_int<16>(instruction.D_Form.D);
 			add_sub_decoded.op2_reg_address = 0;
 			add_sub_decoded.result_reg_address = instruction.D_Form.RT;
 			add_sub_decoded.alter_CA = true;
@@ -1379,7 +1377,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			add_sub_decoded.op1_immediate = 0;
 			add_sub_decoded.op1_reg_address = instruction.D_Form.RA;
 			add_sub_decoded.op2_imm = true;
-			add_sub_decoded.op2_immediate = (int16_t)instruction.D_Form.D;
+			add_sub_decoded.op2_immediate = ap_int<16>(instruction.D_Form.D);
 			add_sub_decoded.op2_reg_address = 0;
 			add_sub_decoded.result_reg_address = instruction.D_Form.RT;
 			add_sub_decoded.alter_CA = true;
@@ -1400,7 +1398,7 @@ decode_result_t decode(uint32_t instruction_port) {
 				add_sub_decoded.op1_reg_address = instruction.D_Form.RA;
 			}
 			add_sub_decoded.op2_imm = true;
-			add_sub_decoded.op2_immediate = (int16_t)instruction.D_Form.D;
+			add_sub_decoded.op2_immediate = ap_int<16>(instruction.D_Form.D);
 			add_sub_decoded.op2_reg_address = 0;
 			add_sub_decoded.result_reg_address = instruction.D_Form.RT;
 			add_sub_decoded.alter_CA = false;
@@ -1421,7 +1419,8 @@ decode_result_t decode(uint32_t instruction_port) {
 				add_sub_decoded.op1_reg_address = instruction.D_Form.RA;
 			}
 			add_sub_decoded.op2_imm = true;
-			add_sub_decoded.op2_immediate = (int16_t)instruction.D_Form.D << 16;
+			add_sub_decoded.op2_immediate(31, 16) = instruction.D_Form.D;
+			add_sub_decoded.op2_immediate(15, 0) = 0;
 			add_sub_decoded.op2_reg_address = 0;
 			add_sub_decoded.result_reg_address = instruction.D_Form.RT;
 			add_sub_decoded.alter_CA = false;
@@ -1434,7 +1433,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			fixed_point_decode_result.execute_mul = true;
 			mul_decoded.op1_reg_address = instruction.D_Form.RA;
 			mul_decoded.op2_imm = true;
-			mul_decoded.op2_immediate = (int16_t)instruction.D_Form.D;
+			mul_decoded.op2_immediate = ap_int<16>(instruction.D_Form.D);
 			mul_decoded.op2_reg_address = 0;
 			mul_decoded.result_reg_address = instruction.D_Form.RT;
 			mul_decoded.mul_signed = true;
@@ -1447,26 +1446,24 @@ decode_result_t decode(uint32_t instruction_port) {
 			{
                 // L is not used on 32 Bit implementations
 				fixed_point_decode_result.execute_compare = true;
-				uint8_t BF = instruction.D_Form.RT >> 2;
 				cmp_decoded.cmp_signed = false;
 				cmp_decoded.op1_reg_address = instruction.D_Form.RA;
 				cmp_decoded.op2_imm = true;
 				cmp_decoded.op2_immediate = instruction.D_Form.D;
 				cmp_decoded.op2_reg_address = 0;
-				cmp_decoded.BF = BF;
+				cmp_decoded.BF = instruction.D_Form.RT(4, 2);
 			}
 			break;
 		case 11: // cmpi
 			{
 			    // L is not used on 32 Bit implementations
 				fixed_point_decode_result.execute_compare = true;
-				uint8_t BF = instruction.D_Form.RT >> 2;
 				cmp_decoded.cmp_signed = true;
 				cmp_decoded.op1_reg_address = instruction.D_Form.RA;
 				cmp_decoded.op2_imm = true;
-				cmp_decoded.op2_immediate = (int16_t)instruction.D_Form.D;
+				cmp_decoded.op2_immediate = ap_int<16>(instruction.D_Form.D);
 				cmp_decoded.op2_reg_address = 0;
-				cmp_decoded.BF = BF;
+				cmp_decoded.BF = instruction.D_Form.RT(4, 2);
 			}
 			break;
 		// D Form Trap instructions
@@ -1477,7 +1474,7 @@ decode_result_t decode(uint32_t instruction_port) {
 			fixed_point_decode_result.execute_trap = true;
 			trap_decoded.op1_reg_address = instruction.D_Form.RA;
 			trap_decoded.op2_imm = true;
-			trap_decoded.op2_immediate = (int16_t)instruction.D_Form.D;
+			trap_decoded.op2_immediate = ap_int<16>(instruction.D_Form.D);
 			trap_decoded.op2_reg_address = 0;
 			trap_decoded.TO = instruction.D_Form.RT;
 			break;
@@ -1497,7 +1494,8 @@ decode_result_t decode(uint32_t instruction_port) {
 			log_decoded.operation = logical::OR;
 			log_decoded.op1_reg_address = instruction.D_Form.RT;
 			log_decoded.op2_imm = true;
-			log_decoded.op2_immediate = instruction.D_Form.D << 16;
+			log_decoded.op2_immediate(31, 16) = instruction.D_Form.D;
+			log_decoded.op2_immediate(15, 0) = 0;
 			log_decoded.op2_reg_address = 0;
 			log_decoded.result_reg_address = instruction.D_Form.RA;
 			log_decoded.alter_CR0 = false;
@@ -1517,7 +1515,8 @@ decode_result_t decode(uint32_t instruction_port) {
 			log_decoded.operation = logical::XOR;
 			log_decoded.op1_reg_address = instruction.D_Form.RT;
 			log_decoded.op2_imm = true;
-			log_decoded.op2_immediate = instruction.D_Form.D << 16;
+            log_decoded.op2_immediate(31, 16) = instruction.D_Form.D;
+            log_decoded.op2_immediate(15, 0) = 0;
 			log_decoded.op2_reg_address = 0;
 			log_decoded.result_reg_address = instruction.D_Form.RA;
 			log_decoded.alter_CR0 = false;
@@ -1537,7 +1536,8 @@ decode_result_t decode(uint32_t instruction_port) {
 			log_decoded.operation = logical::AND;
 			log_decoded.op1_reg_address = instruction.D_Form.RT;
 			log_decoded.op2_imm = true;
-			log_decoded.op2_immediate = instruction.D_Form.D << 16;
+            log_decoded.op2_immediate(31, 16) = instruction.D_Form.D;
+            log_decoded.op2_immediate(15, 0) = 0;
 			log_decoded.op2_reg_address = 0;
 			log_decoded.result_reg_address = instruction.D_Form.RA;
 			log_decoded.alter_CR0 = true;
@@ -1676,14 +1676,14 @@ decode_result_t decode(uint32_t instruction_port) {
 					floating_point_decode_result.execute_compare = true;
 					float_compare_decoded.FRA = instruction.X_Form.RA;
 					float_compare_decoded.FRA = instruction.X_Form.RB;
-					float_compare_decoded.BF = instruction.X_Form.RT >> 2;
+					float_compare_decoded.BF = instruction.X_Form.RT(4, 2);
 					float_compare_decoded.unordered = true;
 					break;
 				case 63: // fcmpo
 					floating_point_decode_result.execute_compare = true;
 					float_compare_decoded.FRA = instruction.X_Form.RA;
 					float_compare_decoded.FRA = instruction.X_Form.RB;
-					float_compare_decoded.BF = instruction.X_Form.RT >> 2;
+					float_compare_decoded.BF = instruction.X_Form.RT(4, 2);
 					float_compare_decoded.unordered = false;
 					break;
 				// X Form floating point status instructions
@@ -1709,8 +1709,8 @@ decode_result_t decode(uint32_t instruction_port) {
 				case 64: // mcrfs
 					floating_point_decode_result.execute_status = true;
 					float_status_decoded.FRT_FRB = 0;
-					float_status_decoded.BF_BT = instruction.X_Form.RT >> 2;
-					float_status_decoded.BFA = instruction.X_Form.RA >> 2;
+					float_status_decoded.BF_BT = instruction.X_Form.RT(4, 2);
+					float_status_decoded.BFA = instruction.X_Form.RA(4, 2);
 					float_status_decoded.U = 0;
 					float_status_decoded.FLM = 0;
 					float_status_decoded.move_to_FPR = false;
@@ -1743,9 +1743,9 @@ decode_result_t decode(uint32_t instruction_port) {
 				case 134: // mtfsfi, mtfsfi.
 					floating_point_decode_result.execute_status = true;
 					float_status_decoded.FRT_FRB = 0;
-					float_status_decoded.BF_BT = instruction.X_Form.RT >> 2;
+					float_status_decoded.BF_BT = instruction.X_Form.RT(4, 2);
 					float_status_decoded.BFA = 0;
-					float_status_decoded.U = instruction.X_Form.RB >> 1;
+					float_status_decoded.U = instruction.X_Form.RB(4, 1);
 					float_status_decoded.FLM = 0;
 					float_status_decoded.move_to_FPR = false;
 					float_status_decoded.move_to_CR = false;

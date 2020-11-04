@@ -28,148 +28,291 @@
 #define __PPC_TYPES__
 
 #include <cstdint>
+#include <ap_int.h>
 #include "registers.hpp"
 
-typedef union {
-	uint32_t instruction_bits;
+typedef struct {
+	ap_uint<32> instruction_bits;
+	void operator=(ap_uint<32> val) {
+	    instruction_bits = val;
+	    I_Form = val;
+	    B_Form = val;
+	    SC_Form = val;
+	    D_Form = val;
+	    DS_Form = val;
+	    X_Form = val;
+	    XL_Form = val;
+	    XFX_Form = val;
+	    XFL_Form = val;
+	    XS_Form = val;
+	    XO_Form = val;
+	    A_Form = val;
+	    M_Form = val;
+	    MD_Form = val;
+	    MDS_Form = val;
+	}
 
-	struct __attribute__ ((__packed__)) {
-		uint8_t LK:1;
-		uint8_t AA:1;
-		uint32_t LI:24;
-		uint8_t OPCD:6;
+	struct {
+		ap_uint<1> LK;
+		ap_uint<1> AA;
+		ap_uint<24> LI;
+		ap_uint<6> OPCD;
+		void operator=(ap_uint<32> &val) {
+		    LK = val[0];
+		    AA = val[1];
+		    LI = val(25, 2);
+		    OPCD = val(31, 26);
+		}
 	} I_Form;
 
-	struct __attribute__ ((__packed__)) {
-		uint8_t LK:1;
-		uint8_t AA:1;
-		uint16_t BD:14;
-		uint8_t BI:5;
-		uint8_t BO:5;
-		uint8_t OPCD:6;
+	struct {
+		ap_uint<1> LK;
+        ap_uint<1> AA;
+        ap_uint<14> BD;
+        ap_uint<5> BI;
+        ap_uint<5> BO;
+        ap_uint<6> OPCD;
+        void operator=(ap_uint<32> &val) {
+            LK = val[0];
+            AA = val[1];
+            BD = val(15, 2);
+            BI = val(20, 16);
+            BO = val(25, 21);
+            OPCD = val(31, 26);
+        }
 	} B_Form;
 
-	struct __attribute__ ((__packed__)) {
-		uint8_t UNUSED_5:1;
-		uint8_t ALWAYS_ONE:1;
-		uint8_t UNUSED_4:3;
-		uint8_t LEV:7;
-		uint8_t UNUSED_3:4;
-		uint8_t UNUSED_2:5;
-		uint8_t UNUSED_1:5;
-		uint8_t OPCD:6;
+	struct {
+		ap_uint<1> UNUSED_5;
+		ap_uint<1> ALWAYS_ONE;
+		ap_uint<3> UNUSED_4;
+		ap_uint<7> LEV;
+		ap_uint<4> UNUSED_3;
+		ap_uint<5> UNUSED_2;
+		ap_uint<5> UNUSED_1;
+		ap_uint<6> OPCD;
+        void operator=(ap_uint<32> &val) {
+            UNUSED_5 = val[0];
+            ALWAYS_ONE = val[1];
+            UNUSED_4 = val(4, 2);
+            LEV = val(11, 5);
+            UNUSED_3 = val(15, 12);
+            UNUSED_2 = val(20, 16);
+            UNUSED_1 = val(25, 21);
+            OPCD = val(31, 26);
+        }
 	} SC_Form;
 
-	struct __attribute__ ((__packed__)) {
-		uint16_t D:16;
-		uint8_t RA:5;
-		uint8_t RT:5;
-		uint8_t OPCD:6;
+	struct {
+		ap_uint<16> D;
+		ap_uint<5> RA;
+		ap_uint<5> RT;
+		ap_uint<6> OPCD;
+        void operator=(ap_uint<32> &val) {
+            D = val(15, 0);
+            RA = val(20, 16);
+            RT = val(25, 21);
+            OPCD = val(31, 26);
+        }
 	} D_Form;
 
-	struct __attribute__ ((__packed__)) {
-		uint8_t XO:2;
-		uint16_t DS:14;
-		uint8_t RA:5;
-		uint8_t RT:5;
-		uint8_t OPCD:6;
+	struct {
+		ap_uint<2> XO;
+		ap_uint<14> DS;
+		ap_uint<5> RA;
+		ap_uint<5> RT;
+		ap_uint<6> OPCD;
+        void operator=(ap_uint<32> &val) {
+            XO = val(1, 0);
+            DS = val(15, 2);
+            RA = val(20, 16);
+            RT = val(25, 21);
+            OPCD = val(31, 26);
+        }
 	} DS_Form;
 
-	struct __attribute__ ((__packed__)) {
-		uint8_t Rc:1;
-		uint16_t XO:10;
-		uint8_t RB:5;
-		uint8_t RA:5;
-		uint8_t RT:5;
-		uint8_t OPCD:6;
+	struct {
+		ap_uint<1> Rc;
+		ap_uint<10> XO;
+		ap_uint<5> RB;
+		ap_uint<5> RA;
+		ap_uint<5> RT;
+		ap_uint<6> OPCD;
+        void operator=(ap_uint<32> &val) {
+            Rc = val[0];
+            XO = val(10, 1);
+            RB = val(15, 11);
+            RA = val(20, 16);
+            RT = val(25, 21);
+            OPCD = val(31, 26);
+        }
 	} X_Form;
 
-	struct __attribute__ ((__packed__)) {
-		uint8_t LK:1;
-		uint16_t XO:10;
-		uint8_t BB:5;
-		uint8_t BA:5;
-		uint8_t BT:5;
-		uint8_t OPCD:6;
+	struct {
+		ap_uint<1> LK;
+		ap_uint<10> XO;
+		ap_uint<5> BB;
+		ap_uint<5> BA;
+		ap_uint<5> BT;
+		ap_uint<6> OPCD;
+        void operator=(ap_uint<32> &val) {
+            LK = val[0];
+            XO = val(10, 1);
+            BB = val(15, 11);
+            BA = val(20, 16);
+            BT = val(25, 21);
+            OPCD = val(31, 26);
+        }
 	} XL_Form;
 
-	struct __attribute__ ((__packed__)) {
-		uint8_t UNUSED_1:1;
-		uint16_t XO:10;
-		uint16_t spr:10;
-		uint8_t RT:5;
-		uint8_t OPCD:6;
+	struct {
+		ap_uint<1> UNUSED_1;
+		ap_uint<10> XO;
+		ap_uint<10> spr;
+		ap_uint<5> RT;
+		ap_uint<6> OPCD;
+        void operator=(ap_uint<32> &val) {
+            UNUSED_1 = val[0];
+            XO = val(10, 1);
+            spr = val(20, 11);
+            RT = val(25, 21);
+            OPCD = val(31, 26);
+        }
 	} XFX_Form;
 
-	struct __attribute__ ((__packed__)) {
-		uint8_t Rc:1;
-		uint16_t XO:10;
-		uint8_t FRB:5;
-		uint8_t UNUSED_2:1;
-		uint8_t FLM:8;
-		uint8_t UNUSED_1:1;
-		uint8_t OPCD:6;
+	struct {
+		ap_uint<1> Rc;
+		ap_uint<10> XO;
+		ap_uint<5> FRB;
+		ap_uint<1> UNUSED_2;
+		ap_uint<8> FLM;
+		ap_uint<1> UNUSED_1;
+		ap_uint<6> OPCD;
+        void operator=(ap_uint<32> &val) {
+            Rc = val[0];
+            XO = val(10, 1);
+            FRB = val(15, 11);
+            UNUSED_2 = val[16];
+            FLM = val(24, 17);
+            UNUSED_1 = val[25];
+            OPCD = val(31, 26);
+        }
 	} XFL_Form;
 
-	struct __attribute__ ((__packed__)) {
-		uint8_t Rc:1;
-		uint8_t SH_2:1;
-		uint16_t XO:9;
-		uint8_t SH_1:5;
-		uint8_t RA:5;
-		uint8_t RS:5;
-		uint8_t OPCD:6;
+	struct {
+		ap_uint<1> Rc;
+		ap_uint<1> SH_2;
+		ap_uint<9> XO;
+		ap_uint<5> SH_1;
+		ap_uint<5> RA;
+		ap_uint<5> RS;
+		ap_uint<6> OPCD;
+        void operator=(ap_uint<32> &val) {
+            Rc = val[0];
+            SH_2 = val[1];
+            XO = val(10, 2);
+            SH_1 = val(15, 11);
+            RA = val(20, 16);
+            RS = val(25, 21);
+            OPCD = val(31, 26);
+        }
 	} XS_Form;
 
-	struct __attribute__ ((__packed__)) {
-		uint8_t Rc:1;
-		uint16_t XO:9;
-		uint8_t OE:1;
-		uint8_t RB:5;
-		uint8_t RA:5;
-		uint8_t RT:5;
-		uint8_t OPCD:6;
+	struct {
+		ap_uint<1> Rc;
+		ap_uint<9> XO;
+		ap_uint<1> OE;
+		ap_uint<5> RB;
+		ap_uint<5> RA;
+		ap_uint<5> RT;
+		ap_uint<6> OPCD;
+        void operator=(ap_uint<32> &val) {
+            Rc = val[0];
+            XO = val(9, 1);
+            OE = val[10];
+            RB = val(15, 11);
+            RA = val(20, 16);
+            RT = val(25, 21);
+            OPCD = val(31, 26);
+        }
 	} XO_Form;
 
-	struct __attribute__ ((__packed__)) {
-		uint8_t Rc:1;
-		uint8_t XO:5;
-		uint8_t FRC:5;
-		uint8_t FRB:5;
-		uint8_t FRA:5;
-		uint8_t FRT:5;
-		uint8_t OPCD:6;
+	struct {
+		ap_uint<1> Rc;
+		ap_uint<5> XO;
+		ap_uint<5> FRC;
+		ap_uint<5> FRB;
+		ap_uint<5> FRA;
+		ap_uint<5> FRT;
+		ap_uint<6> OPCD;
+        void operator=(ap_uint<32> &val) {
+            Rc = val[0];
+            XO = val(5, 1);
+            FRC = val(10, 6);
+            FRB = val(15, 11);
+            FRA = val(20, 16);
+            FRT = val(25, 21);
+            OPCD = val(31, 26);
+        }
 	} A_Form;
 
-	struct __attribute__ ((__packed__)) {
-		uint8_t Rc:1;
-		uint8_t ME:5;
-		uint8_t MB:5;
-		uint8_t RB:5;
-		uint8_t RA:5;
-		uint8_t RS:5;
-		uint8_t OPCD:6;
+	struct {
+		ap_uint<1> Rc;
+		ap_uint<5> ME;
+		ap_uint<5> MB;
+        ap_uint<5> RB;
+        ap_uint<5> RA;
+        ap_uint<5> RS;
+        ap_uint<6> OPCD;
+        void operator=(ap_uint<32> &val) {
+            Rc = val[0];
+            ME = val(5, 1);
+            MB = val(10, 6);
+            RB = val(15, 11);
+            RA = val(20, 16);
+            RS = val(25, 21);
+            OPCD = val(31, 26);
+        }
 	} M_Form;
 
-	struct __attribute__ ((__packed__)) {
-		uint8_t Rc:1;
-		uint8_t SH_2:1;
-		uint8_t XO:3;
-		uint8_t MB:6;
-		uint8_t SH_1:5;
-		uint8_t RA:5;
-		uint8_t RS:5;
-		uint8_t OPCD:6;
+	struct {
+		ap_uint<1> Rc;
+		ap_uint<1> SH_2;
+		ap_uint<3> XO;
+		ap_uint<6> MB;
+        ap_uint<5> SH_1;
+        ap_uint<5> RA;
+        ap_uint<5> RS;
+        ap_uint<6> OPCD;
+        void operator=(ap_uint<32> &val) {
+            Rc = val[0];
+            SH_2 = val[1];
+            XO = val(4, 2);
+            MB = val(10, 5);
+            SH_1 = val(15, 11);
+            RA = val(20, 16);
+            RS = val(25, 21);
+            OPCD = val(31, 26);
+        }
 	} MD_Form;
 
-	struct __attribute__ ((__packed__)) {
-		uint8_t Rc:1;
-		uint8_t XO:4;
-		uint8_t MB:6;
-		uint8_t RB:5;
-		uint8_t RA:5;
-		uint8_t RS:5;
-		uint8_t OPCD:6;
+	struct {
+		ap_uint<1> Rc;
+		ap_uint<4> XO;
+		ap_uint<6> MB;
+		ap_uint<5> RB;
+		ap_uint<5> RA;
+		ap_uint<5> RS;
+		ap_uint<6> OPCD;
+        void operator=(ap_uint<32> &val) {
+            Rc = val[0];
+            XO = val(4, 1);
+            MB = val(10, 5);
+            RB = val(15, 11);
+            RA = val(20, 16);
+            RS = val(25, 21);
+            OPCD = val(31, 26);
+        }
 	} MDS_Form;
 } instruction_t;
 
@@ -178,13 +321,13 @@ typedef enum {BRANCH, BRANCH_CONDITIONAL, BRANCH_CONDITIONAL_LINK, BRANCH_CONDIT
 
 typedef struct {
 	branch_op_t operation;
-	uint8_t LK:1;
-	uint8_t AA:1;
-	uint32_t LI:24;
-	uint16_t BD:14;
-	uint8_t BI:5;
-	uint8_t BO:5;
-	uint8_t BH:2;
+	ap_uint<1> LK;
+	ap_uint<1> AA;
+	ap_uint<24> LI;
+	ap_uint<14> BD;
+	ap_uint<5> BI;
+	ap_uint<5> BO;
+	ap_uint<2> BH;
 } branch_decode_t;
 
 typedef uint8_t system_call_decode_t;
@@ -195,9 +338,9 @@ namespace condition {
 
 typedef struct {
 	condition::condition_op_t operation;
-	uint8_t CR_op1_reg_address:5;
-	uint8_t CR_op2_reg_address:5;
-	uint8_t CR_result_reg_address:5;
+	ap_uint<5> CR_op1_reg_address;
+	ap_uint<5> CR_op2_reg_address;
+	ap_uint<5> CR_result_reg_address;
 } condition_decode_t;
 
 typedef struct {
@@ -211,16 +354,16 @@ typedef struct {
 
 // Types for fixed point processor
 typedef struct {
-	uint8_t word_size:2; // in bytes-1
+	ap_uint<2> word_size; // in bytes-1
 	bool sum1_imm; // Use immediate for first summand
-	int16_t sum1_immediate;
-	uint8_t sum1_reg_address:5;
+	ap_int<16> sum1_immediate;
+	ap_uint<5> sum1_reg_address;
 	bool sum2_imm; // Use immediate for second summand
-	int16_t sum2_immediate;
-	uint8_t sum2_reg_address:5;
+	ap_int<16> sum2_immediate;
+	ap_uint<5> sum2_reg_address;
 	bool write_ea; // write effective address
-	uint8_t ea_reg_address:5;
-	uint8_t result_reg_address:5;
+	ap_uint<5> ea_reg_address;
+	ap_uint<5> result_reg_address;
 	bool sign_extend;
 	bool little_endian;
 	bool multiple;
@@ -229,12 +372,12 @@ typedef struct {
 typedef struct {
 	bool subtract;
 	bool op1_imm; // Use immediate for first operand
-	int32_t op1_immediate;
-	uint8_t op1_reg_address:5;
+	ap_int<32> op1_immediate;
+	ap_uint<5> op1_reg_address;
 	bool op2_imm; // Use immediate for first operand
-	int32_t op2_immediate;
-	uint8_t op2_reg_address:5;
-	uint8_t result_reg_address:5;
+	ap_int<32> op2_immediate;
+	ap_uint<5> op2_reg_address;
+	ap_uint<5> result_reg_address;
 	bool alter_CA;
 	bool alter_CR0;
 	bool alter_OV;
@@ -242,11 +385,11 @@ typedef struct {
 } add_sub_decode_t;
 
 typedef struct {
-	uint8_t op1_reg_address:5;
+	ap_uint<5> op1_reg_address;
 	bool op2_imm; // Use immediate for first operand
-	int32_t op2_immediate;
-	uint8_t op2_reg_address:5;
-	uint8_t result_reg_address:5;
+	ap_int<32> op2_immediate;
+	ap_uint<5> op2_reg_address;
+	ap_uint<5> result_reg_address;
 	bool mul_signed;
 	bool mul_higher;
 	bool alter_CR0;
@@ -254,29 +397,29 @@ typedef struct {
 } mul_decode_t;
 
 typedef struct {
-	uint8_t dividend_reg_address:5;
-	uint8_t divisor_reg_address:5;
-	uint8_t result_reg_address:5;
+    ap_uint<5> dividend_reg_address;
+    ap_uint<5> divisor_reg_address;
+    ap_uint<5> result_reg_address;
 	bool div_signed;
 	bool alter_CR0;
 	bool alter_OV;
 } div_decode_t;
 
 typedef struct {
-	uint8_t op1_reg_address:5;
+    ap_uint<5> op1_reg_address;
 	bool op2_imm; // Use immediate for second operand
-	int32_t op2_immediate;
-	uint8_t op2_reg_address:5;
+	ap_int<32> op2_immediate;
+    ap_uint<5> op2_reg_address;
 	bool cmp_signed;
-	uint8_t BF:3;
+	ap_uint<3> BF;
 } cmp_decode_t;
 
 typedef struct {
-	uint8_t op1_reg_address:5;
+    ap_uint<5> op1_reg_address;
 	bool op2_imm; // Use immediate for second operand
-	int32_t op2_immediate;
-	uint8_t op2_reg_address:5;
-	uint8_t TO:5;
+	ap_int<32> op2_immediate;
+    ap_uint<5> op2_reg_address;
+    ap_uint<5> TO;
 } trap_decode_t;
 
 namespace logical {
@@ -291,32 +434,32 @@ namespace logical {
 
 typedef struct {
 	logical::logical_op_t operation;
-	uint8_t op1_reg_address:5;
+    ap_uint<5> op1_reg_address;
 	bool op2_imm; // Use immediate for second operand
-	uint32_t op2_immediate;
-	uint8_t op2_reg_address:5;
-	uint8_t result_reg_address:5;
+	ap_uint<32> op2_immediate;
+    ap_uint<5> op2_reg_address;
+    ap_uint<5> result_reg_address;
 	bool alter_CR0;
 } log_decode_t;
 
 typedef struct {
 	bool shift_imm;
-	uint8_t shift_immediate:5;
-	uint8_t shift_reg_address:5;
-	uint8_t source_reg_address:5;
-	uint8_t target_reg_address:5;
-	uint8_t MB:5;
-	uint8_t ME:5;
+    ap_uint<5> shift_immediate;
+    ap_uint<5> shift_reg_address;
+    ap_uint<5> source_reg_address;
+    ap_uint<5> target_reg_address;
+    ap_uint<5> MB;
+    ap_uint<5> ME;
 	bool mask_insert;
 	bool alter_CR0;
 } rotate_decode_t;
 
 typedef struct {
 	bool shift_imm;
-	uint8_t shift_immediate:5;
-	uint8_t shift_reg_address:5;
-	uint8_t source_reg_address:5;
-	uint8_t target_reg_address:5;
+    ap_uint<5> shift_immediate;
+    ap_uint<5> shift_reg_address;
+    ap_uint<5> source_reg_address;
+    ap_uint<5> target_reg_address;
 	bool shift_left;
 	bool sign_extend;
 	bool alter_CA;
@@ -329,9 +472,9 @@ namespace system_ppc {
 
 typedef struct {
 	system_ppc::system_op_t operation;
-	uint8_t RS_RT:5; // RS or RT reg address
-	uint16_t SPR:10; // Special purpose register address
-	uint8_t FXM; // Field mask
+    ap_uint<5> RS_RT; // RS or RT reg address
+    ap_uint<10> SPR; // Special purpose register address
+    ap_uint<8> FXM; // Field mask
 } system_decode_t;
 
 typedef struct {
@@ -362,16 +505,16 @@ typedef struct {
 
 // Types for floating point processor
 typedef struct {
-	uint8_t word_size:3; // in bytes-1
+    ap_uint<3> word_size; // in bytes-1
 	bool sum1_imm; // Use immediate for first summand
-	int16_t sum1_immediate;
-	uint8_t sum1_reg_address:5;
+    ap_int<16> sum1_immediate;
+    ap_uint<5> sum1_reg_address;
 	bool sum2_imm; // Use immediate for second summand
-	int16_t sum2_immediate;
-	uint8_t sum2_reg_address:5;
+    ap_int<16> sum2_immediate;
+    ap_uint<5> sum2_reg_address;
 	bool write_ea; // write effective address
-	uint8_t ea_reg_address:5;
-	uint8_t result_reg_address:5;
+    ap_uint<5> ea_reg_address;
+    ap_uint<5> result_reg_address;
 	bool sign_extend; // Sign extend means, store as integer word for floating point
 	bool little_endian; // Unused for floating point
 	bool multiple; // Unused for floating point
@@ -381,8 +524,8 @@ typedef enum {MOVE, NEGATE, ABSOLUTE, NEGATIVE_ABSOLUTE} float_move_op_t;
 
 typedef struct {
 	float_move_op_t operation;
-	uint8_t source_reg_address:5;
-	uint8_t target_reg_address:5;
+    ap_uint<5> source_reg_address;
+    ap_uint<5> target_reg_address;
 	bool alter_CR1;
 } float_move_decode_t;
 
@@ -392,18 +535,18 @@ namespace floating_point {
 
 typedef struct {
 	floating_point::float_arithmetic_op_t operation;
-	uint8_t op1_reg_address:5;
-	uint8_t op2_reg_address:5;
-	uint8_t result_reg_address:5;
+    ap_uint<5> op1_reg_address;
+    ap_uint<5> op2_reg_address;
+    ap_uint<5> result_reg_address;
 	bool single_precision;
 	bool alter_CR1;
 } float_arithmetic_decode_t;
 
 typedef struct {
-	uint8_t mul1_reg_address:5;
-	uint8_t mul2_reg_address:5;
-	uint8_t add_reg_address:5;
-	uint8_t result_reg_address:5;
+    ap_uint<5> mul1_reg_address;
+    ap_uint<5> mul2_reg_address;
+    ap_uint<5> add_reg_address;
+    ap_uint<5> result_reg_address;
 	bool single_precision;
 	bool negate_add;
 	bool negate_result;
@@ -411,8 +554,8 @@ typedef struct {
 } float_madd_decode_t;
 
 typedef struct {
-	uint8_t source_reg_address:5;
-	uint8_t target_reg_address:5;
+    ap_uint<5> source_reg_address;
+    ap_uint<5> target_reg_address;
 	bool round_to_single;
 	bool convert_to_integer;
 	bool round_toward_zero;
@@ -420,18 +563,18 @@ typedef struct {
 } float_convert_decode_t;
 
 typedef struct {
-	uint8_t FRA:5;
-	uint8_t FRB:5;
-	uint8_t BF:3;
+    ap_uint<5> FRA;
+    ap_uint<5> FRB;
+    ap_uint<3> BF;
 	bool unordered;
 } float_compare_decode_t;
 
 typedef struct {
-	uint8_t FRT_FRB:5; // FRT or FRB
-	uint8_t BF_BT:5; // BF or BT
-	uint8_t BFA:3;
-	uint8_t U:4;
-	uint8_t FLM;
+    ap_uint<5> FRT_FRB; // FRT or FRB
+    ap_uint<5> BF_BT; // BF or BT
+    ap_uint<3> BFA;
+    ap_uint<4> U;
+    ap_uint<8> FLM;
 	bool move_to_FPR;
 	bool move_to_CR;
 	bool move_to_FPSCR;
