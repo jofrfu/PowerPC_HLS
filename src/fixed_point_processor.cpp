@@ -312,7 +312,7 @@ void fixed_point::logical(bool execute, log_decode_t decoded, registers_t &regis
 			case logical::COUNT_LEDING_ZEROS_WORD:
 				{
 					ap_uint<6> count = 0;
-					for(uint32_t i = 31; i >= 0; i--) {
+					for(int32_t i = 31; i >= 0; i--) {
 #pragma HLS unroll
 						if(op1[i] == 0) {
 						    count++;
@@ -440,7 +440,7 @@ void fixed_point::shift(bool execute, shift_decode_t decoded, registers_t &regis
 				}
 
 				// Sign extend
-				for(uint32_t i = 31; i >= 0; i++) {
+				for(uint32_t i = 0; i < 32; i++) {
 #pragma HLS unroll
 					if(i >= (32-shift)) {
 						result[i] = result[31-shift];

@@ -27,29 +27,26 @@
 #include <ap_int.h>
 
 union condition_field {
-    condition_field() : condition_fixed_point({0,0,0,0}) {}
-    ~condition_field() {}
-
 	struct condition_fixed_point {
-		ap_uint<1> SO; // Bit 3
-        ap_uint<1> EQ; // Bit 2
-        ap_uint<1> GT; // Bit 1
-        ap_uint<1> LT; // Bit 0
+		uint8_t SO:1; // Bit 3
+		uint8_t EQ:1; // Bit 2
+		uint8_t GT:1; // Bit 1
+		uint8_t LT:1; // Bit 0
 	} condition_fixed_point;
 
 	// Special type for CR1
 	struct condition_floating_point {
-        ap_uint<1> OX; 	// Bit 7
-        ap_uint<1> VX; 	// Bit 6
-        ap_uint<1> FEX;	// Bit 5
-        ap_uint<1> FX; 	// Bit 4
+		uint8_t OX:1; 	// Bit 7
+		uint8_t VX:1; 	// Bit 6
+		uint8_t FEX:1;	// Bit 5
+		uint8_t FX:1; 	// Bit 4
 	} condition_floating_point;
 
 	struct condition_floating_point_compare {
-        ap_uint<1> FU; // Bit 3
-        ap_uint<1> FE; // Bit 2
-        ap_uint<1> FG; // Bit 1
-        ap_uint<1> FL; // Bit 0
+		uint8_t FU:1; // Bit 3
+		uint8_t FE:1; // Bit 2
+		uint8_t FG:1; // Bit 1
+		uint8_t FL:1; // Bit 0
 	} condition_floating_point_compare;
 };
 
@@ -82,7 +79,7 @@ public:
     condition_field& operator[](uint32_t i) {
         return CR[i];
     }
-private:
+
 	condition_field CR[8];
 };
 
