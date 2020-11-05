@@ -19,18 +19,25 @@
 // You should have received a copy of the GNU General Public License
 // along with PowerPC_HLS. If not, see <http://www.gnu.org/licenses/>.
 
-/*
- * Author: Jonas Fuhrmann
- * Date: 23.09.2020
- */
+//
+// Created by Jonas Fuhrmann on 05.11.20.
+//
 
-#ifndef __INSTRUCTION_DECODE__
-#define __INSTRUCTION_DECODE__
+#ifndef POWERPC_HLS_PIPELINE_HPP
+#define POWERPC_HLS_PIPELINE_HPP
 
-#include <stdint.h>
-#include "ppc_types.h"
+#include <ap_int.h>
+#include "instruction_decode.hpp"
+
 namespace pipeline {
-    decode_result_t decode(uint32_t instruction_port);
-}
+    /*
+    typedef struct {
+        ap_uint<32> op1;
+        ap_uint<32> op2;
+    } operands_t;
+*/
+    //operands_t fetch_operands(decode_result_t decoded);
 
-#endif
+    bool execute(decode_result_t decoded, registers_t &registers, ap_uint<32> *data_memory);
+}
+#endif //POWERPC_HLS_PIPELINE_HPP

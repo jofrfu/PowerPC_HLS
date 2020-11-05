@@ -477,29 +477,23 @@ typedef struct {
     ap_uint<8> FXM; // Field mask
 } system_decode_t;
 
+namespace fixed_point {
+    typedef enum {
+        LOAD, STORE, LOAD_STRING, STORE_STRING, ADD_SUB, MUL, DIV, COMPARE, TRAP, LOGICAL, ROTATE, SHIFT, SYSTEM
+    } execute_t;
+}
+
 typedef struct {
-	bool execute_load;
-	bool execute_store;
-	bool execute_load_string;
-	bool execute_store_string;
+    fixed_point::execute_t execute;
 	load_store_decode_t load_store_decoded;
-	bool execute_add_sub;
 	add_sub_decode_t add_sub_decoded;
-	bool execute_mul;
 	mul_decode_t mul_decoded;
-	bool execute_div;
 	div_decode_t div_decoded;
-	bool execute_compare;
 	cmp_decode_t cmp_decoded;
-	bool execute_trap;
 	trap_decode_t trap_decoded;
-	bool execute_logical;
 	log_decode_t log_decoded;
-	bool execute_rotate;
 	rotate_decode_t rotate_decoded;
-	bool execute_shift;
 	shift_decode_t shift_decoded;
-	bool execute_system;
 	system_decode_t system_decoded;
 } fixed_point_decode_result_t;
 

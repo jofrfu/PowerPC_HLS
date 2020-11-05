@@ -25,6 +25,7 @@
 #include <fstream>
 
 #include "instruction_decode.hpp"
+#include "pipeline.hpp"
 #include "fixed_point_processor.hpp"
 
 int32_t read_byte_code(const char *file_name, uint32_t *instruction_memory, uint32_t memory_size) {
@@ -109,62 +110,8 @@ int32_t read_data(const char *file_name, ap_uint<32> *data_memory, uint32_t memo
 }
 
 bool execute_single_instruction(uint32_t instruction, registers_t &registers, ap_uint<32> *data_memory) {
-	decode_result_t decoded = decode(instruction);
-	fixed_point::load<ap_uint<32>*>(
-			decoded.fixed_point_decode_result.execute_load,
-			decoded.fixed_point_decode_result.load_store_decoded,
-			registers, data_memory);
-	fixed_point::store<ap_uint<32>*>(
-			decoded.fixed_point_decode_result.execute_store,
-			decoded.fixed_point_decode_result.load_store_decoded,
-			registers, data_memory);
-	fixed_point::load_string<ap_uint<32>*>(
-            decoded.fixed_point_decode_result.execute_load_string,
-            decoded.fixed_point_decode_result.load_store_decoded,
-            registers, data_memory
-	        );
-    fixed_point::store_string<ap_uint<32>*>(
-            decoded.fixed_point_decode_result.execute_store_string,
-            decoded.fixed_point_decode_result.load_store_decoded,
-            registers, data_memory);
-	fixed_point::add_sub(
-			decoded.fixed_point_decode_result.execute_add_sub,
-			decoded.fixed_point_decode_result.add_sub_decoded,
-			registers);
-	fixed_point::multiply(
-			decoded.fixed_point_decode_result.execute_mul,
-			decoded.fixed_point_decode_result.mul_decoded,
-			registers);
-	fixed_point::divide(
-			decoded.fixed_point_decode_result.execute_div,
-			decoded.fixed_point_decode_result.div_decoded,
-			registers);
-	fixed_point::compare(
-			decoded.fixed_point_decode_result.execute_compare,
-			decoded.fixed_point_decode_result.cmp_decoded,
-			registers);
-	bool trap = fixed_point::trap(
-			decoded.fixed_point_decode_result.execute_trap,
-			decoded.fixed_point_decode_result.trap_decoded,
-			registers);
-	fixed_point::logical(
-			decoded.fixed_point_decode_result.execute_logical,
-			decoded.fixed_point_decode_result.log_decoded,
-			registers);
-	fixed_point::rotate(
-			decoded.fixed_point_decode_result.execute_rotate,
-			decoded.fixed_point_decode_result.rotate_decoded,
-			registers);
-	fixed_point::shift(
-			decoded.fixed_point_decode_result.execute_shift,
-			decoded.fixed_point_decode_result.shift_decoded,
-			registers);
-	fixed_point::system(
-			decoded.fixed_point_decode_result.execute_system,
-			decoded.fixed_point_decode_result.system_decoded,
-			registers);
-
-	return trap;
+	decode_result_t decoded = pipeline::decode(instruction);
+	return pipeline::execute(decoded, registers, data_memory);
 }
 
 void execute_program(uint32_t *instruction_memory, uint32_t size, registers_t &registers, ap_uint<32> *data_memory, trap_handler_t trap_handler) {

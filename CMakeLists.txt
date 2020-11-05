@@ -12,7 +12,9 @@ add_executable(PowerPC_HLS
         src/fixed_point_processor.hpp
         src/instruction_decode.hpp
         src/test_bench_utils.hpp
+        src/pipeline.hpp
         src/fixed_point_utils.cpp
         src/fixed_point_processor.cpp
         src/instruction_decode.cpp
-        src/test_bench_utils.cpp)
+        src/test_bench_utils.cpp
+        src/pipeline.cpp)
