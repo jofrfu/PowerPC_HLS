@@ -27,7 +27,8 @@
 #include "fixed_point_processor.hpp"
 
 bool pipeline::execute(decode_result_t decoded, registers_t &registers, ap_uint<32> *data_memory) {
-    bool trap_happened = false;
+#pragma HLS pipeline
+	bool trap_happened = false;
     switch (decoded.fixed_point_decode_result.execute) {
         case fixed_point::LOAD:
             fixed_point::load<ap_uint<32>*>(decoded.fixed_point_decode_result.load_store_decoded, registers, data_memory);

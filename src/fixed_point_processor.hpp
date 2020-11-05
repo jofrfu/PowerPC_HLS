@@ -26,11 +26,11 @@
 #include <stdint.h>
 #include <ap_int.h>
 #include "ppc_types.h"
-//#include "fixed_point_processor.cxx"
 
 namespace fixed_point {
     template<typename T>
     void load(load_store_decode_t decoded, registers_t &registers, T data_memory) {
+#pragma HLS pipeline
         uint32_t sum1, sum2;
         if (decoded.sum1_imm) {
             sum1 = (int32_t) decoded.sum1_immediate;
@@ -60,6 +60,7 @@ namespace fixed_point {
 
         for (int32_t i = decoded.result_reg_address; i < n; i++) {
 #pragma HLS loop_tripcount min=1 max=32 avg=16
+#pragma HLS pipeline
             switch (decoded.word_size) {
                 case 0: // Byte
                     interm = data_memory[upper_address];
@@ -193,6 +194,7 @@ namespace fixed_point {
 
     template<typename T>
     void store(load_store_decode_t decoded, registers_t &registers, T data_memory) {
+#pragma HLS pipeline
         uint32_t sum1, sum2;
         if (decoded.sum1_imm) {
             sum1 = (int32_t) decoded.sum1_immediate;
@@ -219,6 +221,7 @@ namespace fixed_point {
 
         for (int32_t i = decoded.result_reg_address; i < n; i++) {
 #pragma HLS loop_tripcount min=1 max=32 avg=16
+#pragma HLS pipeline
             ap_uint<32> result = registers.GPR[i];
             switch (decoded.word_size) {
                 case 0: // Byte
@@ -333,6 +336,7 @@ namespace fixed_point {
 
     template<typename T>
     void load_string(load_store_decode_t decoded, registers_t &registers, T data_memory) {
+#pragma HLS pipeline
         uint32_t sum1, sum2;
         ap_uint<7> n;
         ap_uint<5> r = decoded.result_reg_address - 1;
@@ -360,6 +364,7 @@ namespace fixed_point {
         for (ap_uint<2> i = 3; n > 0; i--, n--, ea++) {
 //#pragma HLS unroll factor=4 TODO: write the loop in a way, that 4 bytes accesses the memory once
 #pragma HLS loop_tripcount min=1 max=120 avg=32
+#pragma HLS pipeline
             if (i == 3) {
                 r++;
                 registers.GPR[r] = 0;
@@ -373,6 +378,7 @@ namespace fixed_point {
 
     template<typename T>
     void store_string(load_store_decode_t decoded, registers_t &registers, T data_memory) {
+#pragma HLS pipeline
         uint32_t sum1, sum2;
         ap_uint<7> n;
         ap_uint<5> r = decoded.result_reg_address - 1;
@@ -400,6 +406,7 @@ namespace fixed_point {
         for (ap_uint<2> i = 3; n > 0; i--, n--, ea++) {
 //#pragma HLS unroll factor=4 TODO: write the loop in a way, that 4 bytes accesses the memory once
 #pragma HLS loop_tripcount min=1 max=120 avg=32
+#pragma HLS pipeline
             if (i == 3) {
                 r++;
             }

@@ -7,15 +7,21 @@
 
 static registers_t registers;
 
-bool top(uint32_t *instruction_memory, ap_uint<32> *data_memory) {
-#pragma HLS interface m_axi port=instruction_memory
-#pragma HLS interface m_axi port=data_memory
+void process(uint32_t instruction, ap_uint<32> *data_memory) {
+	decode_result_t decoded = pipeline::decode(instruction);
+	pipeline::execute(decoded, registers, data_memory);
+}
 
-//#pragma HLS ARRAY_PARTITION variable=registers.GPR complete dim=1
-//#pragma HLS ARRAY_PARTITION variable=registers.FPR complete dim=1
-//#pragma HLS ARRAY_PARTITION variable=registers.condition_reg.CR complete dim=1
+void top(uint32_t instruction_memory[1024], ap_uint<32> data_memory[1024]) {
+#pragma HLS interface bram port=instruction_memory
+#pragma HLS interface bram port=data_memory
+#pragma HLS ARRAY_PARTITION variable=registers.GPR complete dim=1
+#pragma HLS ARRAY_PARTITION variable=registers.FPR complete dim=1
+#pragma HLS ARRAY_PARTITION variable=registers.condition_reg.CR complete dim=1
 
-	//for(int32_t i = 0; i < 1024; i++) {
-	decode_result_t decoded = pipeline::decode(instruction_memory[0]);
-	return pipeline::execute(decoded, registers, data_memory);
+	for(int32_t i = 0; i < 1024; i++) {
+#pragma HLS dataflow
+//#pragma HLS stable variable=registers
+		process(instruction_memory[i], data_memory);
+	}
 }
