@@ -1,0 +1,42 @@
+{
+  "Before" : {
+    "GPR" : {
+      "1" : 98847872,
+      "2" : 0
+    },
+
+    "CR" : {
+      "CR0" : {
+        "LT" : false,
+        "GT" : false,
+        "EQ" : false,
+        "SO" : false
+      }
+    },
+    "XER" : 0,
+    "LR" : 0
+  },
+
+  "After" : {
+    "GPR" : {
+      "1" : 98847872,
+      "2" : 3830218757
+    },
+    "CR" : {
+      "CR0" : {
+        "LT" : false,
+        "GT" : false,
+        "EQ" : false,
+        "SO" : false
+      }
+    },
+    "XER" : {
+      "OV" : false,
+      "SO" : false
+    },
+    "LR" : 0
+  },
+
+  "Assembly" :
+  "rlwinm 2, 1, 8, 0, 31"
+}

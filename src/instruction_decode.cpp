@@ -269,7 +269,7 @@ decode_result_t pipeline::decode(uint32_t instruction_port) {
 			break;
 		case 23: // rlwnm, rlwnm.
 			fixed_point_decode_result.execute = fixed_point::ROTATE;
-			rotate_decoded.shift_imm = true;
+			rotate_decoded.shift_imm = false;
 			rotate_decoded.shift_immediate = 0;
 			rotate_decoded.shift_reg_address = instruction.M_Form.RB;
 			rotate_decoded.source_reg_address = instruction.M_Form.RS;

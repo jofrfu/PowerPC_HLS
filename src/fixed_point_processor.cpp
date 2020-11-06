@@ -345,11 +345,11 @@ void fixed_point::logical(log_decode_t decoded, registers_t &registers) {
 void fixed_point::rotate(rotate_decode_t decoded, registers_t &registers) {
 #pragma HLS pipeline
     ap_uint<32> source = registers.GPR[decoded.source_reg_address];
-    ap_uint<32> shift;
+    ap_uint<5> shift;
     if (decoded.shift_imm) {
         shift = decoded.shift_immediate;
     } else {
-        shift = registers.GPR[decoded.shift_reg_address];
+        shift = registers.GPR[decoded.shift_reg_address](4, 0);
     }
 
     ap_uint<5> mask_begin = decoded.MB;
@@ -357,21 +357,22 @@ void fixed_point::rotate(rotate_decode_t decoded, registers_t &registers) {
 
     ap_uint<32> mask = 0;
     // Generate the mask
+    // MB and ME are in big endian notation, hence the position is reversed with 31-i
     for (uint32_t i = 0; i < 32; i++) {
 #pragma HLS unroll
         if (mask_begin > mask_end) {
             if (i <= mask_end) {
-                mask[i] = 1;
+                mask[31-i] = 1;
             } else if (i >= mask_begin) {
-                mask[i] = 1;
+                mask[31-i] = 1;
             } else {
-                mask[i] = 0;
+                mask[31-i] = 0;
             }
         } else {
             if (i >= mask_begin && i <= mask_end) {
-                mask[i] = 1;
+                mask[31-i] = 1;
             } else {
-                mask[i] = 0;
+                mask[31-i] = 0;
             }
         }
     }
@@ -403,11 +404,11 @@ void fixed_point::rotate(rotate_decode_t decoded, registers_t &registers) {
 void fixed_point::shift(shift_decode_t decoded, registers_t &registers) {
 #pragma HLS pipeline
     ap_uint<32> source = registers.GPR[decoded.source_reg_address];
-    ap_uint<32> shift;
+    ap_uint<5> shift;
     if (decoded.shift_imm) {
         shift = decoded.shift_immediate;
     } else {
-        shift = registers.GPR[decoded.shift_reg_address];
+        shift = registers.GPR[decoded.shift_reg_address](4, 0);
     }
 
     // Saturation
