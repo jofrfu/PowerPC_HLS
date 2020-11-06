@@ -411,9 +411,6 @@ void fixed_point::shift(shift_decode_t decoded, registers_t &registers) {
         shift = registers.GPR[decoded.shift_reg_address](4, 0);
     }
 
-    // Saturation
-    //if (shift > 32) shift = 32;
-
     ap_uint<32> result;
     ap_uint<1> carry;
     if (decoded.shift_left) {
