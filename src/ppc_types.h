@@ -343,12 +343,16 @@ typedef struct {
 	ap_uint<5> CR_result_reg_address;
 } condition_decode_t;
 
+namespace branch {
+    typedef enum {
+        BRANCH, SYSTEM_CALL, CONDITION
+    } execute_t;
+}
+
 typedef struct {
-	bool execute_branch;
+	branch::execute_t execute;
 	branch_decode_t branch_decoded;
-	bool execute_system_call;
 	system_call_decode_t system_call_decoded;
-	bool execute_condition;
 	condition_decode_t condition_decoded;
 } branch_decode_result_t;
 

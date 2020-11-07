@@ -36,9 +36,7 @@ decode_result_t pipeline::decode(uint32_t instruction_port) {
 
 	// branch processor decode structures
 	branch_decode_result_t branch_result;
-	branch_result.execute_branch = false;
-	branch_result.execute_system_call = false;
-	branch_result.execute_condition = false;
+	branch_result.execute = branch::CONDITION;
 
 	branch_decode_t branch_decoded;
 	init_branch(branch_decoded)
@@ -117,7 +115,7 @@ decode_result_t pipeline::decode(uint32_t instruction_port) {
 	switch(instruction.I_Form.OPCD) {
 		// B Form Branch instructions
 		case 16: // bc, bca, bcl, bcla
-			branch_result.execute_branch = true;
+			branch_result.execute = branch::BRANCH;
 			branch_decoded.operation = BRANCH;
 			branch_decoded.LK = instruction.B_Form.LK;
 			branch_decoded.AA = instruction.B_Form.AA;
@@ -129,7 +127,7 @@ decode_result_t pipeline::decode(uint32_t instruction_port) {
 			break;
 		// I Form Branch instructions
 		case 18: // b, ba, bl, bla
-			branch_result.execute_branch = true;
+			branch_result.execute = branch::BRANCH;
 			branch_decoded.operation = BRANCH_CONDITIONAL;
 			branch_decoded.LK = instruction.I_Form.LK;
 			branch_decoded.AA = instruction.I_Form.AA;
@@ -143,7 +141,7 @@ decode_result_t pipeline::decode(uint32_t instruction_port) {
 			switch(instruction.XL_Form.XO) {
 				// XL Form Branch instructions
 				case 16: // bclr, bclrl
-					branch_result.execute_branch = true;
+					branch_result.execute = branch::BRANCH;
 					branch_decoded.operation = BRANCH_CONDITIONAL_LINK;
 					branch_decoded.LK = instruction.XL_Form.LK;
 					branch_decoded.AA = 0;
@@ -154,7 +152,7 @@ decode_result_t pipeline::decode(uint32_t instruction_port) {
 					branch_decoded.BH = instruction.XL_Form.BB; // BH is part of BH in XL Form
 					break;
 				case 528: // bcctr, bcctrl
-					branch_result.execute_branch = true;
+					branch_result.execute = branch::BRANCH;
 					branch_decoded.operation = BRANCH_CONDITIONAL_COUNT;
 					branch_decoded.LK = instruction.XL_Form.LK;
 					branch_decoded.AA = 0;
@@ -166,56 +164,56 @@ decode_result_t pipeline::decode(uint32_t instruction_port) {
 					break;
 				// XL Form Condition instructions
 				case 0: // mcrf
-					branch_result.execute_condition = true;
+					branch_result.execute = branch::CONDITION;
 					condition_decoded.operation = condition::MOVE;
 					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
 					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
 					condition_decoded.CR_result_reg_address = instruction.XL_Form.BT;
 					break;
 				case 33: // crnor
-					branch_result.execute_condition = true;
+					branch_result.execute = branch::CONDITION;
 					condition_decoded.operation = condition::NOR;
 					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
 					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
 					condition_decoded.CR_result_reg_address = instruction.XL_Form.BT;
 					break;
 				case 129: // crandc
-					branch_result.execute_condition = true;
+					branch_result.execute = branch::CONDITION;
 					condition_decoded.operation = condition::AND_COMPLEMENT;
 					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
 					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
 					condition_decoded.CR_result_reg_address = instruction.XL_Form.BT;
 					break;
 				case 193: // crxor
-					branch_result.execute_condition = true;
+					branch_result.execute = branch::CONDITION;
 					condition_decoded.operation = condition::XOR;
 					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
 					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
 					condition_decoded.CR_result_reg_address = instruction.XL_Form.BT;
 					break;
 				case 257: // crand
-					branch_result.execute_condition = true;
+					branch_result.execute = branch::CONDITION;
 					condition_decoded.operation = condition::AND;
 					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
 					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
 					condition_decoded.CR_result_reg_address = instruction.XL_Form.BT;
 					break;
 				case 289: // creqv
-					branch_result.execute_condition = true;
+					branch_result.execute = branch::CONDITION;
 					condition_decoded.operation = condition::EQUIVALENT;
 					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
 					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
 					condition_decoded.CR_result_reg_address = instruction.XL_Form.BT;
 					break;
 				case 417: // crorc
-					branch_result.execute_condition = true;
+					branch_result.execute = branch::CONDITION;
 					condition_decoded.operation = condition::OR_COMPLEMENT;
 					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
 					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
 					condition_decoded.CR_result_reg_address = instruction.XL_Form.BT;
 					break;
 				case 449: // cror
-					branch_result.execute_condition = true;
+					branch_result.execute = branch::CONDITION;
 					condition_decoded.operation = condition::OR;
 					condition_decoded.CR_op1_reg_address = instruction.XL_Form.BA;
 					condition_decoded.CR_op2_reg_address = instruction.XL_Form.BB;
@@ -229,7 +227,7 @@ decode_result_t pipeline::decode(uint32_t instruction_port) {
 				case 0: // Invalid instruction!
 					break;
 				case 1: // sc
-					branch_result.execute_system_call = true;
+					branch_result.execute = branch::SYSTEM_CALL;
 					system_call_decoded = instruction.SC_Form.LEV;
 					break;
 			}

@@ -57,10 +57,10 @@ public:
         ap_uint<32> temp = value;
         for(int32_t i = 0; i < 8; i++) {
 #pragma HLS unroll
-            CR[7-i].condition_fixed_point.SO = temp[i*4+0];
-            CR[7-i].condition_fixed_point.EQ = temp[i*4+1];
-            CR[7-i].condition_fixed_point.GT = temp[i*4+2];
-            CR[7-i].condition_fixed_point.LT = temp[i*4+3];
+            CR[i].condition_fixed_point.SO = temp[i*4+0];
+            CR[i].condition_fixed_point.EQ = temp[i*4+1];
+            CR[i].condition_fixed_point.GT = temp[i*4+2];
+            CR[i].condition_fixed_point.LT = temp[i*4+3];
         }
         return *this;
     }
@@ -69,10 +69,10 @@ public:
         ap_uint<32> temp;
         for(int32_t i = 0; i < 8; i++) {
 #pragma HLS unroll
-            temp[i*4+0] = CR[7-i].condition_fixed_point.SO;
-            temp[i*4+1] = CR[7-i].condition_fixed_point.EQ;
-            temp[i*4+2] = CR[7-i].condition_fixed_point.GT;
-            temp[i*4+3] = CR[7-i].condition_fixed_point.LT;
+            temp[i*4+0] = CR[i].condition_fixed_point.SO;
+            temp[i*4+1] = CR[i].condition_fixed_point.EQ;
+            temp[i*4+2] = CR[i].condition_fixed_point.GT;
+            temp[i*4+3] = CR[i].condition_fixed_point.LT;
         }
         return temp;
     }
@@ -120,6 +120,7 @@ typedef struct {
 	ap_uint<32> link_register; // Link register
 	fixed_point_exception_reg fixed_exception_reg; // Fixed point exception register
 	ap_uint<32> count_register; // Count register
+	ap_uint<32> program_counter; // Program counter register
 } registers_t;
 
 #endif
