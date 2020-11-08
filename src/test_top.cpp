@@ -19,9 +19,9 @@ void top(uint32_t instruction_memory[1024], ap_uint<32> data_memory[1024]) {
 #pragma HLS ARRAY_PARTITION variable=registers.FPR complete dim=1
 #pragma HLS ARRAY_PARTITION variable=registers.condition_reg.CR complete dim=1
 
-	for(int32_t i = 0; i < 1024; i++) {
+	for(registers.program_counter = 0; true; registers.program_counter += 4) {
 #pragma HLS dataflow
 //#pragma HLS stable variable=registers
-		process(instruction_memory[i], data_memory);
+		process(instruction_memory[registers.program_counter(31, 2)], data_memory);
 	}
 }

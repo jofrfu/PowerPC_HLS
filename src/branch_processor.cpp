@@ -125,10 +125,10 @@ void branch::condition(condition_decode_t decoded, registers_t &registers) {
             CR[decoded.CR_result_reg_address] = CR[decoded.CR_op1_reg_address] ^ CR[decoded.CR_op2_reg_address];
             break;
         case condition::NAND:
-            CR[decoded.CR_result_reg_address] = ~(CR[decoded.CR_op1_reg_address] & CR[decoded.CR_op2_reg_address]);
+            CR[decoded.CR_result_reg_address] = !(CR[decoded.CR_op1_reg_address] & CR[decoded.CR_op2_reg_address]);
             break;
         case condition::NOR:
-            CR[decoded.CR_result_reg_address] = ~(CR[decoded.CR_op1_reg_address] | CR[decoded.CR_op2_reg_address]);
+            CR[decoded.CR_result_reg_address] = !(CR[decoded.CR_op1_reg_address] | CR[decoded.CR_op2_reg_address]);
             break;
         case condition::EQUIVALENT:
             CR[decoded.CR_result_reg_address] = CR[decoded.CR_op1_reg_address] ^ ~CR[decoded.CR_op2_reg_address];

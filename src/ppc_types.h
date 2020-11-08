@@ -345,7 +345,7 @@ typedef struct {
 
 namespace branch {
     typedef enum {
-        BRANCH, SYSTEM_CALL, CONDITION
+        NONE, BRANCH, SYSTEM_CALL, CONDITION
     } execute_t;
 }
 
@@ -483,7 +483,7 @@ typedef struct {
 
 namespace fixed_point {
     typedef enum {
-        LOAD, STORE, LOAD_STRING, STORE_STRING, ADD_SUB, MUL, DIV, COMPARE, TRAP, LOGICAL, ROTATE, SHIFT, SYSTEM
+        NONE, LOAD, STORE, LOAD_STRING, STORE_STRING, ADD_SUB, MUL, DIV, COMPARE, TRAP, LOGICAL, ROTATE, SHIFT, SYSTEM
     } execute_t;
 }
 

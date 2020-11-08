@@ -36,7 +36,7 @@ decode_result_t pipeline::decode(uint32_t instruction_port) {
 
 	// branch processor decode structures
 	branch_decode_result_t branch_result;
-	branch_result.execute = branch::CONDITION;
+	branch_result.execute = branch::NONE;
 
 	branch_decode_t branch_decoded;
 	init_branch(branch_decoded)
@@ -48,7 +48,7 @@ decode_result_t pipeline::decode(uint32_t instruction_port) {
 
 	// fixed point processor decode structures
 	fixed_point_decode_result_t fixed_point_decode_result;
-	fixed_point_decode_result.execute = fixed_point::LOGICAL;
+	fixed_point_decode_result.execute = fixed_point::NONE;
 
 	load_store_decode_t load_store_decoded;
 	init_load_store(load_store_decoded)
