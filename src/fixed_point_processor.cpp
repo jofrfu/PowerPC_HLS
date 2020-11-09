@@ -23,7 +23,6 @@
 #include "fixed_point_utils.hpp"
 
 void fixed_point::add_sub(add_sub_decode_t decoded, registers_t &registers) {
-#pragma HLS pipeline
     ap_uint<32> op1;
     ap_uint<32> op2;
 
@@ -74,7 +73,6 @@ void fixed_point::add_sub(add_sub_decode_t decoded, registers_t &registers) {
 }
 
 void fixed_point::multiply(mul_decode_t decoded, registers_t &registers) {
-#pragma HLS pipeline
     ap_int<33> op1, op2;
 
     op1 = registers.GPR[decoded.op1_reg_address];
@@ -135,7 +133,6 @@ void fixed_point::multiply(mul_decode_t decoded, registers_t &registers) {
 }
 
 void fixed_point::divide(div_decode_t decoded, registers_t &registers) {
-#pragma HLS pipeline
     ap_int<33> signed_dividend;
     ap_int<33> signed_divisor;
     signed_dividend(31, 0) = registers.GPR[decoded.dividend_reg_address];
@@ -181,7 +178,6 @@ void fixed_point::divide(div_decode_t decoded, registers_t &registers) {
 }
 
 void fixed_point::compare(cmp_decode_t decoded, registers_t &registers) {
-#pragma HLS pipeline
     ap_int<33> op1, op2;
 
     op1(31, 0) = registers.GPR[decoded.op1_reg_address];
@@ -220,7 +216,6 @@ void fixed_point::compare(cmp_decode_t decoded, registers_t &registers) {
 }
 
 bool fixed_point::trap(trap_decode_t decoded, registers_t &registers) {
-#pragma HLS pipeline
     int32_t op1 = registers.GPR[decoded.op1_reg_address];
     int32_t op2;
 
@@ -245,7 +240,6 @@ bool fixed_point::trap(trap_decode_t decoded, registers_t &registers) {
 }
 
 void fixed_point::logical(log_decode_t decoded, registers_t &registers) {
-#pragma HLS pipeline
     ap_uint<32> op1 = registers.GPR[decoded.op1_reg_address];
     ap_uint<32> op2;
 
@@ -343,7 +337,6 @@ void fixed_point::logical(log_decode_t decoded, registers_t &registers) {
 }
 
 void fixed_point::rotate(rotate_decode_t decoded, registers_t &registers) {
-#pragma HLS pipeline
     ap_uint<32> source = registers.GPR[decoded.source_reg_address];
     ap_uint<5> shift;
     if (decoded.shift_imm) {
@@ -402,7 +395,6 @@ void fixed_point::rotate(rotate_decode_t decoded, registers_t &registers) {
 }
 
 void fixed_point::shift(shift_decode_t decoded, registers_t &registers) {
-#pragma HLS pipeline
     ap_uint<32> source = registers.GPR[decoded.source_reg_address];
     ap_uint<5> shift;
     if (decoded.shift_imm) {
@@ -435,7 +427,6 @@ void fixed_point::shift(shift_decode_t decoded, registers_t &registers) {
 }
 
 void fixed_point::system(system_decode_t decoded, registers_t &registers) {
-#pragma HLS pipeline
     // The order of the two 5 bit halves is reversed
     ap_uint<10> SPR;
     SPR(4, 0) = decoded.SPR(9, 5);

@@ -28,7 +28,7 @@
 #include "decode_utils.hpp"
 
 decode_result_t pipeline::decode(uint32_t instruction_port) {
-#pragma HLS pipeline
+//#pragma HLS pipeline
 	instruction_t instruction;
 	instruction = ap_uint<32>(instruction_port);
 

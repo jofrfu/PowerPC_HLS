@@ -28,7 +28,6 @@
 #include "branch_processor.hpp"
 
 bool pipeline::execute(decode_result_t decoded, registers_t &registers, ap_uint<32> *data_memory) {
-#pragma HLS pipeline
 	bool trap_happened = false;
 	if(decoded.fixed_point_decode_result.execute != fixed_point::NONE) {
         switch (decoded.fixed_point_decode_result.execute) {
@@ -41,12 +40,12 @@ bool pipeline::execute(decode_result_t decoded, registers_t &registers, ap_uint<
                                                   data_memory);
                 break;
             case fixed_point::LOAD_STRING:
-                fixed_point::load_string<ap_uint<32> *>(decoded.fixed_point_decode_result.load_store_decoded, registers,
-                                                        data_memory);
+                //fixed_point::load_string<ap_uint<32> *>(decoded.fixed_point_decode_result.load_store_decoded, registers,
+                //                                        data_memory);
                 break;
             case fixed_point::STORE_STRING:
-                fixed_point::store_string<ap_uint<32> *>(decoded.fixed_point_decode_result.load_store_decoded,
-                                                         registers, data_memory);
+                //fixed_point::store_string<ap_uint<32> *>(decoded.fixed_point_decode_result.load_store_decoded,
+                //                                         registers, data_memory);
                 break;
             case fixed_point::ADD_SUB:
                 fixed_point::add_sub(decoded.fixed_point_decode_result.add_sub_decoded, registers);
@@ -81,7 +80,7 @@ bool pipeline::execute(decode_result_t decoded, registers_t &registers, ap_uint<
     } else if(decoded.branch_decode_result.execute != branch::NONE) {
 	    switch(decoded.branch_decode_result.execute) {
             case branch::BRANCH:
-                branch::branch(decoded.branch_decode_result.branch_decoded, registers);
+                //branch::branch(decoded.branch_decode_result.branch_decoded, registers);
                 break;
             case branch::SYSTEM_CALL:
                 branch::system_call(decoded.branch_decode_result.system_call_decoded, registers);
