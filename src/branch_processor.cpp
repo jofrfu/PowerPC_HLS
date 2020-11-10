@@ -55,7 +55,7 @@ void branch::branch(branch_decode_t decoded, registers_t &registers) {
                 registers.count_register--;
             }
             bool ctr_ok = decoded.BO[4-2] | ((registers.count_register != 0) ^ decoded.BO[4-3]);
-            bool cond_ok = decoded.BO[4-0] | (registers.condition_reg.getCR()[decoded.BI] ^ ~decoded.BO[4-1]);
+            bool cond_ok = decoded.BO[4-0] | (registers.condition_reg.getCR()[31-decoded.BI] ^ ~decoded.BO[4-1]);
             if(ctr_ok && cond_ok) {
                 NIA_ext(1, 0) = 0;
                 NIA_ext(15, 2) = decoded.BD;
@@ -82,7 +82,7 @@ void branch::branch(branch_decode_t decoded, registers_t &registers) {
                 registers.count_register--;
             }
             bool ctr_ok = decoded.BO[4 - 2] | ((registers.count_register != 0) ^ decoded.BO[4 - 3]);
-            bool cond_ok = decoded.BO[4 - 0] | (registers.condition_reg.getCR()[decoded.BI] ^ ~decoded.BO[4 - 1]);
+            bool cond_ok = decoded.BO[4 - 0] | (registers.condition_reg.getCR()[31-decoded.BI] ^ ~decoded.BO[4 - 1]);
             if (ctr_ok && cond_ok) {
                 NIA(1, 0) = 0;
                 NIA(31, 2) = registers.link_register(31, 2);
@@ -94,10 +94,10 @@ void branch::branch(branch_decode_t decoded, registers_t &registers) {
             break;
         case BRANCH_CONDITIONAL_COUNT: {
             // BO is in big endian notation, reverse the access (4-x)
-            bool cond_ok = decoded.BO[4-0] | (registers.condition_reg.getCR()[decoded.BI] ^ ~decoded.BO[4 - 1]);
+            bool cond_ok = decoded.BO[4-0] | (registers.condition_reg.getCR()[31-decoded.BI] ^ ~decoded.BO[4 - 1]);
             if(cond_ok) {
                 NIA(1, 0) = 0;
-                NIA(31, 2) = registers.link_register(31, 2);
+                NIA(31, 2) = registers.count_register(31, 2);
 
                 // Take the branch, every iteration the PC will be incremented, subtract 4 to correct the NIA
                 registers.program_counter = NIA-4;

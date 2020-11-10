@@ -1,0 +1,41 @@
+{
+  "_comment" : "Branch conditionally and reduce the CTR.",
+  "Before" : {
+    "GPR" : {
+    },
+
+    "CR" : {
+      "CR2" : {
+        "LT" : false,
+        "GT" : true,
+        "EQ" : false,
+        "SO" : false
+      }
+    },
+    "XER" : 0,
+    "LR" : 0,
+    "CTR" : 728,
+    "PC" : 256
+  },
+
+  "After" : {
+    "GPR" : {
+    },
+
+    "CR" : {
+      "CR2" : {
+        "LT" : false,
+        "GT" : true,
+        "EQ" : false,
+        "SO" : false
+      }
+    },
+    "XER" : 0,
+    "LR" : 0,
+    "CTR" : 727,
+    "PC" : 23484
+  },
+
+  "Assembly" :
+  "bca 8, 9, 23484"
+}

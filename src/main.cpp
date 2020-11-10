@@ -156,6 +156,7 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                 auto XER = before["XER"];
                 auto LR = before["LR"];
                 auto CTR = before["CTR"];
+                auto PC = before["PC"];
 
                 // Check GPRs
                 if(!GPR.is_null()) {
@@ -260,6 +261,11 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                     registers.count_register = CTR.get<uint32_t>();
                 }
 
+                // Check PC
+                if(!PC.is_null()) {
+                    registers.program_counter = PC.get<uint32_t>();
+                }
+
                 // Initialize data (single addressed data support)
                 // Address is supplied on a per byte basis
                 auto sa_data = before["Data"];
@@ -297,6 +303,7 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                 auto XER = after["XER"];
                 auto LR = after["LR"];
                 auto CTR = after["CTR"];
+                auto PC = after["PC"];
 
                 // Check GPRs
                 if (!GPR.is_null()) {
@@ -421,6 +428,12 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                 if(!CTR.is_null()) {
                     INFO("Checking CTR.");
                     REQUIRE(registers.count_register == CTR.get<uint32_t>());
+                }
+
+                // Check PC
+                if(!PC.is_null()) {
+                    INFO("Checking PC.");
+                    REQUIRE(registers.program_counter == PC.get<uint32_t>());
                 }
 
                 // Check trap handler execution

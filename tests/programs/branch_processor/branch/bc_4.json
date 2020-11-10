@@ -1,0 +1,41 @@
+{
+  "_comment" : "Branch conditionally, when CTR reaches 0.",
+  "Before" : {
+    "GPR" : {
+    },
+
+    "CR" : {
+      "CR2" : {
+        "LT" : false,
+        "GT" : true,
+        "EQ" : false,
+        "SO" : false
+      }
+    },
+    "XER" : 0,
+    "LR" : 0,
+    "CTR" : 1,
+    "PC" : 256
+  },
+
+  "After" : {
+    "GPR" : {
+    },
+
+    "CR" : {
+      "CR2" : {
+        "LT" : false,
+        "GT" : true,
+        "EQ" : false,
+        "SO" : false
+      }
+    },
+    "XER" : 0,
+    "LR" : 260,
+    "CTR" : 0,
+    "PC" : 23484
+  },
+
+  "Assembly" :
+  "bcla 18, 0, 23484"
+}

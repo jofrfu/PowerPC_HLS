@@ -116,7 +116,7 @@ decode_result_t pipeline::decode(uint32_t instruction_port) {
 		// B Form Branch instructions
 		case 16: // bc, bca, bcl, bcla
 			branch_result.execute = branch::BRANCH;
-			branch_decoded.operation = BRANCH;
+			branch_decoded.operation = BRANCH_CONDITIONAL;
 			branch_decoded.LK = instruction.B_Form.LK;
 			branch_decoded.AA = instruction.B_Form.AA;
 			branch_decoded.LI = 0;
@@ -128,7 +128,7 @@ decode_result_t pipeline::decode(uint32_t instruction_port) {
 		// I Form Branch instructions
 		case 18: // b, ba, bl, bla
 			branch_result.execute = branch::BRANCH;
-			branch_decoded.operation = BRANCH_CONDITIONAL;
+			branch_decoded.operation = BRANCH;
 			branch_decoded.LK = instruction.I_Form.LK;
 			branch_decoded.AA = instruction.I_Form.AA;
 			branch_decoded.LI = instruction.I_Form.LI;
