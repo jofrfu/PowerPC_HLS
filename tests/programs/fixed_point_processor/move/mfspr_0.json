@@ -1,0 +1,26 @@
+{
+  "_comment" : "Move XER to register 7.",
+  "Before" : {
+    "GPR" : {
+      "7" : 0
+    },
+
+    "CR" : 0,
+    "XER" : 3561530518,
+    "LR" : 0,
+    "CTR" : 0
+  },
+
+  "After" : {
+    "GPR" : {
+      "7" : 3561530518
+    },
+    "CR" : 0,
+    "XER" : 3561530518,
+    "LR" : 0,
+    "CTR" : 0
+  },
+
+  "Assembly" :
+  "mfspr 7, 1"
+}

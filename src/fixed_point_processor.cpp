@@ -394,6 +394,7 @@ void fixed_point::rotate(rotate_decode_t decoded, registers_t &registers) {
     }
 }
 
+// TODO: Combine the implementation of shift and rotate. Shifts are just a special case of rotation. Add carry logic.
 void fixed_point::shift(shift_decode_t decoded, registers_t &registers) {
     ap_uint<32> source = registers.GPR[decoded.source_reg_address];
     ap_uint<5> shift;
@@ -452,7 +453,7 @@ void fixed_point::system(system_decode_t decoded, registers_t &registers) {
                     registers.link_register = registers.GPR[decoded.RS_RT];
                     break;
                 case 9:
-                    registers.condition_reg = registers.GPR[decoded.RS_RT];
+                    registers.count_register = registers.GPR[decoded.RS_RT];
                     break;
             }
             break;
@@ -465,7 +466,7 @@ void fixed_point::system(system_decode_t decoded, registers_t &registers) {
                     registers.GPR[decoded.RS_RT] = registers.link_register;
                     break;
                 case 9:
-                    registers.GPR[decoded.RS_RT] = registers.condition_reg.getCR();
+                    registers.GPR[decoded.RS_RT] = registers.count_register;
                     break;
             }
             break;

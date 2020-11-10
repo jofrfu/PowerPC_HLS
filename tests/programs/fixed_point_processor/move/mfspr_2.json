@@ -1,0 +1,26 @@
+{
+  "_comment" : "Move CTR to register 7.",
+  "Before" : {
+    "GPR" : {
+      "7" : 0
+    },
+
+    "CR" : 0,
+    "XER" : 0,
+    "LR" : 0,
+    "CTR" : 3561530518
+  },
+
+  "After" : {
+    "GPR" : {
+      "7" : 3561530518
+    },
+    "CR" : 0,
+    "XER" : 0,
+    "LR" : 0,
+    "CTR" : 3561530518
+  },
+
+  "Assembly" :
+  "mfspr 7, 9"
+}

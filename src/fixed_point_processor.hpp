@@ -43,8 +43,8 @@ namespace fixed_point {
             sum2 = registers.GPR[decoded.sum2_reg_address];
         }
 
-        uint32_t effective_address = sum1 + sum2;
-        ap_uint<30> upper_address = effective_address >> 2;
+        ap_uint<32> effective_address = sum1 + sum2;
+        ap_uint<30> upper_address = effective_address(31, 2);
         ap_uint<2> lower_address = effective_address;
 
         ap_uint<32> interm;
@@ -205,8 +205,8 @@ namespace fixed_point {
             sum2 = registers.GPR[decoded.sum2_reg_address];
         }
 
-        uint32_t effective_address = sum1 + sum2;
-        ap_uint<30> upper_address = effective_address >> 2;
+        ap_uint<32> effective_address = sum1 + sum2;
+        ap_uint<30> upper_address = effective_address(31, 2);
         ap_uint<2> lower_address = effective_address;
 
         int32_t n;
@@ -355,7 +355,7 @@ namespace fixed_point {
             n = registers.fixed_exception_reg.exception_fields.string_bytes;
         }
 
-        uint32_t ea = sum1 + sum2;
+        ap_uint<32> ea = sum1 + sum2;
         for (ap_uint<2> i = 3; n > 0; i--, n--, ea++) {
 //#pragma HLS unroll factor=4 TODO: write the loop in a way, that 4 bytes accesses the memory once
 #pragma HLS loop_tripcount min=1 max=120 avg=32
@@ -363,10 +363,10 @@ namespace fixed_point {
                 r++;
                 registers.GPR[r] = 0;
             }
-            ap_uint<30> upper_address = ea >> 2;
+            ap_uint<30> upper_address = ea(31, 2);
             ap_uint<2> lower_address = ea;
-            registers.GPR[r]((i + 1) * 8 - 1, i * 8) = data_memory[upper_address]((lower_address + 1) * 8 - 1,
-                                                                                  lower_address * 8);
+            registers.GPR[r]((i + 1) * 8 - 1, i * 8) =
+                    data_memory[upper_address]((lower_address + 1) * 8 - 1,lower_address * 8);
         }
     }
 
@@ -395,17 +395,17 @@ namespace fixed_point {
             n = registers.fixed_exception_reg.exception_fields.string_bytes;
         }
 
-        uint32_t ea = sum1 + sum2;
+        ap_uint<32> ea = sum1 + sum2;
         for (ap_uint<2> i = 3; n > 0; i--, n--, ea++) {
 //#pragma HLS unroll factor=4 TODO: write the loop in a way, that 4 bytes accesses the memory once
 #pragma HLS loop_tripcount min=1 max=120 avg=32
             if (i == 3) {
                 r++;
             }
-            ap_uint<30> upper_address = ea >> 2;
+            ap_uint<30> upper_address = ea(31, 2);
             ap_uint<2> lower_address = ea;
-            data_memory[upper_address]((lower_address + 1) * 8 - 1, lower_address * 8) = registers.GPR[r](
-                    (i + 1) * 8 - 1, i * 8);
+            data_memory[upper_address]((lower_address + 1) * 8 - 1, lower_address * 8) =
+                    registers.GPR[r]((i + 1) * 8 - 1, i * 8);
         }
     }
 

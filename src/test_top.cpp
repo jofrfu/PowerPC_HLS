@@ -1,15 +1,14 @@
 
 #include "ppc_types.h"
 #include "instruction_decode.hpp"
-#include "fixed_point_processor.hpp"
 #include "branch_processor.hpp"
 #include "pipeline.hpp"
 #include <ap_int.h>
 
 static registers_t registers;
 
-void process(uint32_t *instruction, ap_uint<32> *data_memory) {
-	decode_result_t decoded = pipeline::decode(instruction[registers.program_counter(31, 2)]);
+void process(uint32_t *instruction_memory, ap_uint<32> *data_memory) {
+	decode_result_t decoded = pipeline::decode(instruction_memory[registers.program_counter(31, 2)]);
 	if(decoded.branch_decode_result.execute == branch::BRANCH) {
 		// Extracting branch from the "pipeline" reduces the minimal execution time.
 		branch::branch(decoded.branch_decode_result.branch_decoded, registers);

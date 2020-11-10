@@ -1,0 +1,26 @@
+{
+  "_comment" : "Move register 5 to LR.",
+  "Before" : {
+    "GPR" : {
+      "5" : 3561530518
+    },
+
+    "CR" : 0,
+    "XER" : 0,
+    "LR" : 0,
+    "CTR" : 0
+  },
+
+  "After" : {
+    "GPR" : {
+      "5" : 3561530518
+    },
+    "CR" : 0,
+    "XER" : 0,
+    "LR" : 3561530518,
+    "CTR" : 0
+  },
+
+  "Assembly" :
+  "mtspr 8, 5"
+}

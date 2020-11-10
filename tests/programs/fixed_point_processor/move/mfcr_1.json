@@ -1,0 +1,74 @@
+{
+  "_comment" : "Move register 5 to CR.",
+  "Before" : {
+    "GPR": {
+      "5": 0
+    },
+    "CR": 3561530518,
+    "XER": 0,
+    "LR": 0,
+    "CTR": 0
+  },
+
+  "After" : {
+    "GPR" : {
+      "5" : 3561530518
+    },
+    "CR" : {
+      "CR0" : {
+        "LT" : true,
+        "GT" : true,
+        "EQ" : false,
+        "SO" : true
+      },
+      "CR1" : {
+        "LT" : false,
+        "GT" : true,
+        "EQ" : false,
+        "SO" : false
+      },
+      "CR2" : {
+        "LT" : false,
+        "GT" : true,
+        "EQ" : false,
+        "SO" : false
+      },
+      "CR3" : {
+        "LT" : true,
+        "GT" : false,
+        "EQ" : false,
+        "SO" : false
+      },
+      "CR4" : {
+        "LT" : true,
+        "GT" : false,
+        "EQ" : true,
+        "SO" : false
+      },
+      "CR5" : {
+        "LT" : false,
+        "GT" : true,
+        "EQ" : false,
+        "SO" : false
+      },
+      "CR6" : {
+        "LT" : true,
+        "GT" : false,
+        "EQ" : false,
+        "SO" : true
+      },
+      "CR7" : {
+        "LT" : false,
+        "GT" : true,
+        "EQ" : true,
+        "SO" : false
+      }
+    },
+    "XER" : 0,
+    "LR" : 0,
+    "CTR" : 0
+  },
+
+  "Assembly" :
+  "mfcr 5"
+}

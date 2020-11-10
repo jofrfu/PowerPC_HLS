@@ -26,7 +26,7 @@
 
 #include "instruction_decode.hpp"
 #include "pipeline.hpp"
-#include "fixed_point_processor.hpp"
+#include "branch_processor.hpp"
 
 int32_t read_byte_code(const char *file_name, uint32_t *instruction_memory, uint32_t memory_size) {
 	std::ifstream byte_code(file_name, std::ios::binary);
@@ -110,8 +110,16 @@ int32_t read_data(const char *file_name, ap_uint<32> *data_memory, uint32_t memo
 }
 
 bool execute_single_instruction(uint32_t instruction, registers_t &registers, ap_uint<32> *data_memory) {
-	decode_result_t decoded = pipeline::decode(instruction);
-	return pipeline::execute(decoded, registers, data_memory);
+    decode_result_t decoded = pipeline::decode(instruction);
+    bool trap = false;
+    if(decoded.branch_decode_result.execute == branch::BRANCH) {
+        // Extracting branch from the "pipeline" reduces the minimal execution time.
+        branch::branch(decoded.branch_decode_result.branch_decoded, registers);
+    } else {
+        trap = pipeline::execute(decoded, registers, data_memory);
+    }
+    registers.program_counter += 4;
+    return trap;
 }
 
 void execute_program(uint32_t *instruction_memory, uint32_t size, registers_t &registers, ap_uint<32> *data_memory, trap_handler_t trap_handler) {
