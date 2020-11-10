@@ -418,7 +418,7 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                 }
 
                 // Check CTR
-                if(!LR.is_null()) {
+                if(!CTR.is_null()) {
                     INFO("Checking CTR.");
                     REQUIRE(registers.count_register == CTR.get<uint32_t>());
                 }
