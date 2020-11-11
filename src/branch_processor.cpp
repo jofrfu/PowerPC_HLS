@@ -114,35 +114,36 @@ void branch::branch(branch_decode_t decoded, registers_t &registers) {
 
 void branch::condition(condition_decode_t decoded, registers_t &registers) {
     ap_uint<32> CR = registers.condition_reg.getCR();
+    // Big endian notation, reverse access (31-x)
     switch(decoded.operation) {
         case condition::AND:
-            CR[decoded.CR_result_reg_address] = CR[decoded.CR_op1_reg_address] & CR[decoded.CR_op2_reg_address];
+            CR[31-decoded.CR_result_reg_address] = CR[31-decoded.CR_op1_reg_address] & CR[31-decoded.CR_op2_reg_address];
             break;
         case condition::OR:
-            CR[decoded.CR_result_reg_address] = CR[decoded.CR_op1_reg_address] | CR[decoded.CR_op2_reg_address];
+            CR[31-decoded.CR_result_reg_address] = CR[31-decoded.CR_op1_reg_address] | CR[31-decoded.CR_op2_reg_address];
             break;
         case condition::XOR:
-            CR[decoded.CR_result_reg_address] = CR[decoded.CR_op1_reg_address] ^ CR[decoded.CR_op2_reg_address];
+            CR[31-decoded.CR_result_reg_address] = CR[31-decoded.CR_op1_reg_address] ^ CR[31-decoded.CR_op2_reg_address];
             break;
         case condition::NAND:
-            CR[decoded.CR_result_reg_address] = !(CR[decoded.CR_op1_reg_address] & CR[decoded.CR_op2_reg_address]);
+            CR[31-decoded.CR_result_reg_address] = !(CR[31-decoded.CR_op1_reg_address] & CR[31-decoded.CR_op2_reg_address]);
             break;
         case condition::NOR:
-            CR[decoded.CR_result_reg_address] = !(CR[decoded.CR_op1_reg_address] | CR[decoded.CR_op2_reg_address]);
+            CR[31-decoded.CR_result_reg_address] = !(CR[31-decoded.CR_op1_reg_address] | CR[31-decoded.CR_op2_reg_address]);
             break;
         case condition::EQUIVALENT:
-            CR[decoded.CR_result_reg_address] = CR[decoded.CR_op1_reg_address] ^ ~CR[decoded.CR_op2_reg_address];
+            CR[31-decoded.CR_result_reg_address] = CR[31-decoded.CR_op1_reg_address] ^ ~CR[31-decoded.CR_op2_reg_address];
             break;
         case condition::AND_COMPLEMENT:
-            CR[decoded.CR_result_reg_address] = CR[decoded.CR_op1_reg_address] & ~CR[decoded.CR_op2_reg_address];
+            CR[31-decoded.CR_result_reg_address] = CR[31-decoded.CR_op1_reg_address] & ~CR[31-decoded.CR_op2_reg_address];
             break;
         case condition::OR_COMPLEMENT:
-            CR[decoded.CR_result_reg_address] = CR[decoded.CR_op1_reg_address] | ~CR[decoded.CR_op2_reg_address];
+            CR[31-decoded.CR_result_reg_address] = CR[31-decoded.CR_op1_reg_address] | ~CR[31-decoded.CR_op2_reg_address];
             break;
         case condition::MOVE: {
             // Big endian notation, reverse (7-x)
-            ap_uint<3> BF = 7-decoded.CR_result_reg_address(4, 1);
-            ap_uint<3> BFA = 7-decoded.CR_op1_reg_address(4, 1);
+            ap_uint<3> BF = 7-decoded.CR_result_reg_address(4, 2);
+            ap_uint<3> BFA = 7-decoded.CR_op1_reg_address(4, 2);
             CR(4*(BF+1)-1, 4*BF) = CR(4*(BFA+1)-1, 4*BFA);
         }
             break;
