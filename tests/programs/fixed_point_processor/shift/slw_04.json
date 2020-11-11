@@ -1,10 +1,10 @@
 {
-    "_comment" : "Shift left of UINT32_MAX by 31 bits. 31 is the maximum shift according to IBM specs.",
+    "_comment" : "Shift left of UINT32_MAX by 32 bits.",
     "Before" : {
         "GPR" : {
             "1" : 0,
             "2" : 4294967295,
-            "3" : 31
+            "3" : 32
         },
         
         "CR" : 0,
@@ -14,9 +14,9 @@
     
     "After" : {
         "GPR" : {
-            "1" : 2147483648,
+            "1" : 0,
             "2" : 4294967295,
-            "3" : 31
+            "3" : 32
         },
         "CR" : 0,
         "XER" : 0,

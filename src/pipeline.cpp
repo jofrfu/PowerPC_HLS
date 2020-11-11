@@ -68,9 +68,6 @@ bool pipeline::execute(decode_result_t decoded, registers_t &registers, ap_uint<
             case fixed_point::ROTATE:
                 fixed_point::rotate(decoded.fixed_point_decode_result.rotate_decoded, registers);
                 break;
-            case fixed_point::SHIFT:
-                fixed_point::shift(decoded.fixed_point_decode_result.shift_decoded, registers);
-                break;
             case fixed_point::SYSTEM:
                 fixed_point::system(decoded.fixed_point_decode_result.system_decoded, registers);
                 break;
@@ -80,7 +77,7 @@ bool pipeline::execute(decode_result_t decoded, registers_t &registers, ap_uint<
     } else if(decoded.branch_decode_result.execute != branch::NONE) {
 	    switch(decoded.branch_decode_result.execute) {
             case branch::BRANCH:
-                //branch::branch(decoded.branch_decode_result.branch_decoded, registers);
+                // Branch will be executed beforehand for performance reasons
                 break;
             case branch::SYSTEM_CALL:
                 branch::system_call(decoded.branch_decode_result.system_call_decoded, registers);

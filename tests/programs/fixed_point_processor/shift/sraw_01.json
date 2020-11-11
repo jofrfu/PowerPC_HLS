@@ -1,10 +1,10 @@
 {
-    "_comment" : "Empty shift left",
+    "_comment" : "Shift right algebraic of 3772823 by 5 bit. Set CR0.",
     "Before" : {
         "GPR" : {
             "1" : 0,
-            "2" : 0,
-            "3" : 0
+            "2" : 3772823,
+            "3" : 5
         },
 
         "CR" : {
@@ -25,28 +25,26 @@
     
     "After" : {
         "GPR" : {
-            "1" : 0,
-            "2" : 0,
-            "3" : 0
+            "1" : 117900,
+            "2" : 3772823,
+            "3" : 5
         },
-
         "CR" : {
             "CR0" : {
                 "LT" : false,
-                "GT" : false,
+                "GT" : true,
                 "EQ" : false,
-                "SO" : false
+                "SO" : false,
+                "CA" : false
             }
         },
         "XER" : {
             "OV" : false,
-            "SO" : false,
-            "CA" : false
+            "SO" : false
         },
         "LR" : 0
-},
+    },
     
     "Assembly" :
-        "slw 1, 2, 3"
-
+        "sraw. 1, 2, 3"
 }

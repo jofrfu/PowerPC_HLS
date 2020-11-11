@@ -1,11 +1,12 @@
 {
-    "_comment" : "Empty shift left",
+    "_comment" : "Shift left of 3947302 by 7 bits - Set Condition Register.",
     "Before" : {
         "GPR" : {
             "1" : 0,
-            "2" : 0,
-            "3" : 0
+            "2" : 3947302,
+            "3" : 7
         },
+
 
         "CR" : {
             "CR0" : {
@@ -25,15 +26,14 @@
     
     "After" : {
         "GPR" : {
-            "1" : 0,
-            "2" : 0,
-            "3" : 0
+            "1" : 505254656,
+            "2" : 3947302,
+            "3" : 7
         },
-
         "CR" : {
             "CR0" : {
                 "LT" : false,
-                "GT" : false,
+                "GT" : true,
                 "EQ" : false,
                 "SO" : false
             }
@@ -44,9 +44,9 @@
             "CA" : false
         },
         "LR" : 0
-},
+    },
     
     "Assembly" :
-        "slw 1, 2, 3"
+        "slw. 1, 2, 3"
 
 }

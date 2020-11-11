@@ -1,10 +1,9 @@
 {
-    "_comment" : "Empty shift left",
+    "_comment" : "Shift right algebraic of 4252133062 by 31 bit. Set CR0.",
     "Before" : {
         "GPR" : {
             "1" : 0,
-            "2" : 0,
-            "3" : 0
+            "2" : 4252133062
         },
 
         "CR" : {
@@ -25,14 +24,12 @@
     
     "After" : {
         "GPR" : {
-            "1" : 0,
-            "2" : 0,
-            "3" : 0
+            "1" : -1,
+            "2" : 4252133062
         },
-
         "CR" : {
             "CR0" : {
-                "LT" : false,
+                "LT" : true,
                 "GT" : false,
                 "EQ" : false,
                 "SO" : false
@@ -41,12 +38,11 @@
         "XER" : {
             "OV" : false,
             "SO" : false,
-            "CA" : false
+            "CA" : true
         },
         "LR" : 0
-},
+    },
     
     "Assembly" :
-        "slw 1, 2, 3"
-
+        "srawi. 1, 2, 31"
 }

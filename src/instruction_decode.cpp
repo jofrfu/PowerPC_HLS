@@ -74,9 +74,6 @@ decode_result_t pipeline::decode(uint32_t instruction_port) {
 	rotate_decode_t rotate_decoded;
 	init_rotate(rotate_decoded)
 
-	shift_decode_t shift_decoded;
-	init_shift(shift_decoded)
-
 	system_decode_t system_decoded;
 	init_system(system_decoded)
 
@@ -243,6 +240,9 @@ decode_result_t pipeline::decode(uint32_t instruction_port) {
 			rotate_decoded.MB = instruction.M_Form.MB;
 			rotate_decoded.ME = instruction.M_Form.ME;
 			rotate_decoded.mask_insert = true;
+            rotate_decoded.shift = false;
+            rotate_decoded.left = false;
+            rotate_decoded.sign_extend = false;
 			if(instruction.M_Form.Rc == 1) {
 				rotate_decoded.alter_CR0 = true;
 			} else {
@@ -259,6 +259,9 @@ decode_result_t pipeline::decode(uint32_t instruction_port) {
 			rotate_decoded.MB = instruction.M_Form.MB;
 			rotate_decoded.ME = instruction.M_Form.ME;
 			rotate_decoded.mask_insert = false;
+            rotate_decoded.shift = false;
+            rotate_decoded.left = false;
+            rotate_decoded.sign_extend = false;
 			if(instruction.M_Form.Rc == 1) {
 				rotate_decoded.alter_CR0 = true;
 			} else {
@@ -275,6 +278,9 @@ decode_result_t pipeline::decode(uint32_t instruction_port) {
 			rotate_decoded.MB = instruction.M_Form.MB;
 			rotate_decoded.ME = instruction.M_Form.ME;
 			rotate_decoded.mask_insert = false;
+            rotate_decoded.shift = false;
+            rotate_decoded.left = false;
+            rotate_decoded.sign_extend = false;
 			if(instruction.M_Form.Rc == 1) {
 				rotate_decoded.alter_CR0 = true;
 			} else {
@@ -1088,19 +1094,22 @@ decode_result_t pipeline::decode(uint32_t instruction_port) {
 					break;
 				// X Form shift instructions
 				case 24: // slw, slw.
-					fixed_point_decode_result.execute = fixed_point::SHIFT;
-					shift_decoded.shift_imm = false;
-					shift_decoded.shift_immediate = 0;
-					shift_decoded.shift_reg_address = instruction.X_Form.RB;
-					shift_decoded.source_reg_address = instruction.X_Form.RT;
-					shift_decoded.target_reg_address = instruction.X_Form.RA;
-					shift_decoded.shift_left = true;
-					shift_decoded.sign_extend = false;
-					shift_decoded.alter_CA = false;
+					fixed_point_decode_result.execute = fixed_point::ROTATE;
+					rotate_decoded.shift_imm = false;
+                    rotate_decoded.shift_immediate = 0;
+                    rotate_decoded.shift_reg_address = instruction.X_Form.RB;
+                    rotate_decoded.source_reg_address = instruction.X_Form.RT;
+                    rotate_decoded.target_reg_address = instruction.X_Form.RA;
+                    rotate_decoded.MB = 0;
+                    rotate_decoded.ME = 0;
+                    rotate_decoded.mask_insert = false;
+                    rotate_decoded.shift = true;
+                    rotate_decoded.left = true;
+                    rotate_decoded.sign_extend = false;
 					if(instruction.X_Form.Rc == 1) {
-						shift_decoded.alter_CR0 = true;
+                        rotate_decoded.alter_CR0 = true;
 					} else {
-						shift_decoded.alter_CR0 = false;
+                        rotate_decoded.alter_CR0 = false;
 					}
 					break;
 				case 27: // sld, sld.
@@ -1111,57 +1120,66 @@ decode_result_t pipeline::decode(uint32_t instruction_port) {
 					// NOT SUPPORTED!!!
 					break;
 				case 536: // srw, srw.
-					fixed_point_decode_result.execute = fixed_point::SHIFT;
-					shift_decoded.shift_imm = false;
-					shift_decoded.shift_immediate = 0;
-					shift_decoded.shift_reg_address = instruction.X_Form.RB;
-					shift_decoded.source_reg_address = instruction.X_Form.RT;
-					shift_decoded.target_reg_address = instruction.X_Form.RA;
-					shift_decoded.shift_left = false;
-					shift_decoded.sign_extend = false;
-					shift_decoded.alter_CA = false;
+					fixed_point_decode_result.execute = fixed_point::ROTATE;
+                    rotate_decoded.shift_imm = false;
+                    rotate_decoded.shift_immediate = 0;
+                    rotate_decoded.shift_reg_address = instruction.X_Form.RB;
+                    rotate_decoded.source_reg_address = instruction.X_Form.RT;
+                    rotate_decoded.target_reg_address = instruction.X_Form.RA;
+                    rotate_decoded.MB = 0;
+                    rotate_decoded.ME = 0;
+                    rotate_decoded.mask_insert = false;
+                    rotate_decoded.shift = true;
+                    rotate_decoded.left = false;
+                    rotate_decoded.sign_extend = false;
 					if(instruction.X_Form.Rc == 1) {
-						shift_decoded.alter_CR0 = true;
+                        rotate_decoded.alter_CR0 = true;
 					} else {
-						shift_decoded.alter_CR0 = false;
+                        rotate_decoded.alter_CR0 = false;
 					}
 					break;
 				case 539: // srd, srd.
 					// NOT SUPPORTED!!!
 					break;
 				case 792: // sraw, sraw.
-					fixed_point_decode_result.execute = fixed_point::SHIFT;
-					shift_decoded.shift_imm = false;
-					shift_decoded.shift_immediate = 0;
-					shift_decoded.shift_reg_address = instruction.X_Form.RB;
-					shift_decoded.source_reg_address = instruction.X_Form.RT;
-					shift_decoded.target_reg_address = instruction.X_Form.RA;
-					shift_decoded.shift_left = false;
-					shift_decoded.sign_extend = true;
-					shift_decoded.alter_CA = true;
+					fixed_point_decode_result.execute = fixed_point::ROTATE;
+                    rotate_decoded.shift_imm = false;
+                    rotate_decoded.shift_immediate = 0;
+                    rotate_decoded.shift_reg_address = instruction.X_Form.RB;
+                    rotate_decoded.source_reg_address = instruction.X_Form.RT;
+                    rotate_decoded.target_reg_address = instruction.X_Form.RA;
+                    rotate_decoded.MB = 0;
+                    rotate_decoded.ME = 0;
+                    rotate_decoded.mask_insert = false;
+                    rotate_decoded.shift = true;
+                    rotate_decoded.left = false;
+                    rotate_decoded.sign_extend = true;
 					if(instruction.X_Form.Rc == 1) {
-						shift_decoded.alter_CR0 = true;
+                        rotate_decoded.alter_CR0 = true;
 					} else {
-						shift_decoded.alter_CR0 = false;
+                        rotate_decoded.alter_CR0 = false;
 					}
 					break;
 				case 794: // srad, srad.
 					// NOT SUPPORTED!!!
 					break;
 				case 824: // srawi, srawi.
-					fixed_point_decode_result.execute = fixed_point::SHIFT;
-					shift_decoded.shift_imm = true;
-					shift_decoded.shift_immediate = instruction.X_Form.RB;
-					shift_decoded.shift_reg_address = 0;
-					shift_decoded.source_reg_address = instruction.X_Form.RT;
-					shift_decoded.target_reg_address = instruction.X_Form.RA;
-					shift_decoded.shift_left = false;
-					shift_decoded.sign_extend = true;
-					shift_decoded.alter_CA = true;
+					fixed_point_decode_result.execute = fixed_point::ROTATE;
+                    rotate_decoded.shift_imm = true;
+                    rotate_decoded.shift_immediate = instruction.X_Form.RB;
+                    rotate_decoded.shift_reg_address = 0;
+                    rotate_decoded.source_reg_address = instruction.X_Form.RT;
+                    rotate_decoded.target_reg_address = instruction.X_Form.RA;
+                    rotate_decoded.MB = 0;
+                    rotate_decoded.ME = 0;
+                    rotate_decoded.mask_insert = false;
+                    rotate_decoded.shift = true;
+                    rotate_decoded.left = false;
+                    rotate_decoded.sign_extend = true;
 					if(instruction.X_Form.Rc == 1) {
-						shift_decoded.alter_CR0 = true;
+                        rotate_decoded.alter_CR0 = true;
 					} else {
-						shift_decoded.alter_CR0 = false;
+                        rotate_decoded.alter_CR0 = false;
 					}
 					break;
 				// XFX Form move system register instructions
@@ -2031,7 +2049,6 @@ decode_result_t pipeline::decode(uint32_t instruction_port) {
 	fixed_point_decode_result.trap_decoded = trap_decoded;
 	fixed_point_decode_result.log_decoded = log_decoded;
 	fixed_point_decode_result.rotate_decoded = rotate_decoded;
-	fixed_point_decode_result.shift_decoded = shift_decoded;
 	fixed_point_decode_result.system_decoded = system_decoded;
 
 	floating_point_decode_result.float_load_store_decoded = float_load_store_decoded;

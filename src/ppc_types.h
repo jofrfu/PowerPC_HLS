@@ -455,20 +455,13 @@ typedef struct {
     ap_uint<5> MB;
     ap_uint<5> ME;
 	bool mask_insert;
+	// Shift specific variables
+	bool shift;
+    bool left;
+    bool sign_extend;
+
 	bool alter_CR0;
 } rotate_decode_t;
-
-typedef struct {
-	bool shift_imm;
-    ap_uint<5> shift_immediate;
-    ap_uint<5> shift_reg_address;
-    ap_uint<5> source_reg_address;
-    ap_uint<5> target_reg_address;
-	bool shift_left;
-	bool sign_extend;
-	bool alter_CA;
-	bool alter_CR0;
-} shift_decode_t;
 
 namespace system_ppc {
 	typedef enum {MOVE_TO_SPR, MOVE_FROM_SPR, MOVE_TO_CR, MOVE_FROM_CR} system_op_t;
@@ -483,7 +476,7 @@ typedef struct {
 
 namespace fixed_point {
     typedef enum {
-        NONE, LOAD, STORE, LOAD_STRING, STORE_STRING, ADD_SUB, MUL, DIV, COMPARE, TRAP, LOGICAL, ROTATE, SHIFT, SYSTEM
+        NONE, LOAD, STORE, LOAD_STRING, STORE_STRING, ADD_SUB, MUL, DIV, COMPARE, TRAP, LOGICAL, ROTATE, /*SHIFT,*/ SYSTEM
     } execute_t;
 }
 
@@ -497,7 +490,6 @@ typedef struct {
 	trap_decode_t trap_decoded;
 	log_decode_t log_decoded;
 	rotate_decode_t rotate_decoded;
-	shift_decode_t shift_decoded;
 	system_decode_t system_decoded;
 } fixed_point_decode_result_t;
 

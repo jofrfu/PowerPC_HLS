@@ -338,34 +338,77 @@ void fixed_point::logical(log_decode_t decoded, registers_t &registers) {
 
 void fixed_point::rotate(rotate_decode_t decoded, registers_t &registers) {
     ap_uint<32> source = registers.GPR[decoded.source_reg_address];
-    ap_uint<5> shift;
+    ap_uint<6> shift;
     if (decoded.shift_imm) {
         shift = decoded.shift_immediate;
     } else {
-        shift = registers.GPR[decoded.shift_reg_address](4, 0);
+        shift = registers.GPR[decoded.shift_reg_address](5, 0);
     }
 
-    ap_uint<5> mask_begin = decoded.MB;
-    ap_uint<5> mask_end = decoded.ME;
+    ap_uint<5> mask_begin = 0;
+    ap_uint<5> mask_end = 0;
 
-    ap_uint<32> mask = 0;
-    // Generate the mask
-    // MB and ME are in big endian notation, hence the position is reversed with 31-i
-    for (uint32_t i = 0; i < 32; i++) {
-#pragma HLS unroll
-        if (mask_begin > mask_end) {
-            if (i <= mask_end) {
-                mask[31-i] = 1;
-            } else if (i >= mask_begin) {
-                mask[31-i] = 1;
+    bool compute_mask;
+
+    if(decoded.shift) {
+        if(decoded.left) {
+            if(shift[5] == 0) {
+                mask_begin = 0;
+                mask_end = 31 - shift(4, 0);
+                compute_mask = true;
             } else {
-                mask[31-i] = 0;
+                compute_mask = false;
             }
         } else {
-            if (i >= mask_begin && i <= mask_end) {
-                mask[31-i] = 1;
+            mask_begin = shift(4, 0);
+            mask_end = 31;
+            if(decoded.sign_extend) {
+                if(decoded.shift_imm) {
+                    compute_mask = true;
+                } else {
+                    if(shift[5] == 0) {
+                        compute_mask = true;
+                    } else {
+                        compute_mask = false;
+                    }
+                }
             } else {
-                mask[31-i] = 0;
+                if(shift[5] == 0) {
+                    compute_mask = true;
+                } else {
+                    compute_mask = false;
+                }
+            }
+            // Make the rotate left go around completely for right shifts.
+            shift = 32-shift;
+        }
+    } else {
+        mask_begin = decoded.MB;
+        mask_end = decoded.ME;
+        compute_mask = true;
+    }
+
+    ap_uint<32> mask = 0;
+
+    if(compute_mask) {
+        // Generate the mask
+        // MB and ME are in big endian notation, hence the position is reversed with 31-i
+        for (uint32_t i = 0; i < 32; i++) {
+#pragma HLS unroll
+            if (mask_begin > mask_end) {
+                if (i <= mask_end) {
+                    mask[31 - i] = 1;
+                } else if (i >= mask_begin) {
+                    mask[31 - i] = 1;
+                } else {
+                    mask[31 - i] = 0;
+                }
+            } else {
+                if (i >= mask_begin && i <= mask_end) {
+                    mask[31 - i] = 1;
+                } else {
+                    mask[31 - i] = 0;
+                }
             }
         }
     }
@@ -374,51 +417,28 @@ void fixed_point::rotate(rotate_decode_t decoded, registers_t &registers) {
     // Rotate left
     for (uint32_t i = 0; i < 32; i++) {
 #pragma HLS unroll
-        ap_uint<5> target_index = (i + shift) % 32;
+        ap_uint<5> target_index = i + shift(4, 0);
         shifted[target_index] = source[i];
     }
 
     ap_uint<32> result;
     if (decoded.mask_insert) {
         result = (shifted & mask) | (registers.GPR[decoded.target_reg_address] & ~mask);
+    } else if(decoded.shift && !decoded.left && decoded.sign_extend) {
+        ap_uint<32> sign;
+        if(source[31] == 1) {
+            sign = 0xFFFFFFFF;
+        } else {
+            sign = 0;
+        }
+        result = (shifted & mask) | (sign & ~mask);
+        ap_uint<1> carry = sign & ((shifted & ~mask) != 0);
+        registers.fixed_exception_reg.exception_fields.CA = carry;
     } else {
         result = shifted & mask;
     }
 
     registers.GPR[decoded.target_reg_address] = result;
-
-    if (decoded.alter_CR0) {
-        fixed_point::check_condition(result, registers);
-        // Copy the SO field from XER into CR0
-        fixed_point::copy_summary_overflow(registers);
-    }
-}
-
-// TODO: Combine the implementation of shift and rotate. Shifts are just a special case of rotation. Add carry logic.
-void fixed_point::shift(shift_decode_t decoded, registers_t &registers) {
-    ap_uint<32> source = registers.GPR[decoded.source_reg_address];
-    ap_uint<5> shift;
-    if (decoded.shift_imm) {
-        shift = decoded.shift_immediate;
-    } else {
-        shift = registers.GPR[decoded.shift_reg_address](4, 0);
-    }
-
-    ap_uint<32> result;
-    ap_uint<1> carry;
-    if (decoded.shift_left) {
-        result = source << shift;
-    } else if(decoded.sign_extend) { // Shift right signed
-        result = ap_int<32>(source) >> shift;
-    } else { // Shift right unsigned
-    	result = source >> shift;
-    }
-
-    registers.GPR[decoded.target_reg_address] = result;
-
-    if (decoded.alter_CA) {
-        registers.fixed_exception_reg.exception_fields.CA = carry;
-    }
 
     if (decoded.alter_CR0) {
         fixed_point::check_condition(result, registers);

@@ -18,7 +18,8 @@
         },
         "XER" : {
             "OV" : false,
-            "SO" : false
+            "SO" : false,
+            "CA" : false
         },
         "LR" : 0
     },
@@ -39,7 +40,8 @@
         },
         "XER" : {
             "OV" : false,
-            "SO" : false
+            "SO" : false,
+            "CA" : false
         },
         "LR" : 0
     },

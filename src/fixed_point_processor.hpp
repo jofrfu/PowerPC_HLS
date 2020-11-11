@@ -423,8 +423,6 @@ namespace fixed_point {
 
     void rotate(rotate_decode_t decoded, registers_t &registers);
 
-    void shift(shift_decode_t decoded, registers_t &registers);
-
     void system(system_decode_t decoded, registers_t &registers);
 
 }
