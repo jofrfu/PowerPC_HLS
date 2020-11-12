@@ -19,7 +19,7 @@
 // You should have received a copy of the GNU General Public License
 // along with PowerPC_HLS. If not, see <http://www.gnu.org/licenses/>.
 
-#define CATCH_CONFIG_MAIN
+//#define CATCH_CONFIG_MAIN
 #include <catch.hpp>
 #include <json.hpp>
 #include <vector>
@@ -35,6 +35,38 @@
 #define GCC_LOCATION "/opt/devkitpro/devkitPPC/bin/powerpc-eabi-as"
 #define OBJCOPY_LOCATION "/opt/devkitpro/devkitPPC/bin/powerpc-eabi-objcopy"
 
+#ifndef CATCH_CONFIG_MAIN
+#define I_MEM_SIZE 8192
+#define D_MEM_SIZE 16384
+
+#define GPIO_DATA_ADDRESS 8192
+#define GPIO_TRI_ADDRESS (GPIO_DATA_ADDRESS + 4)
+
+    // Complete assembly program tests can go here
+    int main() {
+        uint32_t i_mem[I_MEM_SIZE/4];
+        ap_uint<32> d_mem[D_MEM_SIZE/4];
+        registers_t registers;
+
+        int32_t program_size = read_byte_code("../tests/binaries/led.bin", i_mem, I_MEM_SIZE);
+        if(program_size < 0) {
+            std::cout << "Error loading program binary!!!" << std::endl;
+            exit(-1);
+        }
+
+        registers.program_counter = 0;
+
+        uint32_t last_val = 0;
+        while(true) {
+            execute_single_instruction(i_mem[registers.program_counter(31, 2)], registers, d_mem);
+            if(last_val != d_mem[GPIO_DATA_ADDRESS/4]) {
+                std::cout << "GPIO data reg: " << std::to_string(d_mem[GPIO_DATA_ADDRESS / 4])
+                          << " GPIO tri reg: " << std::to_string(d_mem[GPIO_TRI_ADDRESS / 4]) << "\r" << std::flush;
+                last_val = d_mem[GPIO_DATA_ADDRESS/4];
+            }
+        }
+    }
+#else
 #define I_MEM_SIZE 1024
 #define D_MEM_SIZE 1024
 
@@ -471,3 +503,4 @@ TEST_CASE("Automatic program execution", "[program execution]") {
         }
     }
 }
+#endif
