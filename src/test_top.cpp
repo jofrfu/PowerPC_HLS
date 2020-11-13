@@ -19,15 +19,14 @@ void process(ap_uint<32> *instruction_memory, ap_uint<32> *data_memory) {
 	registers.program_counter += 4;
 }
 
-void top(ap_uint<32> instruction_memory[1024], ap_uint<32> data_memory[1024]) {
-#pragma HLS interface bram port=instruction_memory
-#pragma HLS interface bram port=data_memory
+void PowerPC(ap_uint<32> *instruction_memory, ap_uint<32> *data_memory) {
+#pragma HLS interface m_axi port=instruction_memory
+#pragma HLS interface m_axi port=data_memory
 #pragma HLS ARRAY_PARTITION variable=registers.GPR complete dim=1
 #pragma HLS ARRAY_PARTITION variable=registers.FPR complete dim=1
 #pragma HLS ARRAY_PARTITION variable=registers.condition_reg.CR complete dim=1
 
-	for(int i = 0; i < 1024; i++) {
-#pragma HLS dataflow
+	while(true) {
 		process(instruction_memory, data_memory);
 	}
 }
