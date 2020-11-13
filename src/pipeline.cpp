@@ -27,6 +27,29 @@
 #include "fixed_point_processor.hpp"
 #include "branch_processor.hpp"
 
+ap_uint<32> pipeline::instruction_fetch(ap_uint<32> *instruction_memory, registers_t &registers) {
+    ap_uint<32> instruction = instruction_memory[registers.program_counter(31, 2)];
+    ap_uint<32> big_endian;
+    // Conversion for big endian access
+    big_endian(31, 24) = instruction(7, 0);
+    big_endian(23, 16) = instruction(15, 8);
+    big_endian(15, 8) = instruction(23, 16);
+    big_endian(7, 0) = instruction(31, 24);
+    return big_endian;
+}
+
+// For testing only
+ap_uint<32> pipeline::fetch_index(ap_uint<32> *instruction_memory, uint32_t index) {
+    ap_uint<32> instruction = instruction_memory[index];
+    ap_uint<32> big_endian;
+    // Conversion for big endian access
+    big_endian(31, 24) = instruction(7, 0);
+    big_endian(23, 16) = instruction(15, 8);
+    big_endian(15, 8) = instruction(23, 16);
+    big_endian(7, 0) = instruction(31, 24);
+    return big_endian;
+}
+
 bool pipeline::execute(decode_result_t decoded, registers_t &registers, ap_uint<32> *data_memory) {
 	bool trap_happened = false;
 	if(decoded.fixed_point_decode_result.execute != fixed_point::NONE) {

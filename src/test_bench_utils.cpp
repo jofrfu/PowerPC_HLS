@@ -28,7 +28,7 @@
 #include "pipeline.hpp"
 #include "branch_processor.hpp"
 
-int32_t read_byte_code(const char *file_name, uint32_t *instruction_memory, uint32_t memory_size) {
+int32_t read_byte_code(const char *file_name, ap_uint<32> *instruction_memory, uint32_t memory_size) {
 	std::ifstream byte_code(file_name, std::ios::binary);
 	if(byte_code.is_open()) {
 		std::ios::pos_type begin = byte_code.tellg();
@@ -51,17 +51,6 @@ int32_t read_byte_code(const char *file_name, uint32_t *instruction_memory, uint
 		byte_code.seekg(0, std::ios::beg);
 		byte_code.read((char *)instruction_memory, size);
 		byte_code.close();
-
-		// Little endian to big endian conversion
-		for(uint32_t i = 0; i < size/4; i++) {
-			ap_uint<32> little = instruction_memory[i];
-			ap_uint<32> big;
-			big(0, 7) = little(24, 31);
-			big(8, 15) = little(16, 23);
-			big(16, 23) = little(8, 15);
-			big(24, 31) = little(0, 7);
-			instruction_memory[i] = big;
-		}
 
 		return size/4;
 	} else {
@@ -95,10 +84,10 @@ int32_t read_data(const char *file_name, ap_uint<32> *data_memory, uint32_t memo
 
         for(uint32_t i = 0; i < temp_size/4; i++) {
             ap_uint<32> big;
-            big(0, 7) = temp[i*4+3];
-            big(8, 15) = temp[i*4+2];
-            big(16, 23) = temp[i*4+1];
-            big(24, 31) = temp[i*4+0];
+            big(31, 24) = temp[i*4+3];
+            big(23, 16) = temp[i*4+2];
+            big(15, 8) = temp[i*4+1];
+            big(7, 0) = temp[i*4+0];
             data_memory[i] = big;
         }
 
@@ -109,7 +98,7 @@ int32_t read_data(const char *file_name, ap_uint<32> *data_memory, uint32_t memo
     }
 }
 
-bool execute_single_instruction(uint32_t instruction, registers_t &registers, ap_uint<32> *data_memory) {
+bool execute_single_instruction(ap_uint<32> instruction, registers_t &registers, ap_uint<32> *data_memory) {
     decode_result_t decoded = pipeline::decode(instruction);
     bool trap = false;
     if(decoded.branch_decode_result.execute == branch::BRANCH) {
@@ -122,9 +111,9 @@ bool execute_single_instruction(uint32_t instruction, registers_t &registers, ap
     return trap;
 }
 
-void execute_program(uint32_t *instruction_memory, uint32_t size, registers_t &registers, ap_uint<32> *data_memory, trap_handler_t trap_handler) {
-	for(uint32_t i = 0; i < size; i++) {
-		if(execute_single_instruction(instruction_memory[i], registers, data_memory)) {
+void execute_program(ap_uint<32> *instruction_memory, uint32_t size, registers_t &registers, ap_uint<32> *data_memory, trap_handler_t trap_handler) {
+    for(uint32_t i = 0; i < size; i++) {
+		if(execute_single_instruction(pipeline::fetch_index(instruction_memory, i), registers, data_memory)) {
 		    trap_handler(i);
 		}
 	}

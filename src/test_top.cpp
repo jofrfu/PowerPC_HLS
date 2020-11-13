@@ -7,8 +7,9 @@
 
 static registers_t registers;
 
-void process(uint32_t *instruction_memory, ap_uint<32> *data_memory) {
-	decode_result_t decoded = pipeline::decode(instruction_memory[registers.program_counter(31, 2)]);
+void process(ap_uint<32> *instruction_memory, ap_uint<32> *data_memory) {
+    ap_uint<32> current_instruction = pipeline::instruction_fetch(instruction_memory, registers);
+	decode_result_t decoded = pipeline::decode(current_instruction);
 	if(decoded.branch_decode_result.execute == branch::BRANCH) {
 		// Extracting branch from the "pipeline" reduces the minimal execution time.
 		branch::branch(decoded.branch_decode_result.branch_decoded, registers);
@@ -18,7 +19,7 @@ void process(uint32_t *instruction_memory, ap_uint<32> *data_memory) {
 	registers.program_counter += 4;
 }
 
-void top(uint32_t instruction_memory[1024], ap_uint<32> data_memory[1024]) {
+void top(ap_uint<32> instruction_memory[1024], ap_uint<32> data_memory[1024]) {
 #pragma HLS interface bram port=instruction_memory
 #pragma HLS interface bram port=data_memory
 #pragma HLS ARRAY_PARTITION variable=registers.GPR complete dim=1

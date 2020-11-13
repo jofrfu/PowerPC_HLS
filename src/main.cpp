@@ -29,6 +29,7 @@
 
 #include "test_bench_utils.hpp"
 #include "fixed_point_utils.hpp"
+#include "pipeline.hpp"
 
 #define PROGRAM_PATH "../tests/programs"
 
@@ -44,11 +45,11 @@
 
     // Complete assembly program tests can go here
     int main() {
-        uint32_t i_mem[I_MEM_SIZE/4];
+        ap_uint<32> i_mem[I_MEM_SIZE/4];
         ap_uint<32> d_mem[D_MEM_SIZE/4];
         registers_t registers;
 
-        int32_t program_size = read_byte_code("../tests/binaries/led.bin", i_mem, I_MEM_SIZE);
+        int32_t program_size = read_byte_code("../tests/binaries/led_short.bin", i_mem, I_MEM_SIZE);
         if(program_size < 0) {
             std::cout << "Error loading program binary!!!" << std::endl;
             exit(-1);
@@ -58,7 +59,7 @@
 
         uint32_t last_val = 0;
         while(true) {
-            execute_single_instruction(i_mem[registers.program_counter(31, 2)], registers, d_mem);
+            execute_single_instruction(pipeline::instruction_fetch(i_mem, registers), registers, d_mem);
             if(last_val != d_mem[GPIO_DATA_ADDRESS/4]) {
                 std::cout << "GPIO data reg: " << std::to_string(d_mem[GPIO_DATA_ADDRESS / 4])
                           << " GPIO tri reg: " << std::to_string(d_mem[GPIO_TRI_ADDRESS / 4]) << "\r" << std::flush;
@@ -71,7 +72,7 @@
 #define D_MEM_SIZE 1024
 
 TEST_CASE("Automatic program execution", "[program execution]") {
-    uint32_t i_mem[I_MEM_SIZE];
+    ap_uint<32> i_mem[I_MEM_SIZE];
     ap_uint<32> d_mem[D_MEM_SIZE];
     registers_t registers;
 
