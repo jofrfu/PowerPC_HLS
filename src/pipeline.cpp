@@ -28,6 +28,7 @@
 #include "branch_processor.hpp"
 
 ap_uint<32> pipeline::instruction_fetch(ap_uint<32> *instruction_memory, registers_t &registers) {
+#pragma HLS inline
     ap_uint<32> instruction = instruction_memory[registers.program_counter(31, 2)];
     ap_uint<32> big_endian;
     // Conversion for big endian access

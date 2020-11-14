@@ -20,11 +20,14 @@ void process(ap_uint<32> *instruction_memory, ap_uint<32> *data_memory) {
 }
 
 void PowerPC(ap_uint<32> *instruction_memory, ap_uint<32> *data_memory) {
+#pragma HLS interface ap_ctrl_none port=return
 #pragma HLS interface m_axi port=instruction_memory
 #pragma HLS interface m_axi port=data_memory
 #pragma HLS ARRAY_PARTITION variable=registers.GPR complete dim=1
 #pragma HLS ARRAY_PARTITION variable=registers.FPR complete dim=1
 #pragma HLS ARRAY_PARTITION variable=registers.condition_reg.CR complete dim=1
+
+	registers.program_counter = 0;
 
 	while(true) {
 		process(instruction_memory, data_memory);
