@@ -51,6 +51,137 @@ ap_uint<32> pipeline::fetch_index(ap_uint<32> *instruction_memory, uint32_t inde
     return big_endian;
 }
 
+pipeline::operands_t pipeline::fetch_operands(decode_result_t decoded, registers_t &registers) {
+    operands_t operands;
+
+    switch(decoded.fixed_point_decode_result.execute) {
+        case fixed_point::NONE:
+            break;
+        case fixed_point::LOAD:
+        case fixed_point::STORE:
+        {
+            uint32_t sum1, sum2;
+            if (decoded.fixed_point_decode_result.load_store_decoded.sum1_imm) {
+                sum1 = (int32_t) decoded.fixed_point_decode_result.load_store_decoded.sum1_immediate;
+            } else {
+                sum1 = registers.GPR[decoded.fixed_point_decode_result.load_store_decoded.sum1_reg_address];
+            }
+
+            if (decoded.fixed_point_decode_result.load_store_decoded.sum2_imm) {
+                sum2 = (int32_t) decoded.fixed_point_decode_result.load_store_decoded.sum2_immediate;
+            } else {
+                sum2 = registers.GPR[decoded.fixed_point_decode_result.load_store_decoded.sum2_reg_address];
+            }
+
+            operands.op1 = sum1;
+            operands.op2 = sum2;
+            operands.n_count = 0;
+        }
+            break;
+        case fixed_point::LOAD_STRING:
+        case fixed_point::STORE_STRING:
+        {
+            uint32_t sum1, sum2;
+            ap_uint<7> n;
+            if (decoded.fixed_point_decode_result.load_store_decoded.sum1_imm) {
+                sum1 = (int32_t) decoded.fixed_point_decode_result.load_store_decoded.sum1_immediate;
+            } else {
+                sum1 = registers.GPR[decoded.fixed_point_decode_result.load_store_decoded.sum1_reg_address];
+            }
+
+            if (decoded.fixed_point_decode_result.load_store_decoded.sum2_imm) {
+                // Sum 2 is zero, which means this is a lswi instruction
+                sum2 = (int32_t) decoded.fixed_point_decode_result.load_store_decoded.sum2_immediate;
+                if (decoded.fixed_point_decode_result.load_store_decoded.sum2_reg_address == 0) {
+                    n = 32;
+                } else {
+                    n = decoded.fixed_point_decode_result.load_store_decoded.sum2_reg_address;
+                }
+            } else {
+                // lswx instruction
+                sum2 = registers.GPR[decoded.fixed_point_decode_result.load_store_decoded.sum2_reg_address];
+                n = registers.fixed_exception_reg.exception_fields.string_bytes;
+            }
+
+            operands.op1 = sum1;
+            operands.op2 = sum2;
+            operands.n_count = n;
+        }
+            break;
+        case fixed_point::ADD_SUB:
+            if (decoded.fixed_point_decode_result.add_sub_decoded.op1_imm) {
+                operands.op1 = decoded.fixed_point_decode_result.add_sub_decoded.op1_immediate;
+            } else {
+                operands.op1 = registers.GPR[decoded.fixed_point_decode_result.add_sub_decoded.op1_reg_address];
+            }
+
+            if (decoded.fixed_point_decode_result.add_sub_decoded.op2_imm) {
+                operands.op2 = decoded.fixed_point_decode_result.add_sub_decoded.op2_immediate;
+            } else {
+                operands.op2 = registers.GPR[decoded.fixed_point_decode_result.add_sub_decoded.op2_reg_address];
+            }
+            operands.n_count = 0;
+            break;
+        case fixed_point::MUL:
+            operands.op1 = registers.GPR[decoded.fixed_point_decode_result.mul_decoded.op1_reg_address];
+            if (decoded.fixed_point_decode_result.mul_decoded.op2_imm) {
+                operands.op2 = decoded.fixed_point_decode_result.mul_decoded.op2_immediate;
+            } else {
+                operands.op2 = registers.GPR[decoded.fixed_point_decode_result.mul_decoded.op2_reg_address];
+            }
+            operands.n_count = 0;
+            break;
+        case fixed_point::DIV:
+            operands.op1 = registers.GPR[decoded.fixed_point_decode_result.div_decoded.dividend_reg_address];
+            operands.op2 = registers.GPR[decoded.fixed_point_decode_result.div_decoded.divisor_reg_address];
+            operands.n_count = 0;
+            break;
+        case fixed_point::COMPARE:
+            operands.op1 = registers.GPR[decoded.fixed_point_decode_result.cmp_decoded.op1_reg_address];
+            if (decoded.fixed_point_decode_result.cmp_decoded.op2_imm) {
+                operands.op2 = decoded.fixed_point_decode_result.cmp_decoded.op2_immediate;
+            } else {
+                operands.op2 = registers.GPR[decoded.fixed_point_decode_result.cmp_decoded.op2_reg_address];
+            }
+            operands.n_count = 0;
+            break;
+        case fixed_point::TRAP:
+            operands.op1 = registers.GPR[decoded.fixed_point_decode_result.trap_decoded.op1_reg_address];
+            if (decoded.fixed_point_decode_result.trap_decoded.op2_imm) {
+                operands.op2 = decoded.fixed_point_decode_result.trap_decoded.op2_immediate;
+            } else {
+                operands.op2 = registers.GPR[decoded.fixed_point_decode_result.trap_decoded.op2_reg_address];
+            }
+            operands.n_count = 0;
+            break;
+        case fixed_point::LOGICAL:
+            operands.op1 = registers.GPR[decoded.fixed_point_decode_result.log_decoded.op1_reg_address];
+            if (decoded.fixed_point_decode_result.log_decoded.op2_imm) {
+                operands.op2 = decoded.fixed_point_decode_result.log_decoded.op2_immediate;
+            } else {
+                operands.op2 = registers.GPR[decoded.fixed_point_decode_result.log_decoded.op2_reg_address];
+            }
+            operands.n_count = 0;
+            break;
+        case fixed_point::ROTATE:
+            operands.op1 = registers.GPR[decoded.fixed_point_decode_result.rotate_decoded.source_reg_address];
+            if (decoded.fixed_point_decode_result.rotate_decoded.shift_imm) {
+                operands.op2 = decoded.fixed_point_decode_result.rotate_decoded.shift_immediate;
+            } else {
+                operands.op2 = registers.GPR[decoded.fixed_point_decode_result.rotate_decoded.shift_reg_address](5, 0);
+            }
+            operands.n_count = 0;
+            break;
+        case fixed_point::SYSTEM:
+            operands.op1 = registers.GPR[decoded.fixed_point_decode_result.system_decoded.RS_RT];
+            operands.op2 = 0;
+            operands.n_count = 0;
+            break;
+    }
+
+    return operands;
+}
+
 bool pipeline::execute(decode_result_t decoded, registers_t &registers, ap_uint<32> *data_memory) {
 	bool trap_happened = false;
 	if(decoded.fixed_point_decode_result.execute != fixed_point::NONE) {
