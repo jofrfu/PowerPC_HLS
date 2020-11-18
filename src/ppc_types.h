@@ -574,21 +574,20 @@ typedef struct {
 	bool alter_CR1;
 } float_status_decode_t;
 
+namespace floating_point {
+    typedef enum {
+        NONE, LOAD, STORE, MOVE, ARITHMETIC, MADD, CONVERT, COMPARE, STATUS
+    } execute_t;
+}
+
 typedef struct {
-	bool execute_load;
-	bool execute_store;
+    floating_point::execute_t execute;
 	float_load_store_decode_t float_load_store_decoded;
-	bool execute_move;
 	float_move_decode_t float_move_decoded;
-	bool execute_arithmetic;
 	float_arithmetic_decode_t float_arithmetic_decoded;
-	bool execute_madd;
 	float_madd_decode_t float_madd_decoded;
-	bool execute_convert;
 	float_convert_decode_t float_convert_decoded;
-	bool execute_compare;
 	float_compare_decode_t float_compare_decoded;
-	bool execute_status;
 	float_status_decode_t float_status_decoded;
 } floating_point_decode_result_t;
 
