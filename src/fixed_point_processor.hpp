@@ -26,22 +26,13 @@
 #include <stdint.h>
 #include <ap_int.h>
 #include "ppc_types.h"
+#include "pipeline.hpp"
 
 namespace fixed_point {
     template<typename T>
-    void load(load_store_decode_t decoded, registers_t &registers, T data_memory) {
-        uint32_t sum1, sum2;
-        if (decoded.sum1_imm) {
-            sum1 = (int32_t) decoded.sum1_immediate;
-        } else {
-            sum1 = registers.GPR[decoded.sum1_reg_address];
-        }
-
-        if (decoded.sum2_imm) {
-            sum2 = (int32_t) decoded.sum2_immediate;
-        } else {
-            sum2 = registers.GPR[decoded.sum2_reg_address];
-        }
+    pipeline::result_t load(load_store_decode_t decoded, registers_t &registers, pipeline::operands_t operands, T data_memory) {
+        uint32_t sum1 = operands.op1;
+        uint32_t sum2 = operands.op2;
 
         ap_uint<32> effective_address = sum1 + sum2;
         ap_uint<30> upper_address = effective_address(31, 2);
@@ -185,25 +176,20 @@ namespace fixed_point {
             upper_address++;
         }
 
+        pipeline::result_t write_back = {effective_address, 0, false, false};
+
         if (decoded.write_ea) {
-            registers.GPR[decoded.ea_reg_address] = effective_address;
+            write_back.address = decoded.ea_reg_address;
+            write_back.write_back = true;
         }
+
+        return write_back;
     }
 
     template<typename T>
-    void store(load_store_decode_t decoded, registers_t &registers, T data_memory) {
-        uint32_t sum1, sum2;
-        if (decoded.sum1_imm) {
-            sum1 = (int32_t) decoded.sum1_immediate;
-        } else {
-            sum1 = registers.GPR[decoded.sum1_reg_address];
-        }
-
-        if (decoded.sum2_imm) {
-            sum2 = (int32_t) decoded.sum2_immediate;
-        } else {
-            sum2 = registers.GPR[decoded.sum2_reg_address];
-        }
+    pipeline::result_t store(load_store_decode_t decoded, registers_t &registers, pipeline::operands_t operands, T data_memory) {
+        uint32_t sum1 = operands.op1;
+        uint32_t sum2 = operands.op2;
 
         ap_uint<32> effective_address = sum1 + sum2;
         ap_uint<30> upper_address = effective_address(31, 2);
@@ -325,35 +311,22 @@ namespace fixed_point {
             upper_address++;
         }
 
+        pipeline::result_t write_back = {effective_address, 0, false, false};
+
         if (decoded.write_ea) {
-            registers.GPR[decoded.ea_reg_address] = effective_address;
+            write_back.address = decoded.ea_reg_address;
+            write_back.write_back = true;
         }
+
+        return write_back;
     }
 
     template<typename T>
-    void load_string(load_store_decode_t decoded, registers_t &registers, T data_memory) {
-        uint32_t sum1, sum2;
-        ap_uint<7> n;
+    void load_string(load_store_decode_t decoded, registers_t &registers, pipeline::operands_t operands, T data_memory) {
+        uint32_t sum1 = operands.op1;
+        uint32_t sum2 = operands.op2;
+        ap_uint<7> n = operands.op3;
         ap_uint<5> r = decoded.result_reg_address - 1;
-        if (decoded.sum1_imm) {
-            sum1 = (int32_t) decoded.sum1_immediate;
-        } else {
-            sum1 = registers.GPR[decoded.sum1_reg_address];
-        }
-
-        if (decoded.sum2_imm) {
-            // Sum 2 is zero, which means this is a lswi instruction
-            sum2 = (int32_t) decoded.sum2_immediate;
-            if (decoded.sum2_reg_address == 0) {
-                n = 32;
-            } else {
-                n = decoded.sum2_reg_address;
-            }
-        } else {
-            // lswx instruction
-            sum2 = registers.GPR[decoded.sum2_reg_address];
-            n = registers.fixed_exception_reg.exception_fields.string_bytes;
-        }
 
         ap_uint<32> ea = sum1 + sum2;
         for (ap_uint<2> i = 3; n > 0; i--, n--, ea++) {
@@ -371,29 +344,11 @@ namespace fixed_point {
     }
 
     template<typename T>
-    void store_string(load_store_decode_t decoded, registers_t &registers, T data_memory) {
-        uint32_t sum1, sum2;
-        ap_uint<7> n;
+    void store_string(load_store_decode_t decoded, registers_t &registers, pipeline::operands_t operands, T data_memory) {
+        uint32_t sum1 = operands.op1;
+        uint32_t sum2 = operands.op2;
+        ap_uint<7> n = operands.op3;
         ap_uint<5> r = decoded.result_reg_address - 1;
-        if (decoded.sum1_imm) {
-            sum1 = (int32_t) decoded.sum1_immediate;
-        } else {
-            sum1 = registers.GPR[decoded.sum1_reg_address];
-        }
-
-        if (decoded.sum2_imm) {
-            // Sum 2 is zero, which means this is a lswi instruction
-            sum2 = (int32_t) decoded.sum2_immediate;
-            if (decoded.sum2_reg_address == 0) {
-                n = 32;
-            } else {
-                n = decoded.sum2_reg_address;
-            }
-        } else {
-            // lswx instruction
-            sum2 = registers.GPR[decoded.sum2_reg_address];
-            n = registers.fixed_exception_reg.exception_fields.string_bytes;
-        }
 
         ap_uint<32> ea = sum1 + sum2;
         for (ap_uint<2> i = 3; n > 0; i--, n--, ea++) {
@@ -409,21 +364,21 @@ namespace fixed_point {
         }
     }
 
-    void add_sub(add_sub_decode_t decoded, registers_t &registers);
+    pipeline::result_t add_sub(add_sub_decode_t decoded, registers_t &registers, pipeline::operands_t operands);
 
-    void multiply(mul_decode_t decoded, registers_t &registers);
+    pipeline::result_t multiply(mul_decode_t decoded, registers_t &registers, pipeline::operands_t operands);
 
-    void divide(div_decode_t decoded, registers_t &registers);
+    pipeline::result_t divide(div_decode_t decoded, registers_t &registers, pipeline::operands_t operands);
 
-    void compare(cmp_decode_t decoded, registers_t &registers);
+    pipeline::result_t compare(cmp_decode_t decoded, registers_t &registers, pipeline::operands_t operands);
 
-    bool trap(trap_decode_t decoded, registers_t &registers);
+    pipeline::result_t trap(trap_decode_t decoded, registers_t &registers, pipeline::operands_t operands);
 
-    void logical(log_decode_t decoded, registers_t &registers);
+    pipeline::result_t logical(log_decode_t decoded, registers_t &registers, pipeline::operands_t operands);
 
-    void rotate(rotate_decode_t decoded, registers_t &registers);
+    pipeline::result_t rotate(rotate_decode_t decoded, registers_t &registers, pipeline::operands_t operands);
 
-    void system(system_decode_t decoded, registers_t &registers);
+    pipeline::result_t system(system_decode_t decoded, registers_t &registers, pipeline::operands_t operands);
 
 }
 

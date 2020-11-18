@@ -100,15 +100,17 @@ int32_t read_data(const char *file_name, ap_uint<32> *data_memory, uint32_t memo
 
 bool execute_single_instruction(ap_uint<32> instruction, registers_t &registers, ap_uint<32> *data_memory) {
     decode_result_t decoded = pipeline::decode(instruction);
-    bool trap = false;
+    pipeline::result_t result = {0, 0, false};
     if(decoded.branch_decode_result.execute == branch::BRANCH) {
         // Extracting branch from the "pipeline" reduces the minimal execution time.
         branch::branch(decoded.branch_decode_result.branch_decoded, registers);
     } else {
-        trap = pipeline::execute(decoded, registers, data_memory);
+        auto operands = pipeline::fetch_operands(decoded, registers);
+        result = pipeline::execute(decoded, registers, operands, data_memory);
+        pipeline::write_back(result, registers);
     }
     registers.program_counter += 4;
-    return trap;
+    return result.trap;
 }
 
 void execute_program(ap_uint<32> *instruction_memory, uint32_t size, registers_t &registers, ap_uint<32> *data_memory, trap_handler_t trap_handler) {

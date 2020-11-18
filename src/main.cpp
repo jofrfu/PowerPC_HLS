@@ -19,7 +19,7 @@
 // You should have received a copy of the GNU General Public License
 // along with PowerPC_HLS. If not, see <http://www.gnu.org/licenses/>.
 
-//#define CATCH_CONFIG_MAIN
+#define CATCH_CONFIG_MAIN
 #include <catch.hpp>
 #include <json.hpp>
 #include <vector>

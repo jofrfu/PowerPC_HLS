@@ -22,21 +22,9 @@
 #include "fixed_point_processor.hpp"
 #include "fixed_point_utils.hpp"
 
-void fixed_point::add_sub(add_sub_decode_t decoded, registers_t &registers) {
-    ap_uint<32> op1;
-    ap_uint<32> op2;
-
-    if (decoded.op1_imm) {
-        op1 = decoded.op1_immediate;
-    } else {
-        op1 = registers.GPR[decoded.op1_reg_address];
-    }
-
-    if (decoded.op2_imm) {
-        op2 = decoded.op2_immediate;
-    } else {
-        op2 = registers.GPR[decoded.op2_reg_address];
-    }
+pipeline::result_t fixed_point::add_sub(add_sub_decode_t decoded, registers_t &registers, pipeline::operands_t operands) {
+    ap_uint<32> op1 = operands.op1;
+    ap_uint<32> op2 = operands.op2;
 
     ap_uint<1> carry_in;
     if (decoded.subtract) {
@@ -55,8 +43,6 @@ void fixed_point::add_sub(add_sub_decode_t decoded, registers_t &registers) {
 
     fixed_point::add_result<32> result = fixed_point::add<32>(op1, op2, carry_in);
 
-    registers.GPR[decoded.result_reg_address] = result.sum;
-
     if (decoded.alter_CA) {
         registers.fixed_exception_reg.exception_fields.CA = result.carry;
     }
@@ -70,17 +56,15 @@ void fixed_point::add_sub(add_sub_decode_t decoded, registers_t &registers) {
         // Copy the SO field from XER into CR0
         fixed_point::copy_summary_overflow(registers);
     }
+
+    pipeline::result_t write_back = {result.sum, decoded.result_reg_address, true, false};
+
+    return write_back;
 }
 
-void fixed_point::multiply(mul_decode_t decoded, registers_t &registers) {
-    ap_int<33> op1, op2;
-
-    op1 = registers.GPR[decoded.op1_reg_address];
-    if (decoded.op2_imm) {
-        op2 = decoded.op2_immediate;
-    } else {
-        op2 = registers.GPR[decoded.op2_reg_address];
-    }
+pipeline::result_t fixed_point::multiply(mul_decode_t decoded, registers_t &registers, pipeline::operands_t operands) {
+    ap_int<33> op1 = operands.op1;
+    ap_int<33> op2 = operands.op2;
 
     if (decoded.mul_signed) {
         // sign extend
@@ -96,9 +80,6 @@ void fixed_point::multiply(mul_decode_t decoded, registers_t &registers) {
     // Choose upper or lower part of result
     uint32_t result = decoded.mul_higher ? op_result(63, 32) : op_result(31, 0);
     ap_uint<1> overflow;
-
-    registers.GPR[decoded.result_reg_address] = result;
-
 
     // Overflow
     if (decoded.alter_OV) {
@@ -130,13 +111,17 @@ void fixed_point::multiply(mul_decode_t decoded, registers_t &registers) {
         // Copy the SO field from XER into CR0
         fixed_point::copy_summary_overflow(registers);
     }
+
+    pipeline::result_t write_back = {result, decoded.result_reg_address, true, false};
+
+    return write_back;
 }
 
-void fixed_point::divide(div_decode_t decoded, registers_t &registers) {
+pipeline::result_t fixed_point::divide(div_decode_t decoded, registers_t &registers, pipeline::operands_t operands) {
     ap_int<33> signed_dividend;
     ap_int<33> signed_divisor;
-    signed_dividend(31, 0) = registers.GPR[decoded.dividend_reg_address];
-    signed_divisor(31, 0) = registers.GPR[decoded.divisor_reg_address];
+    signed_dividend(31, 0) = operands.op1;
+    signed_divisor(31, 0) = operands.op2;
     if (decoded.div_signed) {
         // sign extend
         signed_dividend[32] = signed_dividend[31];
@@ -154,8 +139,6 @@ void fixed_point::divide(div_decode_t decoded, registers_t &registers) {
     } else {
         quotient = 0;
     }
-
-    registers.GPR[decoded.result_reg_address] = quotient;
 
     ap_uint<1> overflow;
 
@@ -175,17 +158,17 @@ void fixed_point::divide(div_decode_t decoded, registers_t &registers) {
         // Copy the SO field from XER into CR0
         fixed_point::copy_summary_overflow(registers);
     }
+
+    pipeline::result_t write_back = {quotient, decoded.result_reg_address, true, false};
+
+    return write_back;
 }
 
-void fixed_point::compare(cmp_decode_t decoded, registers_t &registers) {
+pipeline::result_t fixed_point::compare(cmp_decode_t decoded, registers_t &registers, pipeline::operands_t operands) {
     ap_int<33> op1, op2;
 
-    op1(31, 0) = registers.GPR[decoded.op1_reg_address];
-    if (decoded.op2_imm) {
-        op2(31, 0) = decoded.op2_immediate;
-    } else {
-        op2(31, 0) = registers.GPR[decoded.op2_reg_address];
-    }
+    op1(31, 0) = operands.op1;
+    op2(31, 0) = operands.op2;
 
     if (decoded.cmp_signed) {
         op1[32] = op1[31];
@@ -213,41 +196,33 @@ void fixed_point::compare(cmp_decode_t decoded, registers_t &registers) {
 
     // Copy SO into the given SPR
     CR.condition_fixed_point.SO = registers.fixed_exception_reg.exception_fields.SO;
+
+    return {0, 0, false, false};
 }
 
-bool fixed_point::trap(trap_decode_t decoded, registers_t &registers) {
-    int32_t op1 = registers.GPR[decoded.op1_reg_address];
-    int32_t op2;
-
-    if (decoded.op2_imm) {
-        op2 = decoded.op2_immediate;
-    } else {
-        op2 = registers.GPR[decoded.op2_reg_address];
-    }
+pipeline::result_t fixed_point::trap(trap_decode_t decoded, registers_t &registers, pipeline::operands_t operands) {
+    int32_t op1 = operands.op1;
+    int32_t op2 = operands.op2;
 
     uint32_t u_op1 = op1;
     uint32_t u_op2 = op2;
 
     ap_uint<5> TO = decoded.TO;
 
-    return (
+    pipeline::result_t write_back = {0, 0, false, false};
+    write_back.trap = (
             (op1 < op2 && TO[4] == 1) ||
             (op1 > op2 && TO[3] == 1) ||
             (op1 == op2 && TO[2] == 1) ||
             (u_op1 < u_op2 && TO[1] == 1) ||
             (u_op1 > u_op2 && TO[0] == 1)
     );
+    return write_back;
 }
 
-void fixed_point::logical(log_decode_t decoded, registers_t &registers) {
-    ap_uint<32> op1 = registers.GPR[decoded.op1_reg_address];
-    ap_uint<32> op2;
-
-    if (decoded.op2_imm) {
-        op2 = decoded.op2_immediate;
-    } else {
-        op2 = registers.GPR[decoded.op2_reg_address];
-    }
+pipeline::result_t fixed_point::logical(log_decode_t decoded, registers_t &registers, pipeline::operands_t operands) {
+    ap_uint<32> op1 = operands.op1;
+    ap_uint<32> op2 = operands.op2;
 
     ap_uint<32> result;
 
@@ -327,23 +302,20 @@ void fixed_point::logical(log_decode_t decoded, registers_t &registers) {
              */
     }
 
-    registers.GPR[decoded.result_reg_address] = result;
-
     if (decoded.alter_CR0) {
         fixed_point::check_condition(result, registers);
         // Copy the SO field from XER into CR0
         fixed_point::copy_summary_overflow(registers);
     }
+
+    pipeline::result_t write_back = {result, decoded.result_reg_address, true, false};
+
+    return write_back;
 }
 
-void fixed_point::rotate(rotate_decode_t decoded, registers_t &registers) {
-    ap_uint<32> source = registers.GPR[decoded.source_reg_address];
-    ap_uint<6> shift;
-    if (decoded.shift_imm) {
-        shift = decoded.shift_immediate;
-    } else {
-        shift = registers.GPR[decoded.shift_reg_address](5, 0);
-    }
+pipeline::result_t fixed_point::rotate(rotate_decode_t decoded, registers_t &registers, pipeline::operands_t operands) {
+    ap_uint<32> source = operands.op1;
+    ap_uint<6> shift = operands.op2(5, 0);
 
     ap_uint<5> mask_begin = 0;
     ap_uint<5> mask_end = 0;
@@ -438,16 +410,20 @@ void fixed_point::rotate(rotate_decode_t decoded, registers_t &registers) {
         result = shifted & mask;
     }
 
-    registers.GPR[decoded.target_reg_address] = result;
-
     if (decoded.alter_CR0) {
         fixed_point::check_condition(result, registers);
         // Copy the SO field from XER into CR0
         fixed_point::copy_summary_overflow(registers);
     }
+
+    pipeline::result_t write_back = {result, decoded.target_reg_address, true, false};
+
+    return write_back;
 }
 
-void fixed_point::system(system_decode_t decoded, registers_t &registers) {
+pipeline::result_t fixed_point::system(system_decode_t decoded, registers_t &registers, pipeline::operands_t operands) {
+    ap_uint<32> op1 = operands.op1;
+
     // The order of the two 5 bit halves is reversed
     ap_uint<10> SPR;
     SPR(4, 0) = decoded.SPR(9, 5);
@@ -463,30 +439,38 @@ void fixed_point::system(system_decode_t decoded, registers_t &registers) {
         }
     }
 
+    pipeline::result_t write_back = {0, 0, false, false};
+
     switch (decoded.operation) {
         case system_ppc::MOVE_TO_SPR:
             switch (SPR) {
                 case 1:
-                    registers.fixed_exception_reg = registers.GPR[decoded.RS_RT];
+                    registers.fixed_exception_reg = op1;
                     break;
                 case 8:
-                    registers.link_register = registers.GPR[decoded.RS_RT];
+                    registers.link_register = op1;
                     break;
                 case 9:
-                    registers.count_register = registers.GPR[decoded.RS_RT];
+                    registers.count_register = op1;
                     break;
             }
             break;
         case system_ppc::MOVE_FROM_SPR:
             switch (SPR) {
                 case 1:
-                    registers.GPR[decoded.RS_RT] = registers.fixed_exception_reg.getXER();
+                    write_back.result = registers.fixed_exception_reg.getXER();
+                    write_back.address = decoded.RS_RT;
+                    write_back.write_back = true;
                     break;
                 case 8:
-                    registers.GPR[decoded.RS_RT] = registers.link_register;
+                    write_back.result = registers.link_register;
+                    write_back.address = decoded.RS_RT;
+                    write_back.write_back = true;
                     break;
                 case 9:
-                    registers.GPR[decoded.RS_RT] = registers.count_register;
+                    write_back.result = registers.count_register;
+                    write_back.address = decoded.RS_RT;
+                    write_back.write_back = true;
                     break;
             }
             break;
@@ -495,7 +479,11 @@ void fixed_point::system(system_decode_t decoded, registers_t &registers) {
                                        (registers.condition_reg.getCR() & ~mask));
             break;
         case system_ppc::MOVE_FROM_CR:
-            registers.GPR[decoded.RS_RT] = registers.condition_reg.getCR();
+            write_back.result = registers.condition_reg.getCR();
+            write_back.address = decoded.RS_RT;
+            write_back.write_back = true;
             break;
     }
+
+    return write_back;
 }
