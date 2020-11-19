@@ -52,6 +52,7 @@ ap_uint<32> pipeline::fetch_index(ap_uint<32> *instruction_memory, uint32_t inde
 }
 
 pipeline::operands_t pipeline::fetch_operands(decode_result_t decoded, registers_t &registers) {
+#pragma HLS inline
     operands_t operands;
     switch (decoded.fixed_point_decode_result.execute) {
         case fixed_point::NONE:
@@ -179,8 +180,8 @@ pipeline::operands_t pipeline::fetch_operands(decode_result_t decoded, registers
     return operands;
 }
 
-pipeline::result_t
-pipeline::execute(decode_result_t decoded, registers_t &registers, operands_t operands, ap_uint<32> *data_memory) {
+pipeline::result_t pipeline::execute(decode_result_t decoded, registers_t &registers, operands_t operands, ap_uint<32> *data_memory) {
+#pragma HLS inline
     result_t result = {0, 0, false, false};
 
     switch (decoded.fixed_point_decode_result.execute) {
@@ -253,6 +254,7 @@ pipeline::execute(decode_result_t decoded, registers_t &registers, operands_t op
 }
 
 void pipeline::write_back(result_t result, registers_t &registers) {
+#pragma HLS inline
     if(result.write_back) {
         registers.GPR[result.address] = result.result;
     }
