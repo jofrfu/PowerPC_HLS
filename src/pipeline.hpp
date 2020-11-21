@@ -30,9 +30,26 @@
 #include "instruction_decode.hpp"
 
 namespace pipeline {
+    typedef struct {
+        ap_uint<32> op1;
+        ap_uint<32> op2;
+        // Only needed for load/store string
+        ap_uint<7> op3;
+    } operands_t;
+
+    typedef struct {
+        ap_uint<32> result;
+        ap_uint<5> address;
+        bool write_back;
+        bool trap;
+    } result_t;
+
     ap_uint<32> instruction_fetch(ap_uint<32> *instruction_memory, registers_t &registers);
     // For testing only
     ap_uint<32> fetch_index(ap_uint<32> *instruction_memory, uint32_t index);
-    bool execute(decode_result_t decoded, registers_t &registers, ap_uint<32> *data_memory);
+
+    operands_t fetch_operands(decode_result_t decoded, registers_t &registers);
+    result_t execute(decode_result_t decoded, registers_t &registers, operands_t operands, ap_uint<32> *data_memory);
+    void write_back(result_t result, registers_t &registers);
 }
 #endif //POWERPC_HLS_PIPELINE_HPP
