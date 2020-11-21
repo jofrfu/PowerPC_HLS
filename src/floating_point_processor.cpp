@@ -24,3 +24,50 @@
 //
 
 #include "floating_point_processor.hpp"
+#include "floating_point_utils.hpp"
+
+pipeline::float_result_t floating_point::move(float_move_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands) {
+    ap_uint<64> source = operands.op1;
+    ap_uint<64> result = source(62, 0);
+    switch (decoded.operation) {
+        case ::MOVE:
+            result[63] = source[63];
+            break;
+        case NEGATE:
+            result[63] = ~source[63];
+            break;
+        case ABSOLUTE:
+            result[63] = 0;
+            break;
+        case NEGATIVE_ABSOLUTE:
+            result[63] = 1;
+            break;
+    }
+
+    if(decoded.alter_CR1) {
+        copy_condition(registers);
+    }
+
+    return {result, decoded.target_reg_address, true};
+}
+
+pipeline::float_result_t floating_point::arithmetic(float_arithmetic_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands) {
+
+}
+
+pipeline::float_result_t floating_point::multiply_add(float_madd_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands) {
+
+}
+
+pipeline::float_result_t floating_point::convert(float_convert_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands) {
+
+}
+
+pipeline::float_result_t floating_point::compare(float_compare_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands) {
+
+}
+
+pipeline::float_result_t floating_point::status(float_status_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands) {
+
+}
+

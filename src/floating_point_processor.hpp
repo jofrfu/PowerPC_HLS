@@ -26,4 +26,31 @@
 #ifndef POWERPC_HLS_FLOATING_POINT_PROCESSOR_HPP
 #define POWERPC_HLS_FLOATING_POINT_PROCESSOR_HPP
 
+#include "pipeline.hpp"
+#include "ppc_types.h"
+
+namespace floating_point {
+    template<typename T>
+    pipeline::float_result_t load(float_load_store_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands, T data_memory) {
+
+    }
+
+    template<typename T>
+    pipeline::float_result_t store(float_load_store_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands, T data_memory) {
+
+    }
+
+    pipeline::float_result_t move(float_move_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands);
+
+    pipeline::float_result_t arithmetic(float_arithmetic_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands);
+
+    pipeline::float_result_t multiply_add(float_madd_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands);
+
+    pipeline::float_result_t convert(float_convert_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands);
+
+    pipeline::float_result_t compare(float_compare_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands);
+
+    pipeline::float_result_t status(float_status_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands);
+}
+
 #endif //POWERPC_HLS_FLOATING_POINT_PROCESSOR_HPP

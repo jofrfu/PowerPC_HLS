@@ -44,6 +44,18 @@ namespace pipeline {
         bool trap;
     } result_t;
 
+    typedef struct {
+        ap_uint<64> op1;
+        ap_uint<64> op2;
+        ap_uint<64> op3;
+    } float_operands_t;
+
+    typedef struct {
+        ap_uint<64> result;
+        ap_uint<5> address;
+        bool write_back;
+    } float_result_t;
+
     ap_uint<32> instruction_fetch(ap_uint<32> *instruction_memory, registers_t &registers);
     // For testing only
     ap_uint<32> fetch_index(ap_uint<32> *instruction_memory, uint32_t index);

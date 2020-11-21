@@ -113,12 +113,107 @@ struct fixed_point_exception_reg {
 	}
 };
 
+struct floating_point_status_reg {
+    ap_uint<2> RN;
+    ap_uint<1> NI;
+    ap_uint<1> XE;
+    ap_uint<1> ZE;
+    ap_uint<1> UE;
+    ap_uint<1> OE;
+    ap_uint<1> VE;
+    ap_uint<1> VXCVI;
+    ap_uint<1> VXSQRT;
+    ap_uint<1> VXSOFT;
+    ap_uint<1> RESERVED_1;
+    ap_uint<5> FPRF;
+    ap_uint<1> FI;
+    ap_uint<1> FR;
+    ap_uint<1> VXVC;
+    ap_uint<1> VXIMZ;
+    ap_uint<1> VXZDZ;
+    ap_uint<1> VXIDI;
+    ap_uint<1> VXISI;
+    ap_uint<1> VXSNAN;
+    ap_uint<1> XX;
+    ap_uint<1> ZX;
+    ap_uint<1> UX;
+    ap_uint<1> OX;
+    ap_uint<1> VX;
+    ap_uint<1> FEX;
+    ap_uint<1> FX;
+
+    floating_point_status_reg& operator=(ap_uint<32> val) {
+        RN = val(1, 0);
+        NI = val[2];
+        XE = val[3];
+        ZE = val[4];
+        UE = val[5];
+        OE = val[6];
+        VE = val[7];
+        VXCVI = val[8];
+        VXSQRT = val[9];
+        VXSOFT = val[10];
+        RESERVED_1 = val[11];
+        FPRF = val(16, 12);
+        FI = val[17];
+        FR = val[18];
+        VXVC = val[19];
+        VXIMZ = val[20];
+        VXZDZ = val[21];
+        VXIDI = val[22];
+        VXISI = val[23];
+        VXSNAN = val[24];
+        XX = val[25];
+        ZX = val[26];
+        UX = val[27];
+        OX = val[28];
+        VX = val[29];
+        FEX = val[30];
+        FX = val[31];
+
+        return *this;
+    }
+
+    ap_uint<32> getFPSCR() {
+        ap_uint<32> val;
+        val(1, 0) = RN;
+        val[2] = NI;
+        val[3] = XE;
+        val[4] = ZE;
+        val[5] = UE;
+        val[6] = OE;
+        val[7] = VE;
+        val[8] = VXCVI;
+        val[9] = VXSQRT;
+        val[10] = VXSOFT;
+        val[11] = RESERVED_1;
+        val(16, 12) = FPRF;
+        val[17] = FI;
+        val[18] = FR;
+        val[19] = VXVC;
+        val[20] = VXIMZ;
+        val[21] = VXZDZ;
+        val[22] = VXIDI;
+        val[23] = VXISI;
+        val[24] = VXSNAN;
+        val[25] = XX;
+        val[26] = ZX;
+        val[27] = UX;
+        val[28] = OX;
+        val[29] = VX;
+        val[30] = FEX;
+        val[31] = FX;
+        return val;
+    }
+};
+
 typedef struct {
 	ap_uint<32> GPR[32]; // General purpose registers
 	ap_uint<64> FPR[32]; // Floating point registers
 	condition_reg condition_reg; // Condition register
 	ap_uint<32> link_register; // Link register
 	fixed_point_exception_reg fixed_exception_reg; // Fixed point exception register
+	floating_point_status_reg FPSCR; // Floating point status and control register
 	ap_uint<32> count_register; // Count register
 	ap_uint<32> program_counter; // Program counter register
 } registers_t;
