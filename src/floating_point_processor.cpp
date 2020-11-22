@@ -52,7 +52,20 @@ pipeline::float_result_t floating_point::move(float_move_decode_t decoded, regis
 }
 
 pipeline::float_result_t floating_point::arithmetic(float_arithmetic_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands) {
+    ap_uint<64> op1 = operands.op1;
+    ap_uint<64> op2 = operands.op2;
 
+    switch(decoded.operation) {
+        case ADD:
+
+            break;
+        case SUBTRACT:
+            break;
+        case MULTIPLY:
+            break;
+        case DIVIDE:
+            break;
+    }
 }
 
 pipeline::float_result_t floating_point::multiply_add(float_madd_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands) {

@@ -31,3 +31,15 @@ void floating_point::copy_condition(registers_t &registers) {
     registers.condition_reg[1].condition_floating_point.FEX = registers.FPSCR.FEX;
     registers.condition_reg[1].condition_floating_point.FX = registers.FPSCR.FX;
 }
+
+double floating_point::convert_to_double(ap_uint<64> val) {
+    convert_t convert;
+    convert.x = val;
+    return convert.y;
+}
+
+ap_uint<64> floating_point::convert_to_uint(double val) {
+    convert_t convert;
+    convert.y = val;
+    return convert.x;
+}

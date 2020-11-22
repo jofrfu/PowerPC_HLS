@@ -28,9 +28,19 @@
 
 #include <ap_int.h>
 #include "registers.hpp"
+#include <stdint.h>
 
 namespace floating_point {
     void copy_condition(registers_t &registers);
+
+    typedef union {
+        uint64_t x;
+        double y;
+    } convert_t;
+
+    double convert_to_double(ap_uint<64> val);
+
+    ap_uint<64> convert_to_uint(double val);
 }
 
 #endif //POWERPC_HLS_FLOATING_POINT_UTILS_HPP
