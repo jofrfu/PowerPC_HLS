@@ -41,6 +41,8 @@ namespace floating_point {
     double convert_to_double(ap_uint<64> val);
 
     ap_uint<64> convert_to_uint(double val);
+
+    void check_exceptions(double result, registers_t &registers);
 }
 
 #endif //POWERPC_HLS_FLOATING_POINT_UTILS_HPP

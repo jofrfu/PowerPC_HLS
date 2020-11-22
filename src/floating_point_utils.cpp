@@ -43,3 +43,12 @@ ap_uint<64> floating_point::convert_to_uint(double val) {
     convert.y = val;
     return convert.x;
 }
+
+void floating_point::check_exceptions(double result, registers_t &registers) {
+    if(isnan(result)) {
+
+    }
+    if(isinf(result)) {
+
+    }
+}

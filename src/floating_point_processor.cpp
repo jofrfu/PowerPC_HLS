@@ -26,6 +26,8 @@
 #include "floating_point_processor.hpp"
 #include "floating_point_utils.hpp"
 
+#include <hls_math.h>
+
 pipeline::float_result_t floating_point::move(float_move_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands) {
     ap_uint<64> source = operands.op1;
     ap_uint<64> result = source(62, 0);
@@ -52,20 +54,29 @@ pipeline::float_result_t floating_point::move(float_move_decode_t decoded, regis
 }
 
 pipeline::float_result_t floating_point::arithmetic(float_arithmetic_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands) {
-    ap_uint<64> op1 = operands.op1;
-    ap_uint<64> op2 = operands.op2;
+    double op1 = convert_to_double(operands.op1);
+    double op2 = convert_to_double(operands.op2);
+    double result;
 
+    // We don't care if it's single precision or double precision
     switch(decoded.operation) {
         case ADD:
-
+            result = op1 + op2;
             break;
         case SUBTRACT:
+            result = op1 - op2;
             break;
         case MULTIPLY:
+            result = op1 * op2;
             break;
         case DIVIDE:
+            result = op1 / op2;
             break;
     }
+
+
+
+    return {result, decoded.result_reg_address, true};
 }
 
 pipeline::float_result_t floating_point::multiply_add(float_madd_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands) {
