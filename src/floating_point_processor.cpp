@@ -54,29 +54,116 @@ pipeline::float_result_t floating_point::move(float_move_decode_t decoded, regis
 }
 
 pipeline::float_result_t floating_point::arithmetic(float_arithmetic_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands) {
+    if(decoded.operation == SUBTRACT) {
+        // Sub is just an add with negation
+        operands.op2[63] = ~operands.op2[63];
+    }
     double op1 = convert_to_double(operands.op1);
     double op2 = convert_to_double(operands.op2);
     double result;
 
-    // We don't care if it's single precision or double precision
-    switch(decoded.operation) {
-        case ADD:
-            result = op1 + op2;
-            break;
-        case SUBTRACT:
-            result = op1 - op2;
-            break;
-        case MULTIPLY:
-            result = op1 * op2;
-            break;
-        case DIVIDE:
-            result = op1 / op2;
-            break;
+    ap_uint<1> VE = registers.FPSCR.VE;
+
+    bool exception = false;
+
+    if(isnan(op1) || isnan(op2)) {
+        exception = true;
+        // Calculating with NaNs is always invalid
+        if(VE == 1) {
+            result = std::numeric_limits<double>::signaling_NaN();
+        } else {
+            result = std::numeric_limits<double>::quiet_NaN();
+        }
+    } else {
+        // We don't care if it's single precision or double precision
+        switch (decoded.operation) {
+            case SUBTRACT:
+            case ADD:
+                if (isinf(op1) && isinf(op2) && (isless(op1, 0.0) ^ isless(op2, 0.0))) {
+                    exception = true;
+                    // Calculating inf - inf is invalid
+                    if (VE == 1) {
+                        registers.FPSCR.VXISI = 1;
+                        result = std::numeric_limits<double>::signaling_NaN();
+                    } else {
+                        result = std::numeric_limits<double>::quiet_NaN();
+                    }
+                } else {
+                    result = op1 + op2;
+                }
+                break;
+            case MULTIPLY:
+                if ((isinf(op1) ^ isinf(op2)) && (op1 == 0.0 ^ op2 == 0.0)) {
+                    exception = true;
+                    // Calculating inf * 0 is invalid
+                    if (VE == 1) {
+                        registers.FPSCR.VXIMZ = 1;
+                        result = std::numeric_limits<double>::signaling_NaN();
+                    } else {
+                        result = std::numeric_limits<double>::quiet_NaN();
+                    }
+                } else {
+                    result = op1 * op2;
+                }
+                break;
+            case DIVIDE:
+                if (op2 == 0.0) {
+                    exception = true;
+                    // Calculating x / 0 results in QNaN
+                    if (VE == 1) {
+                        if (op1 == 0.0) {
+                            // Calculating 0 / 0 is invalid
+                            registers.FPSCR.VXZDZ = 1;
+                            result = std::numeric_limits<double>::signaling_NaN();
+                        } else {
+                            result = std::numeric_limits<double>::quiet_NaN();
+                        }
+                    } else {
+                        result = std::numeric_limits<double>::quiet_NaN();
+                    }
+                } else if (isinf(op1) && isinf(op2)) {
+                    exception = true;
+                    // Calculating inf / inf is invalid
+                    if (VE == 1) {
+                        registers.FPSCR.VXIDI = 1;
+                        result = std::numeric_limits<double>::signaling_NaN();
+                    } else {
+                        result = std::numeric_limits<double>::quiet_NaN();
+                    }
+                } else {
+                    result = op1 / op2;
+                }
+                break;
+        }
     }
 
+    pipeline::float_result_t write_back;
+    write_back.result = convert_to_uint(result);
+    write_back.address = decoded.result_reg_address;
 
+    // Check conditions and set exceptions accordingly
+    if(VE) {
+        if(result == std::numeric_limits<double>::signaling_NaN()) {
+            registers.FPSCR.VXSNAN = 1;
+            write_back.write_back = false;
+            exception = true;
+        } else {
+            write_back.write_back = true;
+        }
 
-    return {result, decoded.result_reg_address, true};
+        if(exception) {
+            registers.FPSCR.FR = 0;
+            registers.FPSCR.FI = 0;
+        }
+    } else {
+        if(exception) {
+            registers.FPSCR.FR = 0;
+            registers.FPSCR.FI = 0;
+            registers.FPSCR.FPRF = E_QNAN;
+        }
+    }
+
+    return write_back;
 }
 
 pipeline::float_result_t floating_point::multiply_add(float_madd_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands) {

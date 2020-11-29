@@ -30,6 +30,16 @@
 #include "registers.hpp"
 #include <stdint.h>
 
+#define E_QNAN 0b10001
+#define E_N_INF 0b10010
+#define E_N_NORM 0b00010
+#define E_N_DENORM 0b00011
+#define E_N_ZERO 0b01001
+#define E_P_ZERO 0b01000
+#define E_P_DENORM 0b00101
+#define E_P_NORM 0b00100
+#define E_P_INF 0b10100
+
 namespace floating_point {
     void copy_condition(registers_t &registers);
 
@@ -41,8 +51,6 @@ namespace floating_point {
     double convert_to_double(ap_uint<64> val);
 
     ap_uint<64> convert_to_uint(double val);
-
-    void check_exceptions(double result, registers_t &registers);
 }
 
 #endif //POWERPC_HLS_FLOATING_POINT_UTILS_HPP

@@ -24,6 +24,7 @@
 //
 
 #include "floating_point_utils.hpp"
+#include <hls_math.h>
 
 void floating_point::copy_condition(registers_t &registers) {
     registers.condition_reg[1].condition_floating_point.OX = registers.FPSCR.OX;
@@ -42,13 +43,4 @@ ap_uint<64> floating_point::convert_to_uint(double val) {
     convert_t convert;
     convert.y = val;
     return convert.x;
-}
-
-void floating_point::check_exceptions(double result, registers_t &registers) {
-    if(isnan(result)) {
-
-    }
-    if(isinf(result)) {
-
-    }
 }
