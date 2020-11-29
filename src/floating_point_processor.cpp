@@ -63,8 +63,10 @@ pipeline::float_result_t floating_point::arithmetic(float_arithmetic_decode_t de
     double result;
 
     ap_uint<1> VE = registers.FPSCR.VE;
+    ap_uint<1> ZE = registers.FPSCR.ZE;
 
     bool exception = false;
+    bool zero_exception = false;
 
     if(isnan(op1) || isnan(op2)) {
         exception = true;
@@ -107,20 +109,20 @@ pipeline::float_result_t floating_point::arithmetic(float_arithmetic_decode_t de
                 }
                 break;
             case DIVIDE:
-                if (op2 == 0.0) {
+                if (op1 == 0.0 && op2 == 0.0) {
                     exception = true;
-                    // Calculating x / 0 results in QNaN
+                    // Calculating 0 / 0 is invalid
                     if (VE == 1) {
-                        if (op1 == 0.0) {
-                            // Calculating 0 / 0 is invalid
-                            registers.FPSCR.VXZDZ = 1;
-                            result = std::numeric_limits<double>::signaling_NaN();
-                        } else {
-                            result = std::numeric_limits<double>::quiet_NaN();
-                        }
+                        registers.FPSCR.VXZDZ = 1;
+                        result = std::numeric_limits<double>::signaling_NaN();
                     } else {
                         result = std::numeric_limits<double>::quiet_NaN();
                     }
+                } else if(op1 != 0.0 && op2 == 0.0) {
+                    zero_exception = true;
+                    // Calculating x / zero is invalid
+                    registers.FPSCR.ZX = 1;
+                    result = std::numeric_limits<double>::infinity();
                 } else if (isinf(op1) && isinf(op2)) {
                     exception = true;
                     // Calculating inf / inf is invalid
@@ -138,11 +140,10 @@ pipeline::float_result_t floating_point::arithmetic(float_arithmetic_decode_t de
     }
 
     pipeline::float_result_t write_back;
-    write_back.result = convert_to_uint(result);
-    write_back.address = decoded.result_reg_address;
+    ap_uint<64> bit_result = convert_to_uint(result);
 
     // Check conditions and set exceptions accordingly
-    if(VE) {
+    if(VE == 1) {
         if(result == std::numeric_limits<double>::signaling_NaN()) {
             registers.FPSCR.VXSNAN = 1;
             write_back.write_back = false;
@@ -155,13 +156,39 @@ pipeline::float_result_t floating_point::arithmetic(float_arithmetic_decode_t de
             registers.FPSCR.FR = 0;
             registers.FPSCR.FI = 0;
         }
+    } else if(ZE == 1) {
+        if(zero_exception) {
+            registers.FPSCR.FR = 0;
+            registers.FPSCR.FI = 0;
+            write_back.write_back = false;
+        }
     } else {
+        write_back.write_back = true;
+
         if(exception) {
             registers.FPSCR.FR = 0;
             registers.FPSCR.FI = 0;
             registers.FPSCR.FPRF = E_QNAN;
+        } else if(zero_exception) {
+            registers.FPSCR.FR = 0;
+            registers.FPSCR.FI = 0;
+            // Set sign bit of infinity result
+            bit_result[63] = operands.op1[63] ^ operands.op2[63];
+
+            if(bit_result[63] == 1) {
+                registers.FPSCR.FPRF = E_N_INF;
+            } else {
+                registers.FPSCR.FPRF = E_P_INF;
+            }
         }
     }
+
+    if(decoded.alter_CR1) {
+        copy_condition(registers);
+    }
+
+    write_back.result = bit_result;
+    write_back.address = decoded.result_reg_address;
 
     return write_back;
 }

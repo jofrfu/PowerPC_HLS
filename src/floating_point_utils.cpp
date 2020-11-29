@@ -24,7 +24,6 @@
 //
 
 #include "floating_point_utils.hpp"
-#include <hls_math.h>
 
 void floating_point::copy_condition(registers_t &registers) {
     registers.condition_reg[1].condition_floating_point.OX = registers.FPSCR.OX;
