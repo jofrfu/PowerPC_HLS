@@ -64,6 +64,8 @@ pipeline::float_result_t floating_point::arithmetic(float_arithmetic_decode_t de
 
     ap_uint<1> VE = registers.FPSCR.VE;
     ap_uint<1> ZE = registers.FPSCR.ZE;
+    ap_uint<1> OE = registers.FPSCR.OE;
+    ap_uint<1> UE = registers.FPSCR.UE;
 
     bool exception = false;
     bool zero_exception = false;
@@ -142,29 +144,20 @@ pipeline::float_result_t floating_point::arithmetic(float_arithmetic_decode_t de
     pipeline::float_result_t write_back;
     ap_uint<64> bit_result = convert_to_uint(result);
 
+    write_back.write_back = true;
+
+    bool ov_exception = isfinite(op1) && isfinite(op2) && isinf(result) && !zero_exception;
+    // Underflow is impossible to check with this style of code, it will be ignored
+    // Inexact will not be covered, because we ignore rounding
+
+    if(ov_exception) {
+        registers.FPSCR.OX = 1;
+    }
+
+    write_back.write_back = true;
+
     // Check conditions and set exceptions accordingly
-    if(VE == 1) {
-        if(result == std::numeric_limits<double>::signaling_NaN()) {
-            registers.FPSCR.VXSNAN = 1;
-            write_back.write_back = false;
-            exception = true;
-        } else {
-            write_back.write_back = true;
-        }
-
-        if(exception) {
-            registers.FPSCR.FR = 0;
-            registers.FPSCR.FI = 0;
-        }
-    } else if(ZE == 1) {
-        if(zero_exception) {
-            registers.FPSCR.FR = 0;
-            registers.FPSCR.FI = 0;
-            write_back.write_back = false;
-        }
-    } else {
-        write_back.write_back = true;
-
+    if(VE == 0 && ZE == 0 && OE == 0 && UE == 0) {
         if(exception) {
             registers.FPSCR.FR = 0;
             registers.FPSCR.FI = 0;
@@ -179,6 +172,51 @@ pipeline::float_result_t floating_point::arithmetic(float_arithmetic_decode_t de
                 registers.FPSCR.FPRF = E_N_INF;
             } else {
                 registers.FPSCR.FPRF = E_P_INF;
+            }
+        } else if(ov_exception) {
+            registers.FPSCR.OX = 1;
+            registers.FPSCR.XX = 1;
+            registers.FPSCR.FI = 1;
+
+            // Ignore rounding and only allow infinity here
+            if(bit_result[63] == 1) {
+                registers.FPSCR.FPRF = E_N_INF;
+            } else {
+                registers.FPSCR.FPRF = E_P_INF;
+            }
+        }
+    } else {
+        if(VE == 1) {
+            if(result == std::numeric_limits<double>::signaling_NaN()) {
+                registers.FPSCR.VXSNAN = 1;
+                write_back.write_back = false;
+                exception = true;
+            }
+
+            if(exception) {
+                registers.FPSCR.FR = 0;
+                registers.FPSCR.FI = 0;
+            }
+        }
+
+        if(ZE == 1) {
+            if(zero_exception) {
+                registers.FPSCR.FR = 0;
+                registers.FPSCR.FI = 0;
+                write_back.write_back = false;
+            }
+        }
+
+        if(OE == 1) {
+            if(ov_exception) {
+                registers.FPSCR.OX = 1;
+                // We only care for double precision, correct the exponent by 1536
+                bit_result(62, 52) = bit_result(62, 52) - 1536;
+                if(bit_result[63] == 1) {
+                    registers.FPSCR.FPRF = E_N_NORM;
+                } else {
+                    registers.FPSCR.FPRF = E_P_NORM;
+                }
             }
         }
     }
