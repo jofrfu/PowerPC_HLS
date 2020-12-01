@@ -239,10 +239,14 @@ pipeline::float_result_t floating_point::multiply_add(float_madd_decode_t decode
     }
     double op3 = convert_to_double(operands.op3);
 
-    double result = fma(op1, op2, op3);
+    ap_uint<64> result = convert_to_uint(fma(op1, op2, op3));
+
+    if(decoded.negate_result) {
+        result[63] = ~result[63];
+    }
 
     pipeline::float_result_t write_back;
-    write_back.result = convert_to_uint(result);
+    write_back.result = result;
     write_back.address = decoded.result_reg_address;
     write_back.write_back = true;
 
