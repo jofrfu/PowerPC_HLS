@@ -232,7 +232,21 @@ pipeline::float_result_t floating_point::arithmetic(float_arithmetic_decode_t de
 }
 
 pipeline::float_result_t floating_point::multiply_add(float_madd_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands) {
+    double op1 = convert_to_double(operands.op1);
+    double op2 = convert_to_double(operands.op2);
+    if(decoded.negate_add) {
+        operands.op3[63] = ~operands.op3[63];
+    }
+    double op3 = convert_to_double(operands.op3);
 
+    double result = fma(op1, op2, op3);
+
+    pipeline::float_result_t write_back;
+    write_back.result = convert_to_uint(result);
+    write_back.address = decoded.result_reg_address;
+    write_back.write_back = true;
+
+    return write_back;
 }
 
 pipeline::float_result_t floating_point::convert(float_convert_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands) {
