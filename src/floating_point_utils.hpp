@@ -29,6 +29,7 @@
 #include <ap_int.h>
 #include "registers.hpp"
 #include <stdint.h>
+#include <hls_math.h>
 
 #define E_QNAN 0b10001
 #define E_N_INF 0b10010
@@ -42,6 +43,8 @@
 
 namespace floating_point {
     void copy_condition(registers_t &registers);
+
+    ap_uint<5> get_FPRF(double result, ap_uint<1> sign);
 
     typedef union {
         uint64_t x;

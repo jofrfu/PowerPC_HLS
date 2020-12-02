@@ -32,6 +32,32 @@ void floating_point::copy_condition(registers_t &registers) {
     registers.condition_reg[1].condition_floating_point.FX = registers.FPSCR.FX;
 }
 
+ap_uint<5> get_FPRF(double result, ap_uint<1> sign) {
+    ap_uint<5> FPRF;
+    if(sign == 1) {
+        if(isinf(result)) {
+            FPRF = E_N_INF;
+        } else if(isnan(result)) {
+            FPRF = E_QNAN;
+        } else if(result == 0.0) {
+            FPRF = E_N_ZERO;
+        } else {
+            FPRF = E_N_NORM;
+        }
+    } else {
+        if(isinf(result)) {
+            FPRF = E_P_INF;
+        } else if(isnan(result)) {
+            FPRF = E_QNAN;
+        } else if(result == 0.0) {
+            FPRF = E_P_ZERO;
+        } else {
+            FPRF = E_P_NORM;
+        }
+    }
+    return FPRF;
+}
+
 double floating_point::convert_to_double(ap_uint<64> val) {
     convert_t convert;
     convert.x = val;
