@@ -65,7 +65,6 @@ pipeline::float_result_t floating_point::arithmetic(float_arithmetic_decode_t de
     ap_uint<1> VE = registers.FPSCR.VE;
     ap_uint<1> ZE = registers.FPSCR.ZE;
     ap_uint<1> OE = registers.FPSCR.OE;
-    ap_uint<1> UE = registers.FPSCR.UE;
 
     bool exception = false;
     bool zero_exception = false;
@@ -83,7 +82,7 @@ pipeline::float_result_t floating_point::arithmetic(float_arithmetic_decode_t de
         switch (decoded.operation) {
             case SUBTRACT:
             case ADD:
-                if (isinf(op1) && isinf(op2) && (isless(op1, 0.0) ^ isless(op2, 0.0))) {
+                if (isinf(op1) && isinf(op2) && (operands.op1[63] ^ operands.op2[63])) {
                     exception = true;
                     // Calculating inf - inf is invalid
                     if (VE == 1) {
@@ -157,7 +156,7 @@ pipeline::float_result_t floating_point::arithmetic(float_arithmetic_decode_t de
     write_back.write_back = true;
 
     // Check conditions and set exceptions accordingly
-    if(VE == 0 && ZE == 0 && OE == 0 && UE == 0) {
+    if(VE == 0 && ZE == 0 && OE == 0) {
         if(exception) {
             registers.FPSCR.FR = 0;
             registers.FPSCR.FI = 0;
@@ -239,16 +238,104 @@ pipeline::float_result_t floating_point::multiply_add(float_madd_decode_t decode
     }
     double op3 = convert_to_double(operands.op3);
 
-    ap_uint<64> result = convert_to_uint(fma(op1, op2, op3));
+    ap_uint<1> VE = registers.FPSCR.VE;
+    ap_uint<1> OE = registers.FPSCR.OE;
+
+    bool exception = false;
+
+    double result;
+
+    if ((isinf(op1) ^ isinf(op2)) && (op1 == 0.0 ^ op2 == 0.0)) {
+        exception = true;
+        // Calculating inf * 0 is invalid
+        if (VE == 1) {
+            registers.FPSCR.VXIMZ = 1;
+            result = std::numeric_limits<double>::signaling_NaN();
+        } else {
+            result = std::numeric_limits<double>::quiet_NaN();
+        }
+    } else if((isinf(op1) || isinf(op2)) && isinf(op3) && ((operands.op1[63] ^ operands.op2[63]) ^ operands.op3[63])) {
+        exception = true;
+        // Calculating inf - inf i invalid
+        if (VE == 1) {
+            registers.FPSCR.VXISI = 1;
+            result = std::numeric_limits<double>::signaling_NaN();
+        } else {
+            result = std::numeric_limits<double>::quiet_NaN();
+        }
+    } else {
+        result = fma(op1, op2, op3);
+    }
+
+    ap_uint<64> bit_result = convert_to_uint(result);
 
     if(decoded.negate_result) {
-        result[63] = ~result[63];
+        bit_result[63] = ~bit_result[63];
+    }
+
+    bool ov_exception = isfinite(op1) && isfinite(op2)&& isfinite(op3) && isinf(result);
+    // Underflow is impossible to check with this style of code, it will be ignored
+    // Inexact will not be covered, because we ignore rounding
+
+    if(ov_exception) {
+        registers.FPSCR.OX = 1;
     }
 
     pipeline::float_result_t write_back;
+    write_back.write_back = true;
+
+    // Check conditions and set exceptions accordingly
+    if(VE == 0 && OE == 0) {
+        if (exception) {
+            registers.FPSCR.FR = 0;
+            registers.FPSCR.FI = 0;
+            registers.FPSCR.FPRF = E_QNAN;
+        } else if (ov_exception) {
+            registers.FPSCR.OX = 1;
+            registers.FPSCR.XX = 1;
+            registers.FPSCR.FI = 1;
+
+            // Ignore rounding and only allow infinity here
+            if (bit_result[63] == 1) {
+                registers.FPSCR.FPRF = E_N_INF;
+            } else {
+                registers.FPSCR.FPRF = E_P_INF;
+            }
+        } else {
+            if (VE == 1) {
+                if (result == std::numeric_limits<double>::signaling_NaN()) {
+                    registers.FPSCR.VXSNAN = 1;
+                    write_back.write_back = false;
+                    exception = true;
+                }
+
+                if (exception) {
+                    registers.FPSCR.FR = 0;
+                    registers.FPSCR.FI = 0;
+                }
+            }
+
+            if (OE == 1) {
+                if (ov_exception) {
+                    registers.FPSCR.OX = 1;
+                    // We only care for double precision, correct the exponent by 1536
+                    bit_result(62, 52) = bit_result(62, 52) - 1536;
+                    if (bit_result[63] == 1) {
+                        registers.FPSCR.FPRF = E_N_NORM;
+                    } else {
+                        registers.FPSCR.FPRF = E_P_NORM;
+                    }
+                }
+            }
+        }
+    }
+
+    if(decoded.alter_CR1) {
+        copy_condition(registers);
+    }
+
     write_back.result = result;
     write_back.address = decoded.result_reg_address;
-    write_back.write_back = true;
 
     return write_back;
 }
