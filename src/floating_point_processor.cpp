@@ -163,6 +163,8 @@ pipeline::float_result_t floating_point::arithmetic(float_arithmetic_decode_t de
             registers.FPSCR.FR = 0;
             registers.FPSCR.FI = 0;
             registers.FPSCR.FPRF = E_QNAN;
+
+            registers.FPSCR.FX = 1;
         } else if (zero_exception) {
             registers.FPSCR.FR = 0;
             registers.FPSCR.FI = 0;
@@ -174,6 +176,8 @@ pipeline::float_result_t floating_point::arithmetic(float_arithmetic_decode_t de
             } else {
                 registers.FPSCR.FPRF = E_P_INF;
             }
+
+            registers.FPSCR.FX = 1;
         } else if (ov_exception) {
             registers.FPSCR.OX = 1;
             registers.FPSCR.XX = 1;
@@ -185,6 +189,8 @@ pipeline::float_result_t floating_point::arithmetic(float_arithmetic_decode_t de
             } else {
                 registers.FPSCR.FPRF = E_P_INF;
             }
+
+            registers.FPSCR.FX = 1;
         } else {
             registers.FPSCR.FPRF = get_FPRF(result, bit_result[63]);
         }
@@ -199,6 +205,8 @@ pipeline::float_result_t floating_point::arithmetic(float_arithmetic_decode_t de
             if (exception) {
                 registers.FPSCR.FR = 0;
                 registers.FPSCR.FI = 0;
+
+                registers.FPSCR.FX = 1;
             }
         }
 
@@ -207,6 +215,8 @@ pipeline::float_result_t floating_point::arithmetic(float_arithmetic_decode_t de
                 registers.FPSCR.FR = 0;
                 registers.FPSCR.FI = 0;
                 write_back.write_back = false;
+
+                registers.FPSCR.FX = 1;
             }
         }
 
@@ -220,6 +230,8 @@ pipeline::float_result_t floating_point::arithmetic(float_arithmetic_decode_t de
                 } else {
                     registers.FPSCR.FPRF = E_P_NORM;
                 }
+
+                registers.FPSCR.FX = 1;
             }
         }
     }
@@ -295,6 +307,8 @@ floating_point::multiply_add(float_madd_decode_t decoded, registers_t &registers
             registers.FPSCR.FR = 0;
             registers.FPSCR.FI = 0;
             registers.FPSCR.FPRF = E_QNAN;
+
+            registers.FPSCR.FX = 1;
         } else if (ov_exception) {
             registers.FPSCR.OX = 1;
             registers.FPSCR.XX = 1;
@@ -306,6 +320,8 @@ floating_point::multiply_add(float_madd_decode_t decoded, registers_t &registers
             } else {
                 registers.FPSCR.FPRF = E_P_INF;
             }
+
+            registers.FPSCR.FX = 1;
         } else {
             registers.FPSCR.FPRF = get_FPRF(result, bit_result[63]);
         }
@@ -320,6 +336,8 @@ floating_point::multiply_add(float_madd_decode_t decoded, registers_t &registers
             if (exception) {
                 registers.FPSCR.FR = 0;
                 registers.FPSCR.FI = 0;
+
+                registers.FPSCR.FX = 1;
             }
         }
 
@@ -333,6 +351,8 @@ floating_point::multiply_add(float_madd_decode_t decoded, registers_t &registers
                 } else {
                     registers.FPSCR.FPRF = E_P_NORM;
                 }
+
+                registers.FPSCR.FX = 1;
             }
         }
     }
@@ -350,19 +370,98 @@ floating_point::multiply_add(float_madd_decode_t decoded, registers_t &registers
 pipeline::float_result_t
 floating_point::convert(float_convert_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands) {
     double op1 = convert_to_double(operands.op1);
-    double result;
+    ap_uint<64> result;
 
+    // TODO: Check for SNaN and set exceptions accordingly
     if (decoded.round_to_single) {
         // Ignore rounding, we only use double precision
-        result = op1;
+        result = convert_to_uint(op1);
     } else if (decoded.convert_to_integer) {
-
+        // Only words are supported - ignore doublewords, ignore rounding modes
+        if(op1 > 0x7FFFFFFF) {
+            result = 0x7FFFFFFF;
+        } else if(op1 < ((int32_t)0x80000000)) {
+            result = 0x80000000;
+        } else {
+            result = (int32_t) op1;
+        }
     }
+
+    if (decoded.alter_CR1) {
+        copy_condition(registers);
+    }
+
+    pipeline::float_result_t write_back = {result, decoded.target_reg_address, true};
 }
 
 pipeline::float_result_t
 floating_point::compare(float_compare_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands) {
+    double op1 = operands.op1;
+    double op2 = operands.op2;
 
+    auto CR = registers.condition_reg[decoded.BF];
+
+    if(isnan(op1) || isnan(op2)) {
+        CR.condition_floating_point_compare.FU = 1;
+        CR.condition_floating_point_compare.FE = 0;
+        CR.condition_floating_point_compare.FG = 0;
+        CR.condition_floating_point_compare.FL = 0;
+
+        registers.FPSCR.FPRF[0] = 1;
+        registers.FPSCR.FPRF[1] = 0;
+        registers.FPSCR.FPRF[2] = 0;
+        registers.FPSCR.FPRF[3] = 0;
+    } else if(op1 < op2) {
+        CR.condition_floating_point_compare.FU = 0;
+        CR.condition_floating_point_compare.FE = 0;
+        CR.condition_floating_point_compare.FG = 0;
+        CR.condition_floating_point_compare.FL = 1;
+
+        registers.FPSCR.FPRF[0] = 0;
+        registers.FPSCR.FPRF[1] = 0;
+        registers.FPSCR.FPRF[2] = 0;
+        registers.FPSCR.FPRF[3] = 1;
+    } else if(op1 > op2) {
+        CR.condition_floating_point_compare.FU = 0;
+        CR.condition_floating_point_compare.FE = 0;
+        CR.condition_floating_point_compare.FG = 1;
+        CR.condition_floating_point_compare.FL = 0;
+
+        registers.FPSCR.FPRF[0] = 0;
+        registers.FPSCR.FPRF[1] = 0;
+        registers.FPSCR.FPRF[2] = 1;
+        registers.FPSCR.FPRF[3] = 0;
+    } else {
+        CR.condition_floating_point_compare.FU = 0;
+        CR.condition_floating_point_compare.FE = 1;
+        CR.condition_floating_point_compare.FG = 0;
+        CR.condition_floating_point_compare.FL = 0;
+
+        registers.FPSCR.FPRF[0] = 0;
+        registers.FPSCR.FPRF[1] = 1;
+        registers.FPSCR.FPRF[2] = 0;
+        registers.FPSCR.FPRF[3] = 0;
+    }
+
+    if(op1 == std::numeric_limits<double>::signaling_NaN() || op2 == std::numeric_limits<double>::signaling_NaN()) {
+        registers.FPSCR.VXSNAN = 1;
+
+        if(!decoded.unordered) {
+            if (registers.FPSCR.VE == 0) {
+                registers.FPSCR.VXVC = 1;
+            }
+        }
+
+        registers.FPSCR.FX = 1;
+    } else if(op1 == std::numeric_limits<double>::quiet_NaN() || op2 == std::numeric_limits<double>::quiet_NaN()) {
+        if(!decoded.unordered) {
+            registers.FPSCR.VXVC = 1;
+
+            registers.FPSCR.FX = 1;
+        }
+    }
+
+    pipeline::float_result_t write_back = {0.0, 0, false};
 }
 
 pipeline::float_result_t
