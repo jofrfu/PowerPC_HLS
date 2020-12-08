@@ -466,6 +466,86 @@ floating_point::compare(float_compare_decode_t decoded, registers_t &registers, 
 
 pipeline::float_result_t
 floating_point::status(float_status_decode_t decoded, registers_t &registers, pipeline::float_operands_t operands) {
+    ap_uint<64> op1 = operands.op1;
+    ap_uint<64> result = 0;
 
+    if(decoded.move_to_FPR) {
+        result(31, 0) = registers.FPSCR.getFPSCR();
+    } else if(decoded.move_to_CR) {
+        auto CR = registers.condition_reg.getCR();
+        // BF and BFA are in big endian notation, reverse with 7-x
+        CR((7-decoded.BF_BT+1)*4-1, (7-decoded.BF_BT)*4) = registers.FPSCR.getFPSCR()((7-decoded.BFA+1)*4-1, (7-decoded.BFA)*4);
+        registers.condition_reg = CR;
+        switch(decoded.BFA) {
+            case 0:
+                registers.FPSCR.FX = 0;
+                registers.FPSCR.OX = 0;
+                break;
+            case 1:
+                registers.FPSCR.UX = 0;
+                registers.FPSCR.ZX = 0;
+                registers.FPSCR.XX = 0;
+                registers.FPSCR.VXSNAN = 0;
+                break;
+            case 2:
+                registers.FPSCR.VXISI = 0;
+                registers.FPSCR.VXIDI = 0;
+                registers.FPSCR.VXZDZ = 0;
+                registers.FPSCR.VXIMZ = 0;
+                break;
+            case 3:
+                registers.FPSCR.VXVC = 0;
+                break;
+            case 5:
+                registers.FPSCR.VXSOFT = 0;
+                registers.FPSCR.VXSQRT = 0;
+                registers.FPSCR.VXCVI = 0;
+                break;
+        }
+    } else if(decoded.move_to_FPSCR) {
+        if(decoded.use_U) {
+            auto FPSCR = registers.FPSCR.getFPSCR();
+            if(decoded.BF_BT == 0) { // FEX and VX cannot be set explicitly
+                FPSCR(30, 29) = decoded.U(2, 1); // TODO: Check if this is correct
+            } else {
+                FPSCR((7-decoded.BF_BT+1)*4-1, (7-decoded.BF_BT)*4) = decoded.U;
+            }
+            registers.FPSCR = FPSCR;
+        } else if(decoded.bit_0) {
+            // FEX and VX cannot be set explicitly
+            if(decoded.BF_BT != 1 || decoded.BF_BT != 2) {
+                auto FPSCR = registers.FPSCR.getFPSCR();
+                // BT is in big endian notation - reverse with 31-x
+                FPSCR[31 - decoded.BF_BT] = 0;
+                registers.FPSCR = FPSCR;
+            }
+        } else if(decoded.bit_1) {
+            // FEX and VX cannot be set explicitly
+            if(decoded.BF_BT != 1 || decoded.BF_BT != 2) {
+                auto FPSCR = registers.FPSCR.getFPSCR();
+                // BT is in big endian notation - reverse with 31-x
+                FPSCR[31 - decoded.BF_BT] = 1;
+                registers.FPSCR = FPSCR;
+            }
+        } else { // use_FLM
+            ap_uint<8> FLM = decoded.FLM;
+            ap_uint<32> mask;
+            for (uint32_t n = 0, b = 0; n < 8; n++) {
+#pragma HLS unroll
+                for (uint32_t i = 0; i < 4; i++) {
+#pragma HLS unroll
+                    mask[b++] = FLM[n];
+                }
+            }
+
+            mask(30, 29) = 0b00;
+
+            registers.FPSCR = op1(31, 0) & mask;
+        }
+    }
+
+    if(decoded.alter_CR1) {
+        copy_condition(registers);
+    }
 }
 
