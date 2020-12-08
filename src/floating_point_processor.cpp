@@ -469,8 +469,13 @@ floating_point::status(float_status_decode_t decoded, registers_t &registers, pi
     ap_uint<64> op1 = operands.op1;
     ap_uint<64> result = 0;
 
+    pipeline::float_result_t write_back = {0, 0, false};
+
     if(decoded.move_to_FPR) {
         result(31, 0) = registers.FPSCR.getFPSCR();
+        write_back.result = result;
+        write_back.address = decoded.FRT_FRB;
+        write_back.write_back = true;
     } else if(decoded.move_to_CR) {
         auto CR = registers.condition_reg.getCR();
         // BF and BFA are in big endian notation, reverse with 7-x
@@ -547,5 +552,7 @@ floating_point::status(float_status_decode_t decoded, registers_t &registers, pi
     if(decoded.alter_CR1) {
         copy_condition(registers);
     }
+
+    return write_back;
 }
 
