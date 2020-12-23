@@ -187,6 +187,7 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                 auto FPR = before["FPR"];
                 auto CR = before["CR"];
                 auto XER = before["XER"];
+                auto FPSCR = before["FPSCR"];
                 auto LR = before["LR"];
                 auto CTR = before["CTR"];
                 auto PC = before["PC"];
@@ -284,6 +285,94 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                     }
                 }
 
+                // Check FPSCR
+                if(!FPSCR.is_null()) {
+                    if(FPSCR.is_object()) {
+                        if(FPSCR["FX"].is_boolean()) {
+                            registers.FPSCR.FX = FPSCR["FX"].get<bool>();
+                        }
+                        if(FPSCR["FEX"].is_boolean()) {
+                            registers.FPSCR.FEX = FPSCR["FEX"].get<bool>();
+                        }
+                        if(FPSCR["VX"].is_boolean()) {
+                            registers.FPSCR.VX = FPSCR["VX"].get<bool>();
+                        }
+                        if(FPSCR["OX"].is_boolean()) {
+                            registers.FPSCR.OX = FPSCR["OX"].get<bool>();
+                        }
+                        if(FPSCR["UX"].is_boolean()) {
+                            registers.FPSCR.UX = FPSCR["UX"].get<bool>();
+                        }
+                        if(FPSCR["ZX"].is_boolean()) {
+                            registers.FPSCR.ZX = FPSCR["ZX"].get<bool>();
+                        }
+                        if(FPSCR["XX"].is_boolean()) {
+                            registers.FPSCR.XX = FPSCR["XX"].get<bool>();
+                        }
+                        if(FPSCR["VXSNAN"].is_boolean()) {
+                            registers.FPSCR.VXSNAN = FPSCR["VXSNAN"].get<bool>();
+                        }
+                        if(FPSCR["VXISI"].is_boolean()) {
+                            registers.FPSCR.VXISI = FPSCR["VXISI"].get<bool>();
+                        }
+                        if(FPSCR["VXIDI"].is_boolean()) {
+                            registers.FPSCR.VXIDI = FPSCR["VXIDI"].get<bool>();
+                        }
+                        if(FPSCR["VXZDZ"].is_boolean()) {
+                            registers.FPSCR.VXZDZ = FPSCR["VXZDZ"].get<bool>();
+                        }
+                        if(FPSCR["VXIMZ"].is_boolean()) {
+                            registers.FPSCR.VXIMZ = FPSCR["VXIMZ"].get<bool>();
+                        }
+                        if(FPSCR["VXVC"].is_boolean()) {
+                            registers.FPSCR.VXVC = FPSCR["VXVC"].get<bool>();
+                        }
+                        if(FPSCR["FR"].is_boolean()) {
+                            registers.FPSCR.FR = FPSCR["FR"].get<bool>();
+                        }
+                        if(FPSCR["FI"].is_boolean()) {
+                            registers.FPSCR.FI = FPSCR["FI"].get<bool>();
+                        }
+                        if(FPSCR["FPRF"].is_number()) {
+                            registers.FPSCR.FPRF = FPSCR["FPRF"].get<uint8_t>();
+                        }
+
+
+                        if(FPSCR["VXSOFT"].is_boolean()) {
+                            registers.FPSCR.VXSOFT = FPSCR["VXSOFT"].get<bool>();
+                        }
+                        if(FPSCR["VXSQRT"].is_boolean()) {
+                            registers.FPSCR.VXSQRT = FPSCR["VXSQRT"].get<bool>();
+                        }
+                        if(FPSCR["VXCVI"].is_boolean()) {
+                            registers.FPSCR.VXCVI = FPSCR["VXCVI"].get<bool>();
+                        }
+                        if(FPSCR["VE"].is_boolean()) {
+                            registers.FPSCR.VE = FPSCR["VE"].get<bool>();
+                        }
+                        if(FPSCR["OE"].is_boolean()) {
+                            registers.FPSCR.OE = FPSCR["OE"].get<bool>();
+                        }
+                        if(FPSCR["UE"].is_boolean()) {
+                            registers.FPSCR.UE = FPSCR["UE"].get<bool>();
+                        }
+                        if(FPSCR["ZE"].is_boolean()) {
+                            registers.FPSCR.ZE = FPSCR["ZE"].get<bool>();
+                        }
+                        if(FPSCR["XE"].is_boolean()) {
+                            registers.FPSCR.XE = FPSCR["XE"].get<bool>();
+                        }
+                        if(FPSCR["NI"].is_boolean()) {
+                            registers.FPSCR.NI = FPSCR["NI"].get<bool>();
+                        }
+                        if(FPSCR["RN"].is_number()) {
+                            registers.FPSCR.RN = FPSCR["RN"].get<uint8_t>();
+                        }
+                    } else {
+                        registers.FPSCR = FPSCR.get<uint32_t>();
+                    }
+                }
+
                 // Check LR
                 if(!LR.is_null()) {
                     registers.link_register = LR.get<uint32_t>();
@@ -334,6 +423,7 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                 auto FPR = after["FPR"];
                 auto CR = after["CR"];
                 auto XER = after["XER"];
+                auto FPSCR = after["FPSCR"];
                 auto LR = after["LR"];
                 auto CTR = after["CTR"];
                 auto PC = after["PC"];
@@ -448,6 +538,121 @@ TEST_CASE("Automatic program execution", "[program execution]") {
                     } else {
                         INFO("Checking XER.");
                         REQUIRE(registers.fixed_exception_reg.getXER() == XER.get<uint32_t>());
+                    }
+                }
+
+                // Check FPSCR
+                if(!FPSCR.is_null()) {
+                    if(FPSCR.is_object()) {
+                        if(FPSCR["FX"].is_boolean()) {
+                            INFO("Checking FPSCR FX field.")
+                            REQUIRE(registers.FPSCR.FX == FPSCR["FX"].get<bool>());
+                        }
+                        if(FPSCR["FEX"].is_boolean()) {
+                            INFO("Checking FPSCR FEX field.")
+                            REQUIRE(registers.FPSCR.FEX == FPSCR["FEX"].get<bool>());
+                        }
+                        if(FPSCR["VX"].is_boolean()) {
+                            INFO("Checking FPSCR VX field.")
+                            REQUIRE(registers.FPSCR.VX == FPSCR["VX"].get<bool>());
+                        }
+                        if(FPSCR["OX"].is_boolean()) {
+                            INFO("Checking FPSCR OX field.")
+                            REQUIRE(registers.FPSCR.OX == FPSCR["OX"].get<bool>());
+                        }
+                        if(FPSCR["UX"].is_boolean()) {
+                            INFO("Checking FPSCR UX field.")
+                            REQUIRE(registers.FPSCR.UX == FPSCR["UX"].get<bool>());
+                        }
+                        if(FPSCR["ZX"].is_boolean()) {
+                            INFO("Checking FPSCR ZX field.")
+                            REQUIRE(registers.FPSCR.ZX == FPSCR["ZX"].get<bool>());
+                        }
+                        if(FPSCR["XX"].is_boolean()) {
+                            INFO("Checking FPSCR XX field.")
+                            REQUIRE(registers.FPSCR.XX == FPSCR["XX"].get<bool>());
+                        }
+                        if(FPSCR["VXSNAN"].is_boolean()) {
+                            INFO("Checking FPSCR VXSNAN field.")
+                            REQUIRE(registers.FPSCR.VXSNAN == FPSCR["VXSNAN"].get<bool>());
+                        }
+                        if(FPSCR["VXISI"].is_boolean()) {
+                            INFO("Checking FPSCR VXISI field.")
+                            REQUIRE(registers.FPSCR.VXISI == FPSCR["VXISI"].get<bool>());
+                        }
+                        if(FPSCR["VXIDI"].is_boolean()) {
+                            INFO("Checking FPSCR VXIDI field.")
+                            REQUIRE(registers.FPSCR.VXIDI == FPSCR["VXIDI"].get<bool>());
+                        }
+                        if(FPSCR["VXZDZ"].is_boolean()) {
+                            INFO("Checking FPSCR VXZDZ field.")
+                            REQUIRE(registers.FPSCR.VXZDZ == FPSCR["VXZDZ"].get<bool>());
+                        }
+                        if(FPSCR["VXIMZ"].is_boolean()) {
+                            INFO("Checking FPSCR VXIMZ field.")
+                            REQUIRE(registers.FPSCR.VXIMZ == FPSCR["VXIMZ"].get<bool>());
+                        }
+                        if(FPSCR["VXVC"].is_boolean()) {
+                            INFO("Checking FPSCR VXVC field.")
+                            REQUIRE(registers.FPSCR.VXVC == FPSCR["VXVC"].get<bool>());
+                        }
+                        if(FPSCR["FR"].is_boolean()) {
+                            INFO("Checking FPSCR FR field.")
+                            REQUIRE(registers.FPSCR.FR == FPSCR["FR"].get<bool>());
+                        }
+                        if(FPSCR["FI"].is_boolean()) {
+                            INFO("Checking FPSCR FI field.")
+                            REQUIRE(registers.FPSCR.FI == FPSCR["FI"].get<bool>());
+                        }
+                        if(FPSCR["FPRF"].is_number()) {
+                            INFO("Checking FPSCR FPRF field.")
+                            REQUIRE(registers.FPSCR.FPRF == FPSCR["FPRF"].get<uint8_t>());
+                        }
+
+
+                        if(FPSCR["VXSOFT"].is_boolean()) {
+                            INFO("Checking FPSCR VXSOFT field.")
+                            REQUIRE(registers.FPSCR.VXSOFT == FPSCR["VXSOFT"].get<bool>());
+                        }
+                        if(FPSCR["VXSQRT"].is_boolean()) {
+                            INFO("Checking FPSCR VXSQRT field.")
+                            REQUIRE(registers.FPSCR.VXSQRT == FPSCR["VXSQRT"].get<bool>());
+                        }
+                        if(FPSCR["VXCVI"].is_boolean()) {
+                            INFO("Checking FPSCR VXCVI field.")
+                            REQUIRE(registers.FPSCR.VXCVI == FPSCR["VXCVI"].get<bool>());
+                        }
+                        if(FPSCR["VE"].is_boolean()) {
+                            INFO("Checking FPSCR VE field.")
+                            REQUIRE(registers.FPSCR.VE == FPSCR["VE"].get<bool>());
+                        }
+                        if(FPSCR["OE"].is_boolean()) {
+                            INFO("Checking FPSCR OE field.")
+                            REQUIRE(registers.FPSCR.OE == FPSCR["OE"].get<bool>());
+                        }
+                        if(FPSCR["UE"].is_boolean()) {
+                            INFO("Checking FPSCR UE field.")
+                            REQUIRE(registers.FPSCR.UE == FPSCR["UE"].get<bool>());
+                        }
+                        if(FPSCR["ZE"].is_boolean()) {
+                            INFO("Checking FPSCR ZE field.")
+                            REQUIRE(registers.FPSCR.ZE == FPSCR["ZE"].get<bool>());
+                        }
+                        if(FPSCR["XE"].is_boolean()) {
+                            INFO("Checking FPSCR XE field.")
+                            REQUIRE(registers.FPSCR.XE == FPSCR["XE"].get<bool>());
+                        }
+                        if(FPSCR["NI"].is_boolean()) {
+                            INFO("Checking FPSCR NI field.")
+                            REQUIRE(registers.FPSCR.NI == FPSCR["NI"].get<bool>());
+                        }
+                        if(FPSCR["RN"].is_number()) {
+                            INFO("Checking FPSCR RN field.")
+                            REQUIRE(registers.FPSCR.RN == FPSCR["RN"].get<uint8_t>());
+                        }
+                    } else {
+                        INFO("Checking FPSCR.")
+                        REQUIRE(registers.FPSCR.getFPSCR() == FPSCR.get<uint32_t>());
                     }
                 }
 
