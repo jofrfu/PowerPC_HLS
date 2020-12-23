@@ -61,7 +61,10 @@ namespace pipeline {
     ap_uint<32> fetch_index(ap_uint<32> *instruction_memory, uint32_t index);
 
     operands_t fetch_operands(decode_result_t decoded, registers_t &registers);
+    float_operands_t fetch_float_operands(decode_result_t decoded, registers_t &registers);
     result_t execute(decode_result_t decoded, registers_t &registers, operands_t operands, ap_uint<32> *data_memory);
+    float_result_t execute_float(decode_result_t decoded, registers_t &registers, float_operands_t operands, ap_uint<32> *data_memory);
     void write_back(result_t result, registers_t &registers);
+    void write_back_float(float_result_t result, registers_t &registers);
 }
 #endif //POWERPC_HLS_PIPELINE_HPP

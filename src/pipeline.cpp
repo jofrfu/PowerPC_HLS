@@ -26,6 +26,7 @@
 #include "pipeline.hpp"
 #include "fixed_point_processor.hpp"
 #include "branch_processor.hpp"
+#include "floating_point_processor.hpp"
 
 ap_uint<32> pipeline::instruction_fetch(ap_uint<32> *instruction_memory, registers_t &registers) {
 #pragma HLS inline
@@ -53,7 +54,7 @@ ap_uint<32> pipeline::fetch_index(ap_uint<32> *instruction_memory, uint32_t inde
 
 pipeline::operands_t pipeline::fetch_operands(decode_result_t decoded, registers_t &registers) {
 #pragma HLS inline
-    operands_t operands;
+    operands_t operands = {0, 0, 0};
     switch (decoded.fixed_point_decode_result.execute) {
         case fixed_point::NONE:
             break;
@@ -180,6 +181,63 @@ pipeline::operands_t pipeline::fetch_operands(decode_result_t decoded, registers
     return operands;
 }
 
+pipeline::float_operands_t pipeline::fetch_float_operands(decode_result_t decoded, registers_t &registers) {
+#pragma HLS inline
+    float_operands_t operands = {0, 0, 0};
+    switch (decoded.floating_point_decode_result.execute) {
+        case floating_point::NONE:
+            break;
+        case floating_point::LOAD:
+        case floating_point::STORE:
+            uint32_t sum1, sum2;
+            if (decoded.floating_point_decode_result.float_load_store_decoded.sum1_imm) {
+                sum1 = (int32_t) decoded.floating_point_decode_result.float_load_store_decoded.sum1_immediate;
+            } else {
+                sum1 = registers.GPR[decoded.floating_point_decode_result.float_load_store_decoded.sum1_reg_address];
+            }
+
+            if (decoded.floating_point_decode_result.float_load_store_decoded.sum2_imm) {
+                sum2 = (int32_t) decoded.floating_point_decode_result.float_load_store_decoded.sum2_immediate;
+            } else {
+                sum2 = registers.GPR[decoded.floating_point_decode_result.float_load_store_decoded.sum2_reg_address];
+            }
+
+            operands.op1 = sum1;
+            operands.op2 = sum2;
+            operands.op3 = 0;
+            break;
+        case floating_point::MOVE:
+            operands.op1 = registers.FPR[decoded.floating_point_decode_result.float_move_decoded.source_reg_address];
+            break;
+        case floating_point::ARITHMETIC:
+            operands.op1 = registers.FPR[decoded.floating_point_decode_result.float_arithmetic_decoded.op1_reg_address];
+            operands.op2 = registers.FPR[decoded.floating_point_decode_result.float_arithmetic_decoded.op2_reg_address];
+            break;
+        case floating_point::MADD:
+            operands.op1 = registers.FPR[decoded.floating_point_decode_result.float_madd_decoded.mul1_reg_address];
+            operands.op2 = registers.FPR[decoded.floating_point_decode_result.float_madd_decoded.mul2_reg_address];
+            operands.op3 = registers.FPR[decoded.floating_point_decode_result.float_madd_decoded.add_reg_address];
+            break;
+        case floating_point::CONVERT:
+            operands.op1 = registers.FPR[decoded.floating_point_decode_result.float_convert_decoded.source_reg_address];
+            break;
+        case floating_point::COMPARE:
+            operands.op1 = registers.FPR[decoded.floating_point_decode_result.float_compare_decoded.FRA];
+            operands.op2 = registers.FPR[decoded.floating_point_decode_result.float_compare_decoded.FRB];
+            break;
+        case floating_point::STATUS:
+            if(decoded.floating_point_decode_result.float_status_decoded.move_to_FPSCR &&
+                !decoded.floating_point_decode_result.float_status_decoded.use_U &&
+                !decoded.floating_point_decode_result.float_status_decoded.bit_0 &&
+                !decoded.floating_point_decode_result.float_status_decoded.bit_1) {
+                operands.op1 = registers.FPR[decoded.floating_point_decode_result.float_status_decoded.FRT_FRB];
+            }
+            break;
+    }
+
+    return operands;
+}
+
 pipeline::result_t pipeline::execute(decode_result_t decoded, registers_t &registers, operands_t operands, ap_uint<32> *data_memory) {
 #pragma HLS inline
     result_t result = {0, 0, false, false};
@@ -253,9 +311,51 @@ pipeline::result_t pipeline::execute(decode_result_t decoded, registers_t &regis
     return result;
 }
 
+pipeline::float_result_t pipeline::execute_float(decode_result_t decoded, registers_t &registers, float_operands_t operands, ap_uint<32> *data_memory) {
+    float_result_t result = {0, 0, false};
+
+    switch(decoded.floating_point_decode_result.execute) {
+        case floating_point::NONE:
+            break;
+        case floating_point::LOAD:
+            result = floating_point::load(decoded.floating_point_decode_result.float_load_store_decoded, registers, operands, data_memory);
+            break;
+        case floating_point::STORE:
+            result = floating_point::store(decoded.floating_point_decode_result.float_load_store_decoded, registers, operands, data_memory);
+            break;
+        case floating_point::MOVE:
+            result = floating_point::move(decoded.floating_point_decode_result.float_move_decoded, registers, operands);
+            break;
+        case floating_point::ARITHMETIC:
+            result = floating_point::arithmetic(decoded.floating_point_decode_result.float_arithmetic_decoded, registers, operands);
+            break;
+        case floating_point::MADD:
+            result = floating_point::multiply_add(decoded.floating_point_decode_result.float_madd_decoded, registers, operands);
+            break;
+        case floating_point::CONVERT:
+            result = floating_point::convert(decoded.floating_point_decode_result.float_convert_decoded, registers, operands);
+            break;
+        case floating_point::COMPARE:
+            result = floating_point::compare(decoded.floating_point_decode_result.float_compare_decoded, registers, operands);
+            break;
+        case floating_point::STATUS:
+            result = floating_point::status(decoded.floating_point_decode_result.float_status_decoded, registers, operands);
+            break;
+    }
+
+    return result;
+}
+
 void pipeline::write_back(result_t result, registers_t &registers) {
 #pragma HLS inline
     if(result.write_back) {
         registers.GPR[result.address] = result.result;
+    }
+}
+
+void pipeline::write_back_float(float_result_t result, registers_t &registers) {
+#pragma HLS inline
+    if(result.write_back) {
+        registers.FPR[result.address] = result.result;
     }
 }
